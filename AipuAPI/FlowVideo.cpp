@@ -906,13 +906,6 @@ void FlowVideo::SetFlagFlow(bool flag) {
 		gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PAUSED);
 	}
 
-	/*if (cur_state == GST_STATE_PAUSED) {
-		gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
-	}
-	else if(cur_state == GST_STATE_PLAYING)
-	{
-		gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PAUSED);
-	}*/
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	g_main_loop_quit(loop);
 }
