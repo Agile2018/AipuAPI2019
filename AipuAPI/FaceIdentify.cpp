@@ -6,17 +6,19 @@ FaceIndentify::FaceIndentify()
 
 FaceIndentify::~FaceIndentify()
 {
-	
+	delete configuration;
+	delete error;
+	delete format;
 }
 
 void FaceIndentify::LoadConnection() {
-	int errorCode;
+	/*int errorCode;
 	std::string str = "iengine.db";
-	const char *cstr = str.c_str();	
+	const char *cstr = str.c_str();	*/
 
 	SetParamsIdentify();
-	errorCode = connectToDatabase(cstr);
-	cout << "connectToDatabase returns " << errorCode << endl;	
+	/*errorCode = connectToDatabase(cstr);
+	cout << "connectToDatabase returns " << errorCode << endl;	*/
 
 	/*errorCode = IEngine_InitModule();
 	error->CheckError(errorCode, error->medium);
@@ -65,19 +67,21 @@ void FaceIndentify::SetParamsIdentify() {
 	
 }
 
-void FaceIndentify::EnrollUser(Molded* modelImage) {
-	flagEnroll = true;
+void FaceIndentify::EnrollUser(std::tuple<char*, 
+	vector<unsigned char>, int*> modelImage, int client) {
+
+	//flagEnroll = true;
 	int errorCode, userID, score;
 	//IENGINE_USER user = IEngine_InitUser();
 	User* userForDatabase = new User();
-	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(modelImage->GetMoldImage());
+	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
 
-	errorCode = identify(templateData, modelImage->GetMoldSize(), &userID, &score);
-	//error->CheckError(errorCode, error->medium);
-	if (userID == 0 && isRegister)
+	errorCode = identify(templateData, std::get<2>(modelImage)[2], &userID, &score);
+	error->CheckError(errorCode, error->medium);
+	if (userID == 0 && configuration->GetIsRegister() && errorCode == IENGINE_E_NOERROR)
 	{
 
-		errorCode = addUserToDatabase(templateData, modelImage->GetMoldSize(), &userID);
+		errorCode = addUserToDatabase(templateData, std::get<2>(modelImage)[2], &userID);
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {
 			userForDatabase->SetIsNew(true);
@@ -86,21 +90,40 @@ void FaceIndentify::EnrollUser(Molded* modelImage) {
 	}
 
 
-	if (errorCode == IENGINE_E_NOERROR && userID != 0) { 
+	if (errorCode == IENGINE_E_NOERROR && userID != 0 ) {
+		/*lastUser = userID;
+		countRepeatFrame = 0;*/
 		if (!userForDatabase->GetIsNew())
 		{
 			countRepeatUser++;
 		}
+		else
+		{
+			countNewUser++;
+		}
 		userForDatabase->SetUserIdIFace(userID);
-		userForDatabase->SetClient(modelImage->GetIdClient());
-		userForDatabase->SetCropImageData(modelImage->GetCropImageData());
-		userForDatabase->SetMoldCropHeight(modelImage->GetMoldCropHeight());
-		userForDatabase->SetMoldCropLength(modelImage->GetMoldCropLength());
-		userForDatabase->SetMoldCropWidth(modelImage->GetMoldCropWidth());
+		userForDatabase->SetClient(client);
+		userForDatabase->SetCropImageData(std::get<1>(modelImage));
+		userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
+		//userForDatabase->SetMoldCropLength(modelImage->GetMoldCropLength());
+		userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
 		
 		shootUser.on_next(userForDatabase);
 	}
-	flagEnroll = false;
+
+
+	/*else
+	{
+		countRepeatFrame++;
+		if (countRepeatFrame > 1)
+		{
+			lastUser = 0;
+			countRepeatFrame = 0;
+		}
+		
+	}*/
+	//delete userForDatabase;
+	//flagEnroll = false;
 	templateData = NULL;
 
 	//errorCode = IEngine_AddFaceTemplate(user, templateData, modelImage->GetMoldSize());

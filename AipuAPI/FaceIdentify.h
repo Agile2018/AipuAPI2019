@@ -14,10 +14,10 @@ public:
 	FaceIndentify();
 	~FaceIndentify();
 	void LoadConnection();
-	void EnrollUser(Molded* modelImage);
-	void SetIsRegister(bool option) {
+	void EnrollUser(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	/*void SetIsRegister(bool option) {
 		isRegister = option;
-	}
+	}*/
 
 	bool GetFlagEnroll() {
 		return flagEnroll;
@@ -31,6 +31,14 @@ public:
 		return countRepeatUser;
 	}
 
+	void ResetCountNewUser() {
+		countNewUser = 0;
+	}
+
+	int GetCountNewUser() {
+		return countNewUser;
+	}
+
 	void SetParamsIdentify();
 	ConfigurationIdentify* configuration = new ConfigurationIdentify();
 	Rx::subject<Either*> errorSubject;
@@ -38,14 +46,18 @@ public:
 	Rx::subject<User*> userSubject;
 	Rx::observable<User*> observableUser = userSubject.get_observable();
 private:
+
 	ErrorIdKitLib* error = new ErrorIdKitLib();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	Rx::subscriber<User*> shootUser = userSubject.get_subscriber();
 	bool flagEnroll = false;
 	Format* format = new Format();
-	bool isRegister = true;
+	//bool isRegister = true;
 	void ObserverError();
 	int countRepeatUser = 0;
+	int countNewUser = 0;
+	int lastUser = 0;
+	int countRepeatFrame = 0;
 };
 
 

@@ -7,6 +7,11 @@
 
 #include <string>
 
+#define PIPE_ONE 1
+#define PIPE_TWO 2
+#define PIPE_THREE 3
+#define PIPE_FOUR 4
+
 using namespace std;
 
 class AIPUAPI_API AipuAPI
@@ -14,47 +19,34 @@ class AIPUAPI_API AipuAPI
 public:
 	AipuAPI();
 	~AipuAPI();
-	void InitLibrary();
-	void InitLibraryIdentify();
-	void LoadConfiguration(string nameFile);
-	void SetFileVideo(string file);
-	void SetWidthFrame(int value);
-	void SetHeightFrame(int value);
-	void CaptureFlow(int optionFlow);
-	void SetIpCamera(string ip);
-	void SetDeviceVideo(string device);
-	void SetFaceConfidenceThresh(int value);
-	void SetRefreshInterval(int value);
-	void SetTrackingMode(int mode);
-	void SetTrackSpeed(int speed);
-	void SetMotionOptimization(int motion);
-	void SetMinEyeDistance(int minDistance);
-	void SetMaxEyeDistance(int maxDistance);
-	void SetSequenceFps(int fps);
-	void SetClient(int value);
-	void SetFlagFlow(bool flag);
+	void ConnectDatabase();
+	void InitLibrary();	
+	void LoadConfiguration(int option); // 1 2 3 4 throw group
+	void InitWindowMain(int option); // 1 2 3 4 throw group
+	void RunVideo(int option); // 1 2 3 4 throw group
+	void CloseWindow();
 	void Terminate();
+	void ReRunVideo(int option); // throw single
+
+	
 	void ReloadRecognitionFace();
-	void SetConfigurationDatabase();
-	void ShowWindow(int option);
-	void SetIsRegister(bool option);
-	void SetNameWindow(string name);
+	
 	void RecognitionFaceFiles(string file, int client);
-	void SetIsFinishLoadFiles(bool value);
-	bool GetIsFinishLoadFiles();
-	void ResetLowScore();
-	int GetCountLowScore();
-	void ResetCountNotDetect();
-	int GetCountNotDetect();
-	void SetDeepTrack(string value);
-	void ResetCountRepeatUser();
-	int GetCountRepeatUser();
-	void StatePlay();
-	void StatePaused();
+	void SetIsFinishLoadFiles(int option, bool value);
+	bool GetIsFinishLoadFiles(int option);
+	void ResetPerformance(int option);
+	void SavePerformance(int option);
+
+
+	void StatePlay(int option); // single
+	void StatePaused(int option); // single
+	void SetFinishLoop(int option); // single
 	string GetUserJSON();
 	string GetMessageError();
-	void SetFramesTotal(unsigned long int total);
+	
+	
 private:
-	void ObserverEvent();
-	bool isLoadIdentify = false;
+	void ObserverError();
+	void ObserverDatabase();
+	
 };

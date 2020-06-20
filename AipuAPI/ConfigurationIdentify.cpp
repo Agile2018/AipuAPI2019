@@ -20,7 +20,7 @@ void ConfigurationIdentify::ObserverError() {
 }
 
 void ConfigurationIdentify::SetValueJSONToConfiguration() {
-	const Json::Value params = jsonBody[PARAMS];
+	const Json::Value params = configuration->jsonBody[PARAMS];
 	for (Json::Value::const_iterator it = params.begin();
 		it != params.end(); ++it) {
 
@@ -45,14 +45,17 @@ void ConfigurationIdentify::SetValueJSONToConfiguration() {
 		else if (it.key().asString() == BESTMATCHEDCANDIDATES) {
 			bestMatchedCandidates = it->asInt();
 		}
+		else if (it.key().asString() == ISREGISTER) {
+			isRegister = it->asInt();
+		}
 	}
 
 }
 
 void ConfigurationIdentify::ParseJSONToObject() {
-	jsonBody.clear();
-	stringJSON = manageFile->ReadFileText();
-	bool parsingSuccessful = reader.parse(stringJSON, jsonBody);
+	configuration->jsonBody.clear();
+	configuration->stringJSON = configuration->manageFile->ReadFileText();
+	bool parsingSuccessful = configuration->reader.parse(configuration->stringJSON, configuration->jsonBody);
 	if (parsingSuccessful)
 	{
 		SetValueJSONToConfiguration();
@@ -64,8 +67,8 @@ void ConfigurationIdentify::ParseJSONToObject() {
 }
 
 void ConfigurationIdentify::ParseMapToJSON() {
-	jsonBody.clear();
-	jsonParams.clear();
+	configuration->jsonBody.clear();
+	configuration->jsonParams.clear();
 	std::map<std::string, std::int16_t> params;
 
 	params.insert(std::pair<std::string, std::int16_t>(AMINEYE, minEyeDistance));
@@ -75,23 +78,24 @@ void ConfigurationIdentify::ParseMapToJSON() {
 	params.insert(std::pair<std::string, std::int16_t>(SIMILARITYTHRESHOLD, similarityThreshold));
 	params.insert(std::pair<std::string, std::int16_t>(FACEDETECTIONTHRESHOLD, faceDetectionThreshold));
 	params.insert(std::pair<std::string, std::int16_t>(BESTMATCHEDCANDIDATES, bestMatchedCandidates));
+	params.insert(std::pair<std::string, std::int16_t>(ISREGISTER, isRegister));
 	std::map<std::string, std::int16_t>::const_iterator it = params.begin(),
 		end = params.end();
 
 	for (; it != end; ++it) {
-		jsonParams[it->first] = it->second;
+		configuration->jsonParams[it->first] = it->second;
 
 	}
 
-	jsonBody[CONFIGURATION] = IDENTIFY_CONFIGURATION;
-	jsonBody[PARAMS] = jsonParams;
+	configuration->jsonBody[CONFIGURATION] = IDENTIFY_CONFIGURATION;
+	configuration->jsonBody[PARAMS] = configuration->jsonParams;
 
-	SaveConfiguration();
+	configuration->SaveConfiguration();
 
 }
 
 string ConfigurationIdentify::ParseMapToJSONForIdentify() {
-	jsonBody.clear();
+	configuration->jsonBody.clear();
 	std::map<std::string, std::int16_t> params;
 	params.insert(std::pair<std::string, std::int16_t>(IDENTIFICATIONSPEED, identificationSpeed));
 	params.insert(std::pair<std::string, std::int16_t>(AMINEYE, minEyeDistance));
@@ -104,11 +108,11 @@ string ConfigurationIdentify::ParseMapToJSONForIdentify() {
 		end = params.end();
 
 	for (; it != end; ++it) {
-		jsonBody[it->first] = it->second;
+		configuration->jsonBody[it->first] = it->second;
 
 	}
 
-	WriteJSONToString();
+	configuration->WriteJSONToString();
 
-	return stringJSON;
+	return configuration->stringJSON;
 }

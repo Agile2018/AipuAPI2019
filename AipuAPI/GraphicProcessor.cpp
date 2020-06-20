@@ -6,6 +6,7 @@ GraphicProcessor::GraphicProcessor()
 
 GraphicProcessor::~GraphicProcessor()
 {
+	delete format;
 }
 
 bool GraphicProcessor::ThereIsGraphicProcessor() {

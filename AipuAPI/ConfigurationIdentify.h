@@ -4,7 +4,7 @@
 #include "Configuration.h"
 #include "ErrorFaceLib.h"
 
-class ConfigurationIdentify : public Configuration
+class ConfigurationIdentify
 {
 public:
 	ConfigurationIdentify();
@@ -68,6 +68,17 @@ public:
 		return maxEyeDistance;
 	}
 
+	int GetIsRegister() {
+		return isRegister;
+	}
+
+	void SetNameFileConfiguration(string name) {
+		configuration->SetNameFileConfiguration(name);
+	}
+	void SetNameDirectory(string name) {
+		configuration->SetNameDirectory(name);
+	}
+
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 private:
@@ -78,6 +89,7 @@ private:
 	const int SIMILARITY_THRESHOLD = 40; //0..1000 *
 	const int FACE_DETECTION_THRESHOLD = 450;
 	const int BEST_MATCHED_CANDIDATES = 1; //*
+	const int IS_REGISTER = 1;
 
 	const string PARAMS = "Params";
 	const string IDENTIFICATIONSPEED = "A_IdentificationSpeed";
@@ -89,6 +101,7 @@ private:
 	const string SIMILARITYTHRESHOLD = "A_SimilarityThreshold";
 	const string FACEDETECTIONTHRESHOLD = "A_FaceDetectThreshold";
 	const string BESTMATCHEDCANDIDATES = "A_BestMatchedCandidates";
+	const string ISREGISTER = "is_register";
 
 	int minEyeDistance = MIN_EYE_DISTANCE;
 	int maxEyeDistance = MAX_EYE_DISTANCE;
@@ -97,8 +110,10 @@ private:
 	int similarityThreshold = SIMILARITY_THRESHOLD;
 	int faceDetectionThreshold = FACE_DETECTION_THRESHOLD;
 	int bestMatchedCandidates = BEST_MATCHED_CANDIDATES;
+	int isRegister = IS_REGISTER;
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	ErrorFaceLib* error = new ErrorFaceLib();
+	Configuration* configuration = new Configuration();
 	void SetValueJSONToConfiguration();
 	void ObserverError();
 };

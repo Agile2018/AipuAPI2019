@@ -12,7 +12,7 @@ public:
 	Innovatrics();
 	~Innovatrics();
 	void InitLibrary();
-	void InitLibraryIdentify();
+	//void InitLibraryIdentify();
 	void SetIsGraphicProcessor(bool processor) {
 		isGraphicProcessor = processor;
 	}

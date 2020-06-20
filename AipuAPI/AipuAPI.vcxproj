@@ -140,7 +140,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>D:\mongo-c-driver\include\libmongoc-1.0;D:\mongo-c-driver\include\libbson-1.0;D:\mongo-cxx-driver\install\include\bsoncxx\v_noabi;D:\mongo-cxx-driver\install\include\mongocxx\v_noabi;D:\boost_1_70_0;F:\install\Innovatrics SDKs\1.0.0.2\include;C:\Program Files\Innovatrics\IDKit SDK\include;D:\opencv\include;F:\gstreamer\1.0\x86_64\include;F:\gstreamer\1.0\x86_64\lib\glib-2.0\include;F:\gstreamer\1.0\x86_64\include\glib-2.0;F:\gstreamer\1.0\x86_64\include\gstreamer-1.0;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;D:\Program Files %28x86%29\JSONCPP\include;C:\Program Files\Innovatrics\IFace SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\freeglut\include;F:\glew-2.2.0\include;F:\SOIL2-master\src\SOIL2;D:\mongo-c-driver\include\libmongoc-1.0;D:\mongo-c-driver\include\libbson-1.0;D:\mongo-cxx-driver\install\include\bsoncxx\v_noabi;D:\mongo-cxx-driver\install\include\mongocxx\v_noabi;D:\boost_1_70_0;F:\install\Innovatrics SDKs\1.0.0.2\include;C:\Program Files\Innovatrics\IDKit SDK\include;D:\opencv\include;F:\gstreamer\1.0\x86_64\include;F:\gstreamer\1.0\x86_64\lib\glib-2.0\include;F:\gstreamer\1.0\x86_64\include\glib-2.0;F:\gstreamer\1.0\x86_64\include\gstreamer-1.0;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;D:\Program Files %28x86%29\JSONCPP\include;C:\Program Files\Innovatrics\IFace SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,20 +148,21 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>D:\mongo-cxx-driver\install\lib;F:\install\Innovatrics SDKs\1.0.0.2\lib;C:\Program Files\Innovatrics\IDKit SDK\lib;D:\opencv\x64\vc16\lib;F:\gstreamer\1.0\x86_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64;D:\Program Files %28x86%29\JSONCPP\lib;C:\Program Files\Innovatrics\IFace SDK\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iface.lib;idkit.lib;jsoncpp.lib;cudart_static.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;gstapp-1.0.lib;opencv_world420.lib;AFaceAPI.lib;bsoncxx.lib;mongocxx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:\freeglut\lib\x64;F:\glew-2.2.0\lib\Release\x64;F:\SOIL2-master\lib\windows;D:\mongo-cxx-driver\install\lib;F:\install\Innovatrics SDKs\1.0.0.2\lib;C:\Program Files\Innovatrics\IDKit SDK\lib;D:\opencv\x64\vc16\lib;F:\gstreamer\1.0\x86_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64;D:\Program Files %28x86%29\JSONCPP\lib;C:\Program Files\Innovatrics\IFace SDK\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>iface.lib;idkit.lib;jsoncpp.lib;cudart_static.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;gstapp-1.0.lib;opencv_world420.lib;AFaceAPI.lib;bsoncxx.lib;mongocxx.lib;glew32.lib;freeglut.lib;soil2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AipuAPI.h" />
-    <ClInclude Include="Backrest.h" />
     <ClInclude Include="Base64.h" />
     <ClInclude Include="CodesError.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="ConfigurationDatabase.h" />
     <ClInclude Include="ConfigurationFile.h" />
+    <ClInclude Include="ConfigurationFlowVideo.h" />
     <ClInclude Include="ConfigurationIdentify.h" />
     <ClInclude Include="ConfigurationIFace.h" />
+    <ClInclude Include="ConfigurationTracking.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="Either.h" />
     <ClInclude Include="ErrorAipuLib.h" />
@@ -172,26 +173,28 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="FlowVideo.h" />
     <ClInclude Include="Format.h" />
-    <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="FrameData.h" />
+    <ClInclude Include="FrameView.h" />
     <ClInclude Include="GraphicProcessor.h" />
     <ClInclude Include="Innovatrics.h" />
     <ClInclude Include="Molded.h" />
     <ClInclude Include="MongoAccess.h" />
+    <ClInclude Include="Pipe.h" />
     <ClInclude Include="SafeQueue.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="Tracking.h" />
     <ClInclude Include="User.h" />
-    <ClInclude Include="Video.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AipuAPI.cpp" />
-    <ClCompile Include="Backrest.cpp" />
     <ClCompile Include="Base64.cpp" />
     <ClCompile Include="ConfigurationDatabase.cpp" />
     <ClCompile Include="ConfigurationFile.cpp" />
+    <ClCompile Include="ConfigurationFlowVideo.cpp" />
     <ClCompile Include="ConfigurationIdentify.cpp" />
     <ClCompile Include="ConfigurationIFace.cpp" />
+    <ClCompile Include="ConfigurationTracking.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Either.cpp" />
@@ -203,18 +206,20 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FlowVideo.cpp" />
     <ClCompile Include="Format.cpp" />
-    <ClCompile Include="GBuffer.cpp" />
+    <ClCompile Include="FrameData.cpp" />
+    <ClCompile Include="FrameView.cpp" />
     <ClCompile Include="GraphicProcessor.cpp" />
     <ClCompile Include="Innovatrics.cpp" />
     <ClCompile Include="Molded.cpp" />
+    <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Tracking.cpp" />
     <ClCompile Include="User.cpp" />
-    <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

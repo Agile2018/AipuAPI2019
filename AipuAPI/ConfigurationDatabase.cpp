@@ -20,7 +20,7 @@ void ConfigurationDatabase::ObserverError() {
 }
 
 void ConfigurationDatabase::SetValueJSONToConfiguration() {
-	const Json::Value params = jsonBody[PARAMS];
+	const Json::Value params = configuration->jsonBody[PARAMS];
 	for (Json::Value::const_iterator it = params.begin();
 		it != params.end(); ++it) {
 
@@ -38,9 +38,9 @@ void ConfigurationDatabase::SetValueJSONToConfiguration() {
 }
 
 void ConfigurationDatabase::ParseJSONToObject() {
-	jsonBody.clear();
-	stringJSON = manageFile->ReadFileText();
-	bool parsingSuccessful = reader.parse(stringJSON, jsonBody);
+	configuration->jsonBody.clear();
+	configuration->stringJSON = configuration->manageFile->ReadFileText();
+	bool parsingSuccessful = configuration->reader.parse(configuration->stringJSON, configuration->jsonBody);
 	if (parsingSuccessful)
 	{
 		SetValueJSONToConfiguration();
@@ -52,8 +52,8 @@ void ConfigurationDatabase::ParseJSONToObject() {
 }
 
 void ConfigurationDatabase::ParseMapToJSON() {
-	jsonBody.clear();
-	jsonParams.clear();
+	configuration->jsonBody.clear();
+	configuration->jsonParams.clear();
 	std::map<std::string, std::string> params;
 	params.insert(std::pair<std::string, std::string>(NAME_DATABASE, nameDatabase));
 	params.insert(std::pair<std::string, std::string>(CONNECT_STRING, connectString));
@@ -61,13 +61,13 @@ void ConfigurationDatabase::ParseMapToJSON() {
 	std::map<std::string, std::string>::const_iterator it = params.begin(),
 		end = params.end();
 	for (; it != end; ++it) {
-		jsonParams[it->first] = it->second;
+		configuration->jsonParams[it->first] = it->second;
 
 	}
 
-	jsonBody[CONFIGURATION] = DATABASE_CONFIGURATION;
-	jsonBody[PARAMS] = jsonParams;
+	configuration->jsonBody[CONFIGURATION] = DATABASE_CONFIGURATION;
+	configuration->jsonBody[PARAMS] = configuration->jsonParams;
 
-	SaveConfiguration();
+	configuration->SaveConfiguration();
 
 }

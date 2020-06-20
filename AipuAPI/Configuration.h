@@ -26,15 +26,13 @@ public:
 	string GetNameDirectory() {
 		return manageFile->GetNameDirectory();
 	}
-	virtual void ParseJSONToObject() {};
-	virtual void ParseMapToJSON() {};
-
-protected:
-	string stringJSON;
+	/*virtual void ParseJSONToObject() {};
+	virtual void ParseMapToJSON() {};*/
 	Json::Value jsonParams;
 	Json::Value jsonBody;
 	Json::Reader reader;
 	File* manageFile = new File();
+	string stringJSON;
 
 	void WriteJSONToString() {
 		Json::StreamWriterBuilder builder;
@@ -49,6 +47,9 @@ protected:
 		WriteJSONToString();
 		manageFile->WriteFile(stringJSON);
 	}
+private:
+	
+	
 
 };
 

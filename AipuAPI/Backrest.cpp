@@ -123,13 +123,13 @@ void Backrest::ObserverIdentifyFace() {
 			user->SetNameUser(name);
 			user->SetLastNameUser(lastName);
 			user->SetIdentificationUser(identification);			
-			database->InsertNewUser(user);
+			//database->InsertNewUser(user);
 			
 		}
 		else {
-			database->FindUserByIdFace(user->GetUserIdIFace(),
+			/*database->FindUserByIdFace(user->GetUserIdIFace(),
 				user->GetCropImageData(), user->GetMoldCropHeight(),
-				user->GetMoldCropWidth(), user->GetClient());
+				user->GetMoldCropWidth(), user->GetClient());*/
 			
 		}
 
@@ -161,7 +161,7 @@ void Backrest::LoadConfiguration(string nameFile) {
 	configurationFile->ParseJSONToObject();
 	SetNameFileConfigurationFace(configurationFile->GetNameFileConfigurationFaceModel());
 	SetNameFileConfigurationIdentify(configurationFile->GetNameFileConfigurationIdentify());
-	faceModel->SetNameDirectory(configurationFile->GetNameDirectoryTempWork());
+	//faceModel->SetNameDirectory(configurationFile->GetNameDirectoryTempWork());
 	SetNameFileConfigurationDatabase(configurationFile->GetNameFileConfigurationDatabase());
 	database->Configure();
 	database->CheckDatabase();
@@ -191,7 +191,7 @@ void Backrest::SetNameFileConfigurationDatabase(string name) {
 }
 
 void Backrest::SetIsRegister(bool option) {
-	faceIdentify->SetIsRegister(option);
+	//faceIdentify->SetIsRegister(option);
 }
 
 void Backrest::ReloadRecognitionFace() {

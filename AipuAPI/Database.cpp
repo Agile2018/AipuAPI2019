@@ -1,4 +1,6 @@
 #include "Database.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 Database::Database()
 {
@@ -8,6 +10,9 @@ Database::Database()
 
 Database::~Database()
 {
+	delete file;
+	delete base64;
+	delete error;
 }
 
 void Database::Configure() {	
@@ -105,8 +110,9 @@ void Database::AddImageUser(vector<unsigned char> image, int rows, int cols, int
 
 		mongocxx::database database = (*clientConnection)[configuration->GetNameDatabase().c_str()];
 		mongocxx::collection collection = database[COLLECTION_IMAGE.c_str()];
+		
+		string imageBase64 = FileImageToStringBase64(image, rows, cols);		
 
-		string imageBase64 = FileImageToStringBase64(image, rows, cols);
 		bsoncxx::document::value builder = make_document(
 			kvp("id_face", idUser),
 			kvp("data_64", imageBase64.c_str()),
@@ -140,21 +146,32 @@ string Database::FileImageToStringBase64(vector<unsigned char> image, int rows, 
 	string encodedPng;
 	vector<uchar> bufferImage;
 	//Mat img = imread(path, IMREAD_COLOR);
-	Mat img = Mat(rows, cols, CV_8UC3);
+	cv::Mat img = cv::Mat(rows, cols, CV_8UC3);
 	img.data = &image[0];
 
 	int params[3] = { 0 };
-	params[0] = IMWRITE_JPEG_QUALITY;
+	params[0] = cv::IMWRITE_JPEG_QUALITY;
 	params[1] = 100;
 
 	if (!img.empty())
 	{
-		bool code = cv::imencode(".jpg", img,
-			bufferImage, std::vector<int>(params, params + 2));
-		uchar* buffToBase64 = reinterpret_cast<uchar*> (&bufferImage[0]);
+		try
+		{
+			bool code = cv::imencode(".jpg", img,
+				bufferImage, std::vector<int>(params, params + 2));
+			uchar* buffToBase64 = reinterpret_cast<uchar*> (&bufferImage[0]);
 
-		encodedPng = base64->base64_encode(buffToBase64,
-			(unsigned int)bufferImage.size());
+			encodedPng = base64->base64_encode(buffToBase64,
+				(unsigned int)bufferImage.size());
+		}
+		catch (cv::Exception& e)
+		{
+			//const char* err_msg = e.what();
+			std::cout << "Exception caught: " << e.what() << std::endl;
+		}
+		catch (const std::exception& ex) {
+			std::cout << "Exception runtime: " << ex.what() << std::endl;
+		}
 		//std::thread(&Database::DeleteFileTempCropImage, this, path).detach();
 	}
 	return encodedPng;
@@ -194,8 +211,10 @@ void Database::ObserverError() {
 
 void Database::FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
 	int rows, int cols, int client) {
+	
 	if (QueryUserByFace(idFaceUser, client))
 	{
+		
 		UpdateImageUser(idFaceUser, image, rows, cols);
 	}
 	/*std::thread(&Database::QueryUserByFace, this, idFaceUser, client).detach();
@@ -203,6 +222,7 @@ void Database::FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
 }
 
 bool Database::QueryUserByFace(int idFaceUser, int client) {
+
 	/*if (lastUserId != idFaceUser || lastClient != client)
 	{*/
 		//countRepeatOfSomeUser = 0;
@@ -213,28 +233,37 @@ bool Database::QueryUserByFace(int idFaceUser, int client) {
 	{
 		try
 		{
+			
 			auto clientConnection = MongoAccess::instance().GetConnection();
 			
 			mongocxx::database database = (*clientConnection)[configuration->GetNameDatabase().c_str()];
 			mongocxx::collection collection = database[COLLECTION_USER.c_str()];
 			/*lastUserId = idFaceUser;
 			lastClient = client;*/
+			
 			boost::optional<bsoncxx::v_noabi::document::value> cursor = collection
 				.find_one(make_document(kvp("id_face", idFaceUser)));
-
-			auto view = (*cursor).view();
-			if (!view.empty()) {
-				flagSearch = true;
-				int idFace = view["id_face"].get_int32().value;
-				std::vector<std::string> values;
-				values.push_back(to_string(idFace));
-				values.push_back(view["name"].get_utf8().value.to_string());
-				values.push_back(view["lastname"].get_utf8().value.to_string());
-				values.push_back(view["identification"].get_utf8().value.to_string());
-				values.push_back("0");
-				values.push_back(to_string(client));
-				BuildJSONUser(values);
+			
+			if (cursor)
+			{				
+				auto view = (*cursor).view();
+								
+				if (!view.empty()) {
+					
+					flagSearch = true;
+					int idFace = view["id_face"].get_int32().value;
+					std::vector<std::string> values;
+					values.push_back(to_string(idFace));
+					values.push_back(view["name"].get_utf8().value.to_string());
+					values.push_back(view["lastname"].get_utf8().value.to_string());
+					values.push_back(view["identification"].get_utf8().value.to_string());
+					values.push_back("0");
+					values.push_back(to_string(client));
+					
+					BuildJSONUser(values);
+				}
 			}
+			
 		}
 		catch (const mongocxx::exception& e)
 		{
@@ -267,19 +296,25 @@ void Database::UpdateImageUser(int idFaceUser, vector<unsigned char> image, int 
 
 	mongocxx::database database = (*clientConnection)[configuration->GetNameDatabase().c_str()];
 	mongocxx::collection collection = database[COLLECTION_IMAGE.c_str()];
-	string imageBase64 = FileImageToStringBase64(image, rows, cols);
-	try
+	
+	string imageBase64 = FileImageToStringBase64(image, rows, cols);	
+	
+	if (!imageBase64.empty())
 	{
+		try
+		{
 
-		bsoncxx::stdx::optional<mongocxx::v_noabi::result::update> result = collection
-			.update_one(make_document(kvp("id_face", idFaceUser)),
-				make_document(kvp("$set", make_document(kvp("data_64_aux", imageBase64)))));
+			bsoncxx::stdx::optional<mongocxx::v_noabi::result::update> result = collection
+				.update_one(make_document(kvp("id_face", idFaceUser)),
+					make_document(kvp("$set", make_document(kvp("data_64_aux", imageBase64)))));
+		}
+		catch (const mongocxx::exception& e)
+		{
+			error->CheckError(ERROR_DATABASE,
+				error->medium, e.what());
+		}
 	}
-	catch (const mongocxx::exception& e)
-	{
-		error->CheckError(ERROR_DATABASE,
-			error->medium, e.what());
-	}
+	
 }
 
 
@@ -321,4 +356,28 @@ string Database::QueryImageOfUser(int idFaceUser) {
 	auto view = (*cursor).view();
 	string image = view["data_64"].get_utf8().value.to_string();
 	return image;
+}
+
+void Database::ProcessUserDB(User* user) {
+	if (user->GetIsNew())
+	{
+		string number = to_string(user->GetUserIdIFace());
+		string name = "Person " + number;
+		string lastName = "LasName " + number;
+		string identification = "0000000";
+		user->SetNameUser(name);
+		user->SetLastNameUser(lastName);
+		user->SetIdentificationUser(identification);
+		InsertNewUser(user);
+
+	}
+	else {
+		
+		FindUserByIdFace(user->GetUserIdIFace(),
+			user->GetCropImageData(), user->GetMoldCropHeight(),
+			user->GetMoldCropWidth(), user->GetClient());
+		
+
+	}
+	
 }

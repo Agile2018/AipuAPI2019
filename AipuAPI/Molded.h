@@ -13,6 +13,7 @@ public:
 	~Molded();
 	void SetMoldImage(char* mold) {
 		moldImage = mold;
+		templateImage.assign(mold, mold + moldSize);
 	}
 
 	void SetCropImageData(unsigned char* moldCrop) {
@@ -21,6 +22,10 @@ public:
 
 	vector<unsigned char> GetCropImageData() {
 		return cropImageData;
+	}
+
+	vector<char> GetTemplateImage() {
+		return templateImage;
 	}
 
 	void SetMoldSize(int size) {
@@ -78,6 +83,7 @@ public:
 
 private:
 	char* moldImage;
+	vector<char> templateImage;
 	vector<unsigned char> cropImageData;
 	int moldSize, cropWidth, cropHeight, cropLength;
 	string pathImage;

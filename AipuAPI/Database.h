@@ -10,14 +10,14 @@
 #include <bsoncxx/types.hpp>
 #include "ErrorAipuLib.h"
 #include "Base64.h"
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 #include <vector>
 #include <json\json.h>
 #include "ConfigurationDatabase.h"
 #include "File.h"
 
-using namespace cv;
+//using namespace cv;
 using namespace std;
 
 using bsoncxx::builder::basic::kvp;
@@ -32,9 +32,8 @@ public:
 
 	void Configure();
 	void CheckDatabase();
-	void InsertNewUser(User* user);
-	void FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
-		int rows, int cols, int client);
+	void ProcessUserDB(User* user);
+	
 	void ResetIdUser() {
 		lastUserId = -1;
 		lastClient = -1;
@@ -81,7 +80,9 @@ private:
 	string FileImageToStringBase64(vector<unsigned char> image, int rows, int cols);
 	void DeleteFileTempCropImage(string filePath);
 	void UpdateImageUser(int idFaceUser, vector<unsigned char> image, int rows, int cols);
-	
+	void InsertNewUser(User* user);
+	void FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
+		int rows, int cols, int client);
 
 };
 

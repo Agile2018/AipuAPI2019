@@ -4,7 +4,7 @@
 #include "Configuration.h"
 #include "ErrorAipuLib.h"
 
-class ConfigurationDatabase : public Configuration
+class ConfigurationDatabase 
 {
 public:
 	ConfigurationDatabase();
@@ -27,12 +27,21 @@ public:
 	string GetConnectString() {
 		return connectString;
 	}
+
+	void SetNameFileConfiguration(string name) {
+		configuration->SetNameFileConfiguration(name);
+	}
+	void SetNameDirectory(string name) {
+		configuration->SetNameDirectory(name);
+	}
+
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 
 private:
 	const string LABEL_ERROR_PARSING = "Error parsing the JSON string";
 	ErrorAipuLib* error = new ErrorAipuLib();
+	Configuration* configuration = new Configuration();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	const string NAME_DATABASE = "name";
 	const string CONNECT_STRING = "connect";

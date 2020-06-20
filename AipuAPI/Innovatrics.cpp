@@ -42,19 +42,21 @@ void Innovatrics::InitLibrary() {
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->gross);
 	}
-	cout << "initLibrary initLibrary " << errorCode << endl;
-	
+	cout << "initLibrary " << errorCode << endl;
+	std::string str = "iengine.db";
+	errorCode = connectToDatabase(str.c_str());
+	cout << "connectToDatabase returns " << errorCode << endl;	
 }
 
-void Innovatrics::InitLibraryIdentify() {
-	/*int errorCode;
-	auto initData = "{\"licenseFile\":\"iengine.lic\"}";
-	errorCode = initLibrary(initData);
-	if (errorCode != IFACE_OK) {
-		error->CheckError(errorCode, error->gross);
-	}
-	cout << "initLibrary initLibrary " << errorCode << endl;*/
-}
+//void Innovatrics::InitLibraryIdentify() {
+//	/*int errorCode;
+//	auto initData = "{\"licenseFile\":\"iengine.lic\"}";
+//	errorCode = initLibrary(initData);
+//	if (errorCode != IFACE_OK) {
+//		error->CheckError(errorCode, error->gross);
+//	}
+//	cout << "initLibrary initLibrary " << errorCode << endl;*/
+//}
 
 bool Innovatrics::InitParamsGraphicProcessor() {
 	int errorCode;
@@ -96,7 +98,7 @@ void Innovatrics::SetParamsLibrary() {
 		error->CheckError(errorCode, error->medium);
 	}
 	errorCode = IFACE_SetParam(IFACE_GLOBAL_PARAMETERS,
-		IFACE_PARAMETER_GLOBAL_THREAD_NUM, "4"); //IFACE_GLOBAL_THREAD_NUM_DEFAULT
+		IFACE_PARAMETER_GLOBAL_THREAD_NUM, "4"); //IFACE_GLOBAL_THREAD_NUM_DEFAULT  "2"
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->medium);
 	}	
