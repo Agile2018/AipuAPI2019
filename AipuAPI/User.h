@@ -84,8 +84,8 @@ public:
 		return cropHeight;
 	}
 
-	int GetMoldCropLength() {
-		return cropLength;
+	int GetMoldScore() {
+		return score;
 	}
 
 	void SetCropImageData(vector<unsigned char> moldCrop) {
@@ -105,13 +105,13 @@ public:
 		cropHeight = size;
 	}
 
-	void SetMoldCropLength(int size) {
-		cropLength = size;
+	void SetMoldScore(int value) {
+		score = value;
 	}
 
 private:
 	string idDb;
-	int userIdIFace, cropWidth, cropHeight, cropLength;;
+	int userIdIFace, cropWidth, cropHeight, score;
 	string nameUser;
 	string lastNameUser;
 	string identificationUser;

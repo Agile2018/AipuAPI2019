@@ -95,17 +95,19 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 		countRepeatFrame = 0;*/
 		if (!userForDatabase->GetIsNew())
 		{
+			
+			userForDatabase->SetMoldScore(score);
 			countRepeatUser++;
 		}
 		else
 		{
+			userForDatabase->SetMoldScore(std::get<2>(modelImage)[3]);
 			countNewUser++;
 		}
 		userForDatabase->SetUserIdIFace(userID);
 		userForDatabase->SetClient(client);
 		userForDatabase->SetCropImageData(std::get<1>(modelImage));
-		userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
-		//userForDatabase->SetMoldCropLength(modelImage->GetMoldCropLength());
+		userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);		
 		userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
 		
 		shootUser.on_next(userForDatabase);

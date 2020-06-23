@@ -67,11 +67,13 @@ bool Innovatrics::InitParamsGraphicProcessor() {
 			IFACE_PARAMETER_GLOBAL_GPU_DEVICE_ID, "0");
 		if (errorCode != IFACE_OK) {
 			error->CheckError(errorCode, error->less);
+			cout << "Error enabled device: " << errorCode << endl;
 			return false;
 		}
 	}
 	else {
 		error->CheckError(errorCode, error->less);
+		cout << "Error enabled gpu: " << errorCode << endl;
 		return false;
 	}
 	return true;

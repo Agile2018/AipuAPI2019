@@ -132,6 +132,7 @@ void Database::AddImageUser(vector<unsigned char> image, int rows, int cols, int
 void Database::BuildNewUser(User* user) {
 	int idFace = user->GetUserIdIFace();
 	int client = user->GetClient();
+	int score = user->GetMoldScore();
 	std::vector<std::string> values;
 	values.push_back(to_string(idFace));
 	values.push_back(user->GetNameUser());
@@ -139,6 +140,7 @@ void Database::BuildNewUser(User* user) {
 	values.push_back(user->GetIdentificationUser());
 	values.push_back("1");
 	values.push_back(to_string(client));
+	values.push_back(to_string(score));
 	BuildJSONUser(values);
 }
 
@@ -210,9 +212,9 @@ void Database::ObserverError() {
 }
 
 void Database::FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
-	int rows, int cols, int client) {
+	int rows, int cols, int client, int score) {
 	
-	if (QueryUserByFace(idFaceUser, client))
+	if (QueryUserByFace(idFaceUser, client, score))
 	{
 		
 		UpdateImageUser(idFaceUser, image, rows, cols);
@@ -221,7 +223,7 @@ void Database::FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
 	std::thread(&Database::UpdateImageUser, this, idFaceUser, image, rows, cols).detach();*/
 }
 
-bool Database::QueryUserByFace(int idFaceUser, int client) {
+bool Database::QueryUserByFace(int idFaceUser, int client, int score) {
 
 	/*if (lastUserId != idFaceUser || lastClient != client)
 	{*/
@@ -259,7 +261,7 @@ bool Database::QueryUserByFace(int idFaceUser, int client) {
 					values.push_back(view["identification"].get_utf8().value.to_string());
 					values.push_back("0");
 					values.push_back(to_string(client));
-					
+					values.push_back(to_string(score));
 					BuildJSONUser(values);
 				}
 			}
@@ -330,6 +332,7 @@ void Database::BuildJSONUser(vector<std::string> values) {
 	params.insert(std::pair<std::string, std::string>(FIELD_USER_IDENTIFICATION, values[3]));
 	params.insert(std::pair<std::string, std::string>(FIELD_USER_REGISTER, values[4]));
 	params.insert(std::pair<std::string, std::string>(FIELD_CLIENT, values[5]));
+	params.insert(std::pair<std::string, std::string>(FIELD_SCORE, values[6]));
 	std::map<std::string, std::string>::const_iterator it = params.begin(),
 		end = params.end();
 	for (; it != end; ++it) {
@@ -375,7 +378,7 @@ void Database::ProcessUserDB(User* user) {
 		
 		FindUserByIdFace(user->GetUserIdIFace(),
 			user->GetCropImageData(), user->GetMoldCropHeight(),
-			user->GetMoldCropWidth(), user->GetClient());
+			user->GetMoldCropWidth(), user->GetClient(), user->GetMoldScore());
 		
 
 	}

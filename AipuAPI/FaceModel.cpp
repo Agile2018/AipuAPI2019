@@ -108,7 +108,7 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 				int detectedFaces = configuration->GetMaxDetect();
 
 				errorCode = IFACE_DetectFaces(rawImage, widthFace, heightFace,
-					configuration->GetMinEyeDistance(), configuration->GetMaxEyeDistance(),
+					(float)configuration->GetMinEyeDistance(), (float)configuration->GetMaxEyeDistance(),
 					faceHandler, &detectedFaces, faceTemp);
 				delete[] rawImage;
 				error->CheckError(errorCode, error->medium);
@@ -455,10 +455,11 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client) {
 				model->SetMoldSize(templateSize);
 				model->SetIdClient(client);*/
 
-				int sizeImage[3];
+				int sizeImage[4];
 				sizeImage[0] = model->GetMoldCropWidth();
 				sizeImage[1] = model->GetMoldCropHeight();
 				sizeImage[2] = templateSize;
+				sizeImage[3] = quality;
 
 				auto tupleTemplateFace = std::make_tuple(templateData,
 					model->GetCropImageData(), sizeImage);
@@ -554,7 +555,7 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 	}
 
 	errorCode = IFACE_DetectFaces(rawImage, width, height,
-		configuration->GetMinEyeDistance(), configuration->GetMaxEyeDistance(),
+		(float)configuration->GetMinEyeDistance(), (float)configuration->GetMaxEyeDistance(),
 		faceHandlerGlobal, &detectedFaces, faceTemp);
 
 	if (errorCode == IFACE_OK) {

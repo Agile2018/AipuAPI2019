@@ -47,11 +47,11 @@ void Tracking::InitITracking() {
 		IntToStr(configuration->GetRefreshInterval()).c_str());
 	error->CheckError(errorCode, error->medium);
 	errorCode = IFACE_SetParam(objectHandler,
-		IFACE_PARAMETER_TRACK_MIN_EYE_DISTANCE,
+		IFACE_PARAMETER_TRACK_MIN_FACE_SIZE,
 		IntToStr(configuration->GetMinEyeDistance()).c_str());
 	error->CheckError(errorCode, error->medium);
 	errorCode = IFACE_SetParam(objectHandler,
-		IFACE_PARAMETER_TRACK_MAX_EYE_DISTANCE,
+		IFACE_PARAMETER_TRACK_MAX_FACE_SIZE,
 		IntToStr(configuration->GetMaxEyeDistance()).c_str());
 	error->CheckError(errorCode, error->medium);
 	errorCode = IFACE_SetParam(faceHandlerTracking,
@@ -247,14 +247,15 @@ void Tracking::CreateTemplate(void* face, Molded* model) {
 			if (quality > configuration->GetQualityModel()) {
 				//model->SetMoldSize(templateSize);
 				//model->SetMoldImage(templateData);
-				int sizeImage[3];
+				int sizeImage[4];
 				sizeImage[0] = model->GetMoldCropWidth();
 				sizeImage[1] = model->GetMoldCropHeight();
 				sizeImage[2] = templateSize;
+				sizeImage[3] = quality;
 
 				auto tupleTemplateFace = std::make_tuple(templateData,
 					model->GetCropImageData(), sizeImage);
-
+				
 				shootFace.on_next(tupleTemplateFace);
 				
 			}

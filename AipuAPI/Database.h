@@ -57,6 +57,7 @@ private:
 	const string FIELD_USER_IDENTIFICATION = "identification";
 	const string FIELD_USER_REGISTER = "register";
 	const string FIELD_CLIENT = "client";
+	const string FIELD_SCORE = "score";
 	const string FORMAT_IMAGE_64 = "data:image/jpeg;base64,";
 	const string PARAMS = "params";
 	const string DATASOURCE = "MongoDB";
@@ -73,7 +74,7 @@ private:
 	//void AddRecordsUser(User* user);
 	void AddImageUser(vector<unsigned char> image, int rows, int cols, int idUser);
 	void ObserverError();
-	bool QueryUserByFace(int idFaceUser, int client);
+	bool QueryUserByFace(int idFaceUser, int client, int score);
 	void BuildJSONUser(vector<std::string> values);
 	void BuildNewUser(User* user);
 	string QueryImageOfUser(int idFaceUser);
@@ -82,7 +83,7 @@ private:
 	void UpdateImageUser(int idFaceUser, vector<unsigned char> image, int rows, int cols);
 	void InsertNewUser(User* user);
 	void FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
-		int rows, int cols, int client);
+		int rows, int cols, int client, int score);
 
 };
 
