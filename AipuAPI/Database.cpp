@@ -43,10 +43,13 @@ void Database::CheckDatabase() {
 	{
 		databaseIsCreated = true;
 		bsoncxx::document::element ele = doc["name"];
-		/*std::string name = ele.get_utf8().value.to_string();
-		std::cout << name << std::endl;*/
-
+		
 	}
+
+	/*if (databaseIsCreated)
+	{
+		DeleteRecordsUserUnidentified();
+	}*/
 }
 
 void Database::InsertNewUser(User* user) {
@@ -71,6 +74,69 @@ void Database::InsertNewUser(User* user) {
 //	BuildNewUser(user);
 //}
 
+void Database::DeleteRecordsImagesUnidentified() {
+
+	if (databaseIsCreated)
+	{
+		try
+		{
+			auto clientConnection = MongoAccess::instance().GetConnection();
+
+			mongocxx::database database = (*clientConnection)[configuration->GetNameDatabase().c_str()];
+
+			mongocxx::collection collection = database[COLLECTION_IMAGE.c_str()];
+
+			bsoncxx::document::value builder = make_document(
+				kvp("id_face", make_document(kvp("$lt", 0))));
+
+			boost::optional<mongocxx::v_noabi::result::delete_result> result = collection.delete_many(std::move(builder));
+
+
+			if (result) {
+				std::cout << result->deleted_count() << "\n";
+			}
+		}
+		catch (const mongocxx::exception& e)
+		{
+			error->CheckError(ERROR_DATABASE,
+				error->medium, e.what());
+
+		}
+	}
+	
+}
+
+void Database::DeleteRecordsUserUnidentified() {
+
+	if (databaseIsCreated) {
+		try
+		{
+			auto clientConnection = MongoAccess::instance().GetConnection();
+
+			mongocxx::database database = (*clientConnection)[configuration->GetNameDatabase().c_str()];
+
+			mongocxx::collection collection = database[COLLECTION_USER.c_str()];
+
+			bsoncxx::document::value builder = make_document(
+				kvp("id_face", make_document(kvp("$lt", 0))));
+
+			boost::optional<mongocxx::v_noabi::result::delete_result> result = collection.delete_many(std::move(builder));
+
+
+			if (result) {
+				std::cout << result->deleted_count() << "\n";
+			}
+		}
+		catch (const mongocxx::exception& e)
+		{
+			error->CheckError(ERROR_DATABASE,
+				error->medium, e.what());
+
+		}
+	}
+	
+}
+
 void Database::AddUser(User* user) {
 		
 	try
@@ -81,8 +147,8 @@ void Database::AddUser(User* user) {
 
 		mongocxx::collection collection = database[COLLECTION_USER.c_str()];
 
-		lastUserId = user->GetUserIdIFace();
-		lastClient = user->GetClient();
+		/*lastUserId = user->GetUserIdIFace();
+		lastClient = user->GetClient();*/
 		bsoncxx::document::value builder = make_document(
 			kvp("id_face", user->GetUserIdIFace()),
 			kvp("name", user->GetNameUser().c_str()),
@@ -98,7 +164,6 @@ void Database::AddUser(User* user) {
 			error->medium, e.what());
 		
 	}
-
 
 }
 
@@ -138,7 +203,15 @@ void Database::BuildNewUser(User* user) {
 	values.push_back(user->GetNameUser());
 	values.push_back(user->GetLastNameUser());
 	values.push_back(user->GetIdentificationUser());
-	values.push_back("1");
+	if (idFace > 0)
+	{
+		values.push_back("1");
+	}
+	else
+	{
+		values.push_back("3");
+	}
+	
 	values.push_back(to_string(client));
 	values.push_back(to_string(score));
 	BuildJSONUser(values);
@@ -259,7 +332,7 @@ bool Database::QueryUserByFace(int idFaceUser, int client, int score) {
 					values.push_back(view["name"].get_utf8().value.to_string());
 					values.push_back(view["lastname"].get_utf8().value.to_string());
 					values.push_back(view["identification"].get_utf8().value.to_string());
-					values.push_back("0");
+					values.push_back("2");
 					values.push_back(to_string(client));
 					values.push_back(to_string(score));
 					BuildJSONUser(values);
@@ -362,7 +435,7 @@ string Database::QueryImageOfUser(int idFaceUser) {
 }
 
 void Database::ProcessUserDB(User* user) {
-	if (user->GetIsNew())
+	if (user->GetStateUser() == 1)
 	{
 		string number = to_string(user->GetUserIdIFace());
 		string name = "Person " + number;
@@ -374,7 +447,7 @@ void Database::ProcessUserDB(User* user) {
 		InsertNewUser(user);
 
 	}
-	else {
+	else if (user->GetStateUser() == 2) {
 		
 		FindUserByIdFace(user->GetUserIdIFace(),
 			user->GetCropImageData(), user->GetMoldCropHeight(),
@@ -382,5 +455,15 @@ void Database::ProcessUserDB(User* user) {
 		
 
 	}
+	else if (user->GetStateUser() == 3) {
+		string name = "Unidentified";
+		string lastName = "Unidentified";
+		string identification = "-";
+		user->SetNameUser(name);
+		user->SetLastNameUser(lastName);
+		user->SetIdentificationUser(identification);
+		InsertNewUser(user);
+	}
+
 	
 }

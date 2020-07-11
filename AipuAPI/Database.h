@@ -33,11 +33,12 @@ public:
 	void Configure();
 	void CheckDatabase();
 	void ProcessUserDB(User* user);
-	
-	void ResetIdUser() {
+	void DeleteRecordsUserUnidentified();
+	void DeleteRecordsImagesUnidentified();
+	/*void ResetIdUser() {
 		lastUserId = -1;
 		lastClient = -1;
-	}
+	}*/
 	ConfigurationDatabase* configuration = new ConfigurationDatabase();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
@@ -84,7 +85,7 @@ private:
 	void InsertNewUser(User* user);
 	void FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
 		int rows, int cols, int client, int score);
-
+	
 };
 
 

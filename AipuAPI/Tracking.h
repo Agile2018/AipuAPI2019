@@ -62,7 +62,7 @@ private:
 	void* faceHandlerTracking = nullptr;
 	void* objects[NUM_TRACKED_OBJECTS] = {};	
 	
-	bool flagFirstDetect = false;
+	//bool flagFirstDetect = false;
 	bool flagTracking = false;
 	float colorRectangle[NUM_TRACKED_OBJECTS] = {};
 	float imageCoordinatesFollowed[COORDINATES_X_ALL_IMAGES];
@@ -76,7 +76,7 @@ private:
 	unsigned char* LoadImageOfMemory(vector<unsigned char> buffer,
 		int* width, int* height);
 	void CreateFaceOfObject(int indexTracking);
-	void AdvanceVideoStream();	
+	//void AdvanceVideoStream();	
 	void ResetCoordinates();
 	void TrackObjectState();		
 	void ObserverError();

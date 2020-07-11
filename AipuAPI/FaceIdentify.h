@@ -56,8 +56,9 @@ private:
 	void ObserverError();
 	int countRepeatUser = 0;
 	int countNewUser = 0;
-	int lastUser = 0;
+	//int countLastUserUnidentified = 0;
 	int countRepeatFrame = 0;
+	//int countUserNothing = -1;
 };
 
 

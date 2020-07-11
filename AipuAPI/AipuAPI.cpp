@@ -169,6 +169,8 @@ void InitDatabaseMongo() {
 	databaseMongo.configuration->ParseJSONToObject();
 	databaseMongo.Configure();
 	databaseMongo.CheckDatabase();
+	databaseMongo.DeleteRecordsUserUnidentified();
+	databaseMongo.DeleteRecordsImagesUnidentified();
 }
 
 AipuAPI::AipuAPI()

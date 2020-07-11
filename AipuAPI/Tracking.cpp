@@ -152,7 +152,7 @@ void Tracking::InitITracking() {
 	}
 
 	flagTracking = false;
-	flagFirstDetect = false;
+	//flagFirstDetect = false;
 
 	//sizeVideoStream = configuration->GetRefreshInterval() / configuration->GetTimeDeltaMs();
 	//countFlowFrames = 0;
@@ -179,15 +179,15 @@ void Tracking::FaceTracking(std::vector<unsigned char> vectorData) {
 	vectorData.clear();
 }
 
-void Tracking::AdvanceVideoStream() {
-	int positionVideoStream = (countFrameTracking / sizeVideoStream) + 1;
-	int positionFrameMaxVideoStream = sizeVideoStream * positionVideoStream;
-
-	if (countFrameTracking < positionFrameMaxVideoStream)
-	{
-		countFrameTracking = positionFrameMaxVideoStream;
-	}
-}
+//void Tracking::AdvanceVideoStream() {
+//	int positionVideoStream = (countFrameTracking / sizeVideoStream) + 1;
+//	int positionFrameMaxVideoStream = sizeVideoStream * positionVideoStream;
+//
+//	if (countFrameTracking < positionFrameMaxVideoStream)
+//	{
+//		countFrameTracking = positionFrameMaxVideoStream;
+//	}
+//}
 
 void Tracking::BuildCoordinatesImage(float x, float y, float width, 
 	float height, int indexTracked) {
@@ -348,7 +348,7 @@ void Tracking::CreateFaceOfObject(int indexTracking) {
 }
 
 void Tracking::TrackObjectState() {
-	int errorCode, countDesolation = 0;
+	int errorCode; // countDesolation = 0;
 
 	for (int trackedObjectIndex = 0; trackedObjectIndex < NUM_TRACKED_OBJECTS;
 		trackedObjectIndex++)
@@ -363,11 +363,11 @@ void Tracking::TrackObjectState() {
 		if (trackedState == IFACE_TRACKED_OBJECT_STATE_CLEAN) {
 
 
-			countDesolation++;
-			if (countDesolation == NUM_TRACKED_OBJECTS && !flagFirstDetect)
-			{
-				AdvanceVideoStream();
-			}
+			//countDesolation++;
+			//if (countDesolation == NUM_TRACKED_OBJECTS && !flagFirstDetect)
+			//{
+			//	//AdvanceVideoStream();
+			//}
 			errorCode = IFACE_CleanObject(objects[trackedObjectIndex], objectHandler);
 			error->CheckError(errorCode, error->medium);
 			continue;
@@ -376,7 +376,7 @@ void Tracking::TrackObjectState() {
 		switch (trackedState)
 		{
 		case IFACE_TRACKED_OBJECT_STATE_TRACKED:
-			flagFirstDetect = true;
+			//flagFirstDetect = true;
 			float objectScore;
 			errorCode = IFACE_GetObjectBoundingBox(objects[trackedObjectIndex],
 				objectHandler, &bbX, &bbY, &bbWidth, &bbHeight);
@@ -406,7 +406,7 @@ void Tracking::TrackObjectState() {
 			void* newObj;
 			errorCode = IFACE_CreateObject(&newObj);
 			objects[trackedObjectIndex] = newObj;
-			flagFirstDetect = false;			
+			//flagFirstDetect = false;			
 
 			break;
 		case IFACE_TRACKED_OBJECT_STATE_CLEAN:

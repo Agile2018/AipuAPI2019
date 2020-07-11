@@ -53,12 +53,12 @@ public:
 		return pathImageTemp;
 	}
 
-	void SetIsNew(bool response) {
-		isNew = response;
+	void SetStateUser(int value) {
+		state = value;
 	}
 
-	bool GetIsNew() {
-		return isNew;
+	int GetStateUser() {
+		return state;
 	}
 
 	void SetClient(int id) {
@@ -116,7 +116,7 @@ private:
 	string lastNameUser;
 	string identificationUser;
 	string pathImageTemp;
-	bool isNew = false;
+	int state = 2; // 1 -> New, 2 -> enroll, 3 -> nothing
 	int client;
 
 	vector<unsigned char> cropImageData;

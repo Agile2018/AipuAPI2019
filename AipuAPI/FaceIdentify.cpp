@@ -78,22 +78,37 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 
 	errorCode = identify(templateData, std::get<2>(modelImage)[2], &userID, &score);
 	error->CheckError(errorCode, error->medium);
-	if (userID == 0 && configuration->GetIsRegister() && errorCode == IENGINE_E_NOERROR)
+	/*if (userID == 0 && configuration->GetIsRegister() && errorCode == IENGINE_E_NOERROR)
 	{
 
 		errorCode = addUserToDatabase(templateData, std::get<2>(modelImage)[2], &userID);
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {
-			userForDatabase->SetIsNew(true);
+			userForDatabase->SetStateUser(1);
 		}
-		userForDatabase->SetIsNew(true);
-	}
+		userForDatabase->SetStateUser(1);
+	}*/
 
+	if (userID == 0  && errorCode == IENGINE_E_NOERROR)
+	{
+
+		errorCode = addUserToDatabase(templateData, std::get<2>(modelImage)[2], &userID);
+		error->CheckError(errorCode, error->medium);
+		if (configuration->GetIsRegister())
+		{
+			userForDatabase->SetStateUser(1);
+		}
+		else
+		{
+			userForDatabase->SetStateUser(3);
+		}
+		
+	}
 
 	if (errorCode == IENGINE_E_NOERROR && userID != 0 ) {
 		/*lastUser = userID;
 		countRepeatFrame = 0;*/
-		if (!userForDatabase->GetIsNew())
+		if (userForDatabase->GetStateUser() == 2)
 		{
 			
 			userForDatabase->SetMoldScore(score);
@@ -112,18 +127,27 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 		
 		shootUser.on_next(userForDatabase);
 	}
-
-
-	/*else
+	/*else if(errorCode == IENGINE_E_NOERROR && userID == 0)
 	{
-		countRepeatFrame++;
-		if (countRepeatFrame > 1)
+		if (countLastUserUnidentified == 0)
 		{
-			lastUser = 0;
-			countRepeatFrame = 0;
+			userForDatabase->SetStateUser(3);
+			userForDatabase->SetUserIdIFace(countUserNothing);
+			userForDatabase->SetClient(client);
+			userForDatabase->SetMoldScore(std::get<2>(modelImage)[3]);
+			userForDatabase->SetCropImageData(std::get<1>(modelImage));
+			userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
+			userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
+			countUserNothing--;
+			shootUser.on_next(userForDatabase);
 		}
-		
+		countLastUserUnidentified++;
+		if (countLastUserUnidentified == 7)
+		{
+			countLastUserUnidentified = 0;
+		}
 	}*/
+
 	//delete userForDatabase;
 	//flagEnroll = false;
 	templateData = NULL;
