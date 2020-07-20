@@ -15,6 +15,7 @@ public:
 	~FaceIndentify();
 	void LoadConnection();
 	void EnrollUser(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void RemoveUnidentified();
 	/*void SetIsRegister(bool option) {
 		isRegister = option;
 	}*/
@@ -56,6 +57,7 @@ private:
 	void ObserverError();
 	int countRepeatUser = 0;
 	int countNewUser = 0;
+	int lastUserUnidentified = 0;
 	//int countLastUserUnidentified = 0;
 	int countRepeatFrame = 0;
 	//int countUserNothing = -1;

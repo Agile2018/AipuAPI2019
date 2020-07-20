@@ -77,6 +77,7 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
 
 	errorCode = identify(templateData, std::get<2>(modelImage)[2], &userID, &score);
+	//cout << "IENGINE_E_ERROR: " << errorCode << " userID: " << userID << endl;
 	error->CheckError(errorCode, error->medium);
 	/*if (userID == 0 && configuration->GetIsRegister() && errorCode == IENGINE_E_NOERROR)
 	{
@@ -94,7 +95,7 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 
 		errorCode = addUserToDatabase(templateData, std::get<2>(modelImage)[2], &userID);
 		error->CheckError(errorCode, error->medium);
-		if (configuration->GetIsRegister())
+		if (configuration->GetIsRegister() == 1)
 		{
 			userForDatabase->SetStateUser(1);
 		}
@@ -106,8 +107,7 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 	}
 
 	if (errorCode == IENGINE_E_NOERROR && userID != 0 ) {
-		/*lastUser = userID;
-		countRepeatFrame = 0;*/
+		
 		if (userForDatabase->GetStateUser() == 2)
 		{
 			
@@ -119,14 +119,34 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 			userForDatabase->SetMoldScore(std::get<2>(modelImage)[3]);
 			countNewUser++;
 		}
-		userForDatabase->SetUserIdIFace(userID);
-		userForDatabase->SetClient(client);
-		userForDatabase->SetCropImageData(std::get<1>(modelImage));
-		userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);		
-		userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
-		
-		shootUser.on_next(userForDatabase);
+
+		if (userForDatabase->GetStateUser() == 3 && lastUserUnidentified != userID) {
+			//cout << " 33333 last user " << lastUserUnidentified << " user " << userID << endl;
+			RemoveUnidentified();
+			lastUserUnidentified = userID;
+			userForDatabase->SetUserIdIFace(userID);
+			userForDatabase->SetClient(client);
+			userForDatabase->SetCropImageData(std::get<1>(modelImage));
+			userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
+			userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
+			shootUser.on_next(userForDatabase);
+		}
+
+		if ((userForDatabase->GetStateUser() == 2 || 
+			userForDatabase->GetStateUser() == 1) && lastUserUnidentified != userID)
+		{
+			//cout << "last user " << lastUserUnidentified << " user " << userID << endl;
+			userForDatabase->SetUserIdIFace(userID);
+			userForDatabase->SetClient(client);
+			userForDatabase->SetCropImageData(std::get<1>(modelImage));
+			userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
+			userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
+			shootUser.on_next(userForDatabase);
+		}
+					
 	}
+	
+
 	/*else if(errorCode == IENGINE_E_NOERROR && userID == 0)
 	{
 		if (countLastUserUnidentified == 0)
@@ -202,4 +222,17 @@ void FaceIndentify::ObserverError() {
 	auto subscriptionError = observerError.subscribe([this](Either* either) {
 		shootError.on_next(either);
 	});
+}
+
+void FaceIndentify::RemoveUnidentified() {
+	if (lastUserUnidentified != 0)
+	{
+		if (removeUser(lastUserUnidentified) == 0) {
+			cout << "REMOVE UNIDENTIFIED OK" << endl;
+		}
+		else
+		{
+			cout << "REMOVE UNIDENTIFIED ERROR" << endl;
+		}
+	}
 }

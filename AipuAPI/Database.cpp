@@ -203,15 +203,7 @@ void Database::BuildNewUser(User* user) {
 	values.push_back(user->GetNameUser());
 	values.push_back(user->GetLastNameUser());
 	values.push_back(user->GetIdentificationUser());
-	if (idFace > 0)
-	{
-		values.push_back("1");
-	}
-	else
-	{
-		values.push_back("3");
-	}
-	
+	values.push_back(to_string(user->GetStateUser()));	
 	values.push_back(to_string(client));
 	values.push_back(to_string(score));
 	BuildJSONUser(values);

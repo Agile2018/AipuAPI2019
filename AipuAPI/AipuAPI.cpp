@@ -13,6 +13,7 @@ Pipe* pipe3;
 Pipe* pipe4;
 string userJson;
 string messageError;
+bool isOpenWindow = false;
 std::vector<string> listUser;
 const string nameConfigurationOne = "configuration";
 const string nameConfigurationTwo = "configuration1";
@@ -161,6 +162,7 @@ void AipuAPI::InitWindowMain(int option) {
 	default:
 		break;
 	}
+	isOpenWindow = true;
 }
 
 void InitDatabaseMongo() {
@@ -334,6 +336,8 @@ void AipuAPI::RunVideo(int option) {
 	default:
 		break;
 	}
+
+	
 }
 
 void AipuAPI::ReRunVideo(int option) {
@@ -361,8 +365,7 @@ void AipuAPI::CloseWindow() {
 	pipe2->SetFinishLoop();
 	pipe3->SetFinishLoop();
 	pipe4->SetFinishLoop();
-	
-	windowOGL.DestroyWindow();
+		
 }
 
 void AipuAPI::ObserverError() {
@@ -441,7 +444,30 @@ void AipuAPI::ObserverError() {
 }
 
 void AipuAPI::Terminate() {
+	if (pipe1->GetIsLoadConfig())
+	{
+		pipe1->RemoveUnidentified();
+	}
+
+	if (pipe2->GetIsLoadConfig())
+	{
+		pipe2->RemoveUnidentified();
+	}
+	if (pipe3->GetIsLoadConfig())
+	{
+		pipe3->RemoveUnidentified();
+	}
+	if (pipe4->GetIsLoadConfig())
+	{
+		pipe4->RemoveUnidentified();
+	}
+
 	innovatrics->Terminate();
+
+	if (isOpenWindow)
+	{
+		windowOGL.DestroyWindow();
+	}
 	//isLoadIdentify = false;
 	//flowVideo->Terminate();
 }

@@ -42,6 +42,10 @@ public:
 	int GetCountRepeatUser();
 	void SavePerformance();
 	void ResetPerformance();
+	bool GetIsLoadConfig() {
+		return isLoadConfig;
+	}
+	void RemoveUnidentified();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	/*Rx::subject<string> userDetected;
@@ -51,6 +55,7 @@ private:
 	const string filePerformance = "performance.txt";
 	string directoryConfiguration = "configuration";
 	int client = 1;
+	bool isLoadConfig = false;
 	ConfigurationFile* configurationFile = new ConfigurationFile();
 	Configuration* configurationPerformance = new Configuration();
 	FaceModel* faceModel = new FaceModel();

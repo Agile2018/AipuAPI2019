@@ -79,6 +79,7 @@ void Pipe::LoadConfiguration() {
 	SetNameFileConfigurationTracking(configurationFile->GetNameFileConfigurationTracking());
 	SetNameFileConfigurationFlowVideo(configurationFile->GetNameFileConfigurationFlow());
 	configurationPerformance->SetNameFileConfiguration(filePerformance);
+	isLoadConfig = true;
 }
 
 void Pipe::RunFlowVideo() {
@@ -159,6 +160,10 @@ void Pipe::SetNameFileConfigurationFlowVideo(string name) {
 void Pipe::SetIndexFrame(int value)
 {
 	flowVideo->SetIndexFrame(value);
+}
+
+void Pipe::RemoveUnidentified() {
+	faceIdentify->RemoveUnidentified();
 }
 
 void Pipe::ObserverError() {

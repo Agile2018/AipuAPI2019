@@ -803,13 +803,27 @@ void DisplayFrameFour() {
 
 }
 
+void ToggleGlutWindowCloseBox()
+{    
+    HWND hwndGlut;
+    hwndGlut = GetForegroundWindow();   
+    SetClassLongPtr(hwndGlut, GCL_STYLE,
+        GetClassLongPtr(hwndGlut, GCL_STYLE) | CS_NOCLOSE);
+}
+
 void RefreshFrameOne(int value) {
+    static int disabledClose = 0;
     glutSetWindow(windowOne);
     if (frameOne->GetShowFrame())
     {
         
         frameOne->TransformCoordinates();
         LoadImageOnTextureOne();
+        if (disabledClose == 0)
+        {
+            disabledClose = 1;
+            ToggleGlutWindowCloseBox();
+        }
         
     }
     glutTimerFunc(frameOne->GetElapse(), RefreshFrameOne, 1);
@@ -978,8 +992,9 @@ void FrameView::RunFour(int argc, char** argv) {
 void FrameView::RunOne(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB); // GLUT_DOUBLE | GLUT_RGB   GLUT_SINGLE   GLUT_RGBA | GLUT_DOUBLE
-    glutInitWindowSize(400, 400);                    // window size    
+    glutInitWindowSize(400, 400);                    // window size        
     handleWindow = glutCreateWindow(nameWindow.c_str());    // message displayed on top bar window    
+    
     glutSetWindow(handleWindow);
 
     glutDisplayFunc(Display);
@@ -990,8 +1005,7 @@ void FrameView::RunOne(int argc, char** argv) {
     glEnable(GL_LINE_STIPPLE);
     glutDisplayFunc(DisplayFrameOne);
     glutTimerFunc(frameOne->GetElapse(), RefreshFrameOne, 1);
-    InitTextureOne();
-    
+    InitTextureOne();        
     glutMainLoop();
 }
 

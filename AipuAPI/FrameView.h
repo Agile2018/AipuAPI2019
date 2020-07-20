@@ -56,8 +56,7 @@ public:
 	
 
 private:
-	std::string nameWindow = "Recognition Video";
-	
+	std::string nameWindow = "Recognition Videos";
 	
 };
 
