@@ -62,21 +62,21 @@ void InitWindow() {
 	std::thread togl(ThreadRunWindow);
 	togl.detach();
 	pipe1->SetFrameView(&windowOGL);
-	pipe1->SetDatabase(&databaseMongo);
+	//pipe1->SetDatabase(&databaseMongo);
 }
 
 void InitWindowTwo() {
 	std::thread togl(ThreadRunWindowTwo);
 	togl.detach();
 	pipe1->SetFrameView(&windowOGL);
-	pipe1->SetDatabase(&databaseMongo);
+	//pipe1->SetDatabase(&databaseMongo);
 }
 
 void InitWindowFour() {
 	std::thread togl(ThreadRunWindowFour);
 	togl.detach();
 	pipe1->SetFrameView(&windowOGL);
-	pipe1->SetDatabase(&databaseMongo);
+	//pipe1->SetDatabase(&databaseMongo);
 }
 
 void LoadConfigurationVideoOne() {
@@ -85,6 +85,7 @@ void LoadConfigurationVideoOne() {
 	pipe1->SetClient(PIPE_ONE);
 	pipe1->SetIndexFrame(PIPE_ONE);
 	pipe1->LoadConfiguration();
+	
 }
 
 void LoadConfigurationVideoTwo() {
@@ -115,25 +116,97 @@ void AipuAPI::LoadConfiguration(int option) {
 	switch (option)
 	{
 	case 1:
-		LoadConfigurationVideoOne();
-		
+		if (!pipe1->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoOne();
+		}
+				
 		break;
 	case 2:
-		LoadConfigurationVideoOne();
-		LoadConfigurationVideoTwo();
+		if (!pipe1->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoOne();
+		}
+		if (!pipe2->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoTwo();
+		}
+		
 		
 		break;
 	case 3:
-		LoadConfigurationVideoOne();
-		LoadConfigurationVideoTwo();
-		LoadConfigurationVideoThree();
+		if (!pipe1->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoOne();
+		}
+		if (!pipe2->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoTwo();
+		}
+		if (!pipe3->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoThree();
+		}
+		
 		
 		break;
 	case 4:
-		LoadConfigurationVideoOne();
-		LoadConfigurationVideoTwo();
-		LoadConfigurationVideoThree();
-		LoadConfigurationVideoFour();		
+		if (!pipe1->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoOne();
+		}
+		if (!pipe2->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoTwo();
+		}
+		if (!pipe3->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoThree();
+		}
+		if (!pipe4->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoFour();
+		}
+			
+		break;
+	default:
+		break;
+	}
+}
+
+void AipuAPI::LoadConfigurationPipe(int pipeline) {
+	switch (pipeline)
+	{
+	case 1:
+		if (!pipe1->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoOne();
+		}
+
+		break;
+	case 2:
+		
+		if (!pipe2->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoTwo();
+		}
+
+		break;
+	case 3:
+		
+		if (!pipe3->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoThree();
+		}
+
+		break;
+	case 4:
+		
+		if (!pipe4->GetIsLoadConfig())
+		{
+			LoadConfigurationVideoFour();
+		}
+
 		break;
 	default:
 		break;
@@ -188,7 +261,7 @@ AipuAPI::~AipuAPI()
 	delete pipe2;
 	delete pipe3;
 	delete pipe4;
-	listUser.clear();
+	
 }
 
 void AipuAPI::ConnectDatabase() {
@@ -199,7 +272,7 @@ void AipuAPI::ConnectDatabase() {
 	pipe3 = new Pipe();
 	pipe4 = new Pipe();
 	ObserverError();
-
+	pipe1->SetDatabase(&databaseMongo);
 }
 
 void AipuAPI::ObserverDatabase() {
@@ -299,6 +372,7 @@ void RunVideoFour() {
 }
 
 void ReRunVideoOne() {
+	LoadConfigurationVideoOne();
 	std::thread tpipe1(ExecuteFlowVideoOne);
 	tpipe1.detach();
 }
@@ -447,27 +521,36 @@ void AipuAPI::Terminate() {
 	if (pipe1->GetIsLoadConfig())
 	{
 		pipe1->RemoveUnidentified();
+		
 	}
 
 	if (pipe2->GetIsLoadConfig())
 	{
 		pipe2->RemoveUnidentified();
+		
 	}
 	if (pipe3->GetIsLoadConfig())
 	{
 		pipe3->RemoveUnidentified();
+		
 	}
 	if (pipe4->GetIsLoadConfig())
 	{
 		pipe4->RemoveUnidentified();
-	}
+		
+	}	
+
+	listUser.clear();
 
 	innovatrics->Terminate();
 
 	if (isOpenWindow)
 	{
+		cout << "CLOSE WINDOW" << endl;
 		windowOGL.DestroyWindow();
+		
 	}
+	
 	//isLoadIdentify = false;
 	//flowVideo->Terminate();
 }

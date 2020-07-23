@@ -121,7 +121,7 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 		}
 
 		if (userForDatabase->GetStateUser() == 3 && lastUserUnidentified != userID) {
-			//cout << " 33333 last user " << lastUserUnidentified << " user " << userID << endl;
+			
 			RemoveUnidentified();
 			lastUserUnidentified = userID;
 			userForDatabase->SetUserIdIFace(userID);
@@ -135,7 +135,7 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 		if ((userForDatabase->GetStateUser() == 2 || 
 			userForDatabase->GetStateUser() == 1) && lastUserUnidentified != userID)
 		{
-			//cout << "last user " << lastUserUnidentified << " user " << userID << endl;
+			
 			userForDatabase->SetUserIdIFace(userID);
 			userForDatabase->SetClient(client);
 			userForDatabase->SetCropImageData(std::get<1>(modelImage));
@@ -225,6 +225,7 @@ void FaceIndentify::ObserverError() {
 }
 
 void FaceIndentify::RemoveUnidentified() {
+	
 	if (lastUserUnidentified != 0)
 	{
 		if (removeUser(lastUserUnidentified) == 0) {

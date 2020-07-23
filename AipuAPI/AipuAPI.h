@@ -24,6 +24,7 @@ public:
 	void LoadConfiguration(int option); // 1 2 3 4 throw group
 	void InitWindowMain(int option); // 1 2 3 4 throw group
 	void RunVideo(int option); // 1 2 3 4 throw group
+	void LoadConfigurationPipe(int pipeline); // 1 2 3 4 throw single
 	void CloseWindow();
 	void Terminate();
 	void ReRunVideo(int option); // throw single

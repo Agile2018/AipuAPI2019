@@ -490,16 +490,27 @@ void FlowVideo::StatePaused() {
 
 void FlowVideo::SetFinishLoop() {
 	
-	GstState cur_state;
+	//GstState cur_state;
 	if (pipeline != NULL)
 	{
-		gst_element_get_state(GST_ELEMENT(pipeline), &cur_state, NULL, 0);
+		gst_element_change_state(GST_ELEMENT(pipeline), GST_STATE_CHANGE_READY_TO_NULL);
+		/*gst_element_get_state(GST_ELEMENT(pipeline), &cur_state, NULL, 0);
 		if (cur_state == GST_STATE_PLAYING) {
 			gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PAUSED);
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));			
-		}
+		}*/
+
+		//g_main_loop_quit(loop);
+
+		/*gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_NULL);
+		gst_object_unref(GST_OBJECT(pipeline));*/
+
+		/*if (loop)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			g_main_loop_quit(loop);
+		}*/
 		
-		g_main_loop_quit(loop);
 	}
 	
 			
