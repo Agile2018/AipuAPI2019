@@ -53,8 +53,10 @@ public:
 	void SetImageData(int indexFrame, unsigned char* data, int size);
 	void SetSides(int indexFrame, int value);
 	void SetShowFrame(int indexFrame, bool value);
-	
-
+	void SetColourTextFrameOne(float red, float green, float blue);
+	void SetColourTextFrameTwo(float red, float green, float blue);
+	void SetColourTextFrameThree(float red, float green, float blue);
+	void SetColourTextFrameFour(float red, float green, float blue);
 private:
 	std::string nameWindow = "Recognition Videos";
 	

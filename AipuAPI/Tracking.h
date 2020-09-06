@@ -8,6 +8,7 @@
 #include "ConfigurationTracking.h"
 #include "Molded.h"
 
+
 #define NUM_TRACKED_OBJECTS	5
 #define COORDINATES_X_ALL_IMAGES 20
 #define NUM_COORDINATES_X_IMAGE  4
@@ -46,6 +47,12 @@ public:
 		return configuration->GetSequenceFps();
 	}
 
+	void SetTaskIdentify(int task) {
+		taskIdentify = task;
+		//lastQuality = 0;
+		//countModelSend = 0;
+	}
+
 	void ClearAllCoordinatesImage();
 	float* GetCoordiantesRectangle();
 	float* GetColorRectangle();
@@ -58,9 +65,12 @@ public:
 private:		
 	long countFrameTracking = 0;
 	int sizeVideoStream = 0;
+	int taskIdentify = -1; // -1 only tracking -- 0 register by appearance -- 1 register by quality model of user
 	void* objectHandler = nullptr;
 	void* faceHandlerTracking = nullptr;
 	void* objects[NUM_TRACKED_OBJECTS] = {};	
+	//int lastQuality = 0;
+	//int countModelSend = 0;
 	
 	//bool flagFirstDetect = false;
 	bool flagTracking = false;
@@ -80,8 +90,10 @@ private:
 	void ResetCoordinates();
 	void TrackObjectState();		
 	void ObserverError();
-	void CreateTemplate(void* face, Molded* model);
+	void CreateTemplate(void* face, Molded* model, int task);
+	//void CreateTemplateAndSendVariation(void* face, Molded* model);
 	void FaceCropImage(void* face, Molded* model);
+	void RunTask(void* face, Molded* model);
 };
 
 #endif // !TRACKING_H

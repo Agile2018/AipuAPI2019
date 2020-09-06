@@ -29,7 +29,8 @@ void Pipe::SetDatabase(Database* db) {
 
 void Pipe::SetDirectoryConfiguration() {
 	faceModel->configuration->SetNameDirectory(directoryConfiguration);
-	faceIdentify->configuration->SetNameDirectory(directoryConfiguration);
+	/*faceIdentify->configuration->SetNameDirectory(directoryConfiguration);*/
+	faceIdentify->SetNameDirectory(directoryConfiguration);
 	configurationFile->SetNameDirectory(directoryConfiguration);	
 	flowVideo->SetNameDirectoryTracking(directoryConfiguration);
 	flowVideo->configuration->SetNameDirectory(directoryConfiguration);
@@ -133,6 +134,10 @@ void Pipe::SetFinishLoop() {
 	flowVideo->SetFinishLoop();
 }
 
+void Pipe::SetTaskIdentify(int value) {
+	flowVideo->SetTaskIdentify(value);
+}
+
 void Pipe::SetNameFileConfigurationFace(string name) {
 	faceModel->configuration->SetNameFileConfiguration(name);
 	faceModel->configuration->ParseJSONToObject();
@@ -140,8 +145,10 @@ void Pipe::SetNameFileConfigurationFace(string name) {
 }
 
 void Pipe::SetNameFileConfigurationIdentify(string name) {
-	faceIdentify->configuration->SetNameFileConfiguration(name);
-	faceIdentify->configuration->ParseJSONToObject();
+	//faceIdentify->configuration->SetNameFileConfiguration(name);
+	faceIdentify->SetNameFileConfiguration(name);
+	/*faceIdentify->configuration->ParseJSONToObject();*/
+	faceIdentify->ParseJSONToObject();
 	faceIdentify->LoadConnection();
 }
 
@@ -216,7 +223,7 @@ void Pipe::ObserverTrackingFace()
 	auto subscriptionTemplate = templateObservable
 		.subscribe([this](std::tuple<char*, vector<unsigned char>, int*> modelImage) {
 		
-		faceIdentify->EnrollUser(modelImage, client);
+		faceIdentify->ForkTask(modelImage, client);
 		
 		
 	});
@@ -234,7 +241,7 @@ void Pipe::ObserverTemplateImage()
 	auto subscriptionTemplate = templateObservable.subscribe([this](std::tuple<char*, 
 		vector<unsigned char>, int*> modelImage) {
 		
-		faceIdentify->EnrollUser(modelImage, client);
+		faceIdentify->ForkTask(modelImage, client);
 		
 	});
 
@@ -255,3 +262,14 @@ void Pipe::ObserverIdentifyFace() {
 	subscriptionIdentifyUser.clear();
 }
 
+void Pipe::CloseConnection() {
+	faceIdentify->CloseConnection();
+}
+
+void Pipe::AddCollectionOfImages(string folder, int client, int doing) {
+	faceModel->AddCollectionOfImages(folder, client, doing);
+}
+
+void Pipe::ResetEnrollVideo() {
+	faceIdentify->ResetEnrollVideo();
+}

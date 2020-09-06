@@ -5,97 +5,243 @@ FaceIndentify::FaceIndentify()
 }
 
 FaceIndentify::~FaceIndentify()
-{
-	delete configuration;
+{	
 	delete error;
-	delete format;
+	delete format;	
+	delete faceIdkit;	
 }
 
 void FaceIndentify::LoadConnection() {
-	/*int errorCode;
-	std::string str = "iengine.db";
-	const char *cstr = str.c_str();	*/
-
-	SetParamsIdentify();
-	/*errorCode = connectToDatabase(cstr);
-	cout << "connectToDatabase returns " << errorCode << endl;	*/
-
-	/*errorCode = IEngine_InitModule();
-	error->CheckError(errorCode, error->medium);
-	errorCode = IEngine_SetParameter(CFG_IDENTIFICATION_SPEED, 4);
-	error->CheckError(errorCode, error->medium);
-	errorCode = IEngine_SetParameter(CFG_MAX_ROTATION, 90);
-	error->CheckError(errorCode, error->medium);
-	errorCode = IEngine_Connect(cstr);
-	error->CheckError(errorCode, error->medium);*/
-
-
-	/*errorCode = IEngine_ClearDatabase();
-	error->CheckError(errorCode, error->medium);*/
+	faceIdkit->Connection();
+	
 }
 
-void FaceIndentify::SetParamsIdentify() {
-	int errorCode;
-	//std::string paramsIdentify = configuration->ParseMapToJSONForIdentify();	
-	/*std::string paramsIdentify = format->FormatString("{\"A_IdentificationSpeed\": %d, \"A_SimilarityThreshold\": %d, \"A_BestMatchedCandidates\": %d}",
-		configuration->GetIdentificationSpeed(), 
-		configuration->GetSimilarityThreshold(),
-		configuration->GetBestMatchedCandidates());*/
+void FaceIndentify::ForkTask(std::tuple<char*, 
+	vector<unsigned char>, int*> modelImage, int client) {
 
-	string paramsIdentify = format->FormatString("{\"A_IdentificationSpeed\": %d, ",
-		configuration->GetIdentificationSpeed());
-	paramsIdentify += format->FormatString("\"A_MinEyeDist\": %d, ",
-		configuration->GetMinEyeDistance());
-	paramsIdentify += format->FormatString("\"A_MaxEyeDist\": %d, ",
-		configuration->GetMaxEyeDistance());
-	paramsIdentify += format->FormatString("\"A_FaceDetectionForced\": %d, ",
-		configuration->GetFaceDetectionForced());
-	paramsIdentify += format->FormatString("\"A_SimilarityThreshold\": %d, ",
-		configuration->GetSimilarityThreshold());
-	paramsIdentify += format->FormatString("\"A_BestMatchedCandidates\": %d}",
-		configuration->GetBestMatchedCandidates());
+	switch (std::get<2>(modelImage)[4])
+	{
+	case 0:
+		EnrollUser(modelImage, client); 
+		break;
+	case 1:
+		EnrollUserAndTempletes(modelImage, client);
+		break;
+	case 2:
+		EnrollUserTheBestScore(modelImage, client);
+		break;
+	case 3:
+		EnrollUserVideo(modelImage, client);
+		break;
+	default:
+		break;
+	}
 
-	/*std::string paramsIdentify = format->FormatString("{\"A_IdentificationSpeed\": %d, \"A_MinEyeDist\": %d, \"A_MaxEyeDist\": %d, \"A_FaceDetectionForced\": %d}",
-		configuration->GetIdentificationSpeed(),
-		configuration->GetMinEyeDistance(),
-		configuration->GetMaxEyeDistance(), configuration->GetFaceDetectionForced());*/
+}
 
-	errorCode = setBiometricParameters(paramsIdentify.c_str());
+
+void FaceIndentify::EnrollUserVideo(std::tuple<char*,
+	vector<unsigned char>, int*> modelImage, int client) {
+	int errorCode, userID = -1, score = -1;
 	
-	cout << "setBiometricParameters returns " << errorCode << endl;
-	//error->CheckError(errorCode, error->medium);
+	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
+
+	if (countModelSendVideo == 0)
+	{
+		lastId = 0;
+		errorCode = faceIdkit->FindUser(templateData, std::get<2>(modelImage)[2], &userID, &score);
+		error->CheckError(errorCode, error->medium);
+		if (userID == 0 && errorCode == IENGINE_E_NOERROR) {
+			errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
+			error->CheckError(errorCode, error->medium);
+			if (errorCode == IENGINE_E_NOERROR)
+			{
+				lastId = userID;
+				countModelSendVideo++;
+				lastQualityVideo = std::get<2>(modelImage)[3];
+				BuildUserDatabase(modelImage, client, lastId);
+				
+			}
+		}
+		else if (userID != 0 && errorCode == IENGINE_E_NOERROR) {
+			lastId = userID;
+			countModelSendVideo++;
+			lastQualityVideo = std::get<2>(modelImage)[3];
+			errorCode = faceIdkit->AddFaceTemplate(templateData,
+				std::get<2>(modelImage)[2], lastId);
+			error->CheckError(errorCode, error->medium);
+		}
+	}
+	else {
+		if (lastId != 0 && lastQualityVideo != std::get<2>(modelImage)[3])
+		{
+			lastQualityVideo = std::get<2>(modelImage)[3];
+			errorCode = faceIdkit->AddFaceTemplate(templateData,
+				std::get<2>(modelImage)[2], lastId);
+			error->CheckError(errorCode, error->medium);
+			if (errorCode == IENGINE_E_NOERROR) {
+				cout << "ADD TEMPLATE " << endl;
+			}
+		}
+
+	}
+}
+
+void FaceIndentify::EnrollUserAndTempletes(std::tuple<char*,
+	vector<unsigned char>, int*> modelImage, int client) {	
+	int errorCode, userID = -1, score = -1;
+		
+	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
 	
+	if (std::get<2>(modelImage)[5] == 0)
+	{			
+		lastId = 0;
+		errorCode = faceIdkit->FindUser(templateData, std::get<2>(modelImage)[2], &userID, &score);
+		error->CheckError(errorCode, error->medium);
+		if (userID == 0 && errorCode == IENGINE_E_NOERROR) {
+			errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
+			error->CheckError(errorCode, error->medium);
+			if (errorCode == IENGINE_E_NOERROR)
+			{
+				lastId = userID;
+				BuildUserDatabase(modelImage, client, lastId);
+				
+			}
+		}
+		else if(userID != 0 && errorCode == IENGINE_E_NOERROR){
+			lastId = userID;
+			errorCode = faceIdkit->AddFaceTemplate(templateData,
+				std::get<2>(modelImage)[2], lastId);
+			error->CheckError(errorCode, error->medium);			
+		}
+	}
+	else {
+		if (lastId != 0)
+		{
+			errorCode = faceIdkit->AddFaceTemplate(templateData,
+				std::get<2>(modelImage)[2], lastId);
+			error->CheckError(errorCode, error->medium);	
+			if (errorCode == IENGINE_E_NOERROR) {
+				cout << "ADD TEMPLATE " << endl;
+			}
+		}
+		
+	}
+
+	templateData = NULL;
+}
+
+void FaceIndentify::EnrollUserTheBestScore(std::tuple<char*,
+	vector<unsigned char>, int*> modelImage, int client) {
+	int errorCode, userID = -1, score = -1;
+	
+	
+	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
+
+	if (std::get<2>(modelImage)[5] == 0)
+	{
+		lastId = 0;
+		errorCode = faceIdkit->FindUser(templateData, std::get<2>(modelImage)[2], &userID, &score);
+		error->CheckError(errorCode, error->medium);
+		if (userID == 0 && errorCode == IENGINE_E_NOERROR) {
+			errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
+			error->CheckError(errorCode, error->medium);
+			if (errorCode == IENGINE_E_NOERROR)
+			{
+				
+				templateForMatch = NULL;
+				lenghtMatch = 0;
+				lastId = userID;
+				BuildUserDatabase(modelImage, client, lastId);
+				
+				
+			}
+		}
+		else if (userID != 0 && errorCode == IENGINE_E_NOERROR) {	
+			lastId = userID;
+			GetFaceTemplateUser();
+			if (score >= faceIdkit->configuration->GetSimilarityThreshold())
+			{
+				errorCode = faceIdkit->AddFaceTemplate(templateData,
+					std::get<2>(modelImage)[2], lastId);
+				error->CheckError(errorCode, error->medium);
+			}
+			
+		}
+	}
+	else {
+		if (lastId != 0)
+		{						
+			if (templateForMatch == NULL)
+			{
+				GetFaceTemplateUser();
+				
+			}
+			MatchUsers(templateData, std::get<2>(modelImage)[2]);
+												
+		}
+
+	}
+
+	templateData = NULL;
+}
+
+void FaceIndentify::BuildUserDatabase(std::tuple<char*, 
+	vector<unsigned char>, int*> modelImage, int client, int userId) {
+	User* userForDatabase = new User();
+	userForDatabase->SetStateUser(1);
+	userForDatabase->SetMoldScore(std::get<2>(modelImage)[3]);
+	userForDatabase->SetUserIdIFace(userId);
+	userForDatabase->SetClient(client);
+	userForDatabase->SetCropImageData(std::get<1>(modelImage));
+	userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
+	userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
+	shootUser.on_next(userForDatabase);
+}
+
+
+void FaceIndentify::GetFaceTemplateUser() {
+	unsigned char* templatePattern = faceIdkit->GetFaceTemplate(lastId, &lenghtMatch);
+	templateForMatch = reinterpret_cast<const unsigned char*>(templatePattern);
+	templatePattern = NULL;
+}
+
+void FaceIndentify::MatchUsers(const unsigned char* templateIn, int sizeIn) {
+	int errorCode, score = -1;
+
+	errorCode = faceIdkit->MatchUsers(templateForMatch,
+		lenghtMatch, templateIn, sizeIn, &score);
+	error->CheckError(errorCode, error->medium);
+	if (errorCode == IENGINE_E_NOERROR && score >= faceIdkit->configuration->GetSimilarityThreshold())
+	{
+		cout << "SCORE OK: " << score << endl;
+		errorCode = faceIdkit->AddFaceTemplate(templateIn, sizeIn, lastId);
+		error->CheckError(errorCode, error->medium);
+
+	}
+	else {
+		cout << "SCORE NO OK: " << score << endl;
+	}
+
 }
 
 void FaceIndentify::EnrollUser(std::tuple<char*, 
 	vector<unsigned char>, int*> modelImage, int client) {
 
-	//flagEnroll = true;
-	int errorCode, userID, score;
-	//IENGINE_USER user = IEngine_InitUser();
+	int errorCode, userID = -1, score = -1;
 	User* userForDatabase = new User();
 	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
 
-	errorCode = identify(templateData, std::get<2>(modelImage)[2], &userID, &score);
-	//cout << "IENGINE_E_ERROR: " << errorCode << " userID: " << userID << endl;
+	errorCode = faceIdkit->FindUser(templateData, std::get<2>(modelImage)[2], &userID, &score);
+	
 	error->CheckError(errorCode, error->medium);
-	/*if (userID == 0 && configuration->GetIsRegister() && errorCode == IENGINE_E_NOERROR)
-	{
-
-		errorCode = addUserToDatabase(templateData, std::get<2>(modelImage)[2], &userID);
-		error->CheckError(errorCode, error->medium);
-		if (errorCode == IENGINE_E_NOERROR) {
-			userForDatabase->SetStateUser(1);
-		}
-		userForDatabase->SetStateUser(1);
-	}*/
-
+	
 	if (userID == 0  && errorCode == IENGINE_E_NOERROR)
-	{
-
-		errorCode = addUserToDatabase(templateData, std::get<2>(modelImage)[2], &userID);
+	{		
+		errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
+		
 		error->CheckError(errorCode, error->medium);
-		if (configuration->GetIsRegister() == 1)
+		if (faceIdkit->configuration->GetIsRegister() == 1)
 		{
 			userForDatabase->SetStateUser(1);
 		}
@@ -120,98 +266,26 @@ void FaceIndentify::EnrollUser(std::tuple<char*,
 			countNewUser++;
 		}
 
-		if (userForDatabase->GetStateUser() == 3 && lastUserUnidentified != userID) {
-			
-			RemoveUnidentified();
-			lastUserUnidentified = userID;
-			userForDatabase->SetUserIdIFace(userID);
-			userForDatabase->SetClient(client);
-			userForDatabase->SetCropImageData(std::get<1>(modelImage));
-			userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
-			userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
-			shootUser.on_next(userForDatabase);
-		}
-
-		if ((userForDatabase->GetStateUser() == 2 || 
-			userForDatabase->GetStateUser() == 1) && lastUserUnidentified != userID)
+		if (lastUserUnidentified != userID)
 		{
-			
+			if (userForDatabase->GetStateUser() == 3)
+			{
+				RemoveUnidentified();
+				lastUserUnidentified = userID;
+			}
+
 			userForDatabase->SetUserIdIFace(userID);
 			userForDatabase->SetClient(client);
 			userForDatabase->SetCropImageData(std::get<1>(modelImage));
 			userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
 			userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
 			shootUser.on_next(userForDatabase);
-		}
+		}		
 					
 	}
 	
-
-	/*else if(errorCode == IENGINE_E_NOERROR && userID == 0)
-	{
-		if (countLastUserUnidentified == 0)
-		{
-			userForDatabase->SetStateUser(3);
-			userForDatabase->SetUserIdIFace(countUserNothing);
-			userForDatabase->SetClient(client);
-			userForDatabase->SetMoldScore(std::get<2>(modelImage)[3]);
-			userForDatabase->SetCropImageData(std::get<1>(modelImage));
-			userForDatabase->SetMoldCropHeight(std::get<2>(modelImage)[1]);
-			userForDatabase->SetMoldCropWidth(std::get<2>(modelImage)[0]);
-			countUserNothing--;
-			shootUser.on_next(userForDatabase);
-		}
-		countLastUserUnidentified++;
-		if (countLastUserUnidentified == 7)
-		{
-			countLastUserUnidentified = 0;
-		}
-	}*/
-
-	//delete userForDatabase;
-	//flagEnroll = false;
 	templateData = NULL;
 
-	//errorCode = IEngine_AddFaceTemplate(user, templateData, modelImage->GetMoldSize());
-	//if (errorCode == IENGINE_E_NOERROR) {
-	//	User* userForDatabase = new User();
-
-	//	errorCode = IEngine_Connect("iengine.db");
-	//	error->CheckError(errorCode, error->medium);
-
-	//	errorCode = IEngine_FindUser(user, &userID, &score);
-	//	if (userID == 0 && isRegister)
-	//	{
-
-	//		errorCode = IEngine_RegisterUser(user, &userID);
-	//		error->CheckError(errorCode, error->medium);
-	//		if (errorCode == IENGINE_E_NOERROR) {
-	//			userForDatabase->SetIsNew(true);
-	//		}
-	//	}
-	//	if (errorCode == IENGINE_E_NOERROR && userID != 0) {
-	//		/*userForDatabase->SetUserIdIFace(userID);
-	//		userForDatabase->SetPathImageTemp(modelImage->GetPathImage());
-	//		userForDatabase->SetClient(modelImage->GetIdClient());*/
-	//		if (!userForDatabase->GetIsNew())
-	//		{
-	//			countRepeatUser++;
-	//		}
-	//		userForDatabase->SetUserIdIFace(userID);
-	//		userForDatabase->SetClient(modelImage->GetIdClient());
-	//		userForDatabase->SetCropImageData(modelImage->GetCropImageData());
-	//		userForDatabase->SetMoldCropHeight(modelImage->GetMoldCropHeight());
-	//		userForDatabase->SetMoldCropLength(modelImage->GetMoldCropLength());
-	//		userForDatabase->SetMoldCropWidth(modelImage->GetMoldCropWidth());
-	//		shootUser.on_next(userForDatabase);
-	//	}
-	//}
-	//else {
-	//	error->CheckError(errorCode, error->medium);
-	//}
-
-	//errorCode = IEngine_FreeUser(user);
-	//error->CheckError(errorCode, error->medium);
 }
 
 void FaceIndentify::ObserverError() {
@@ -222,18 +296,28 @@ void FaceIndentify::ObserverError() {
 	auto subscriptionError = observerError.subscribe([this](Either* either) {
 		shootError.on_next(either);
 	});
+
+	auto faceIdkitError = faceIdkit->observableError.map([](Either* either) {
+		return either;
+		});
+
+	auto subscriptionFaceIdkitError = faceIdkitError.subscribe([this](Either* either) {
+		shootError.on_next(either);
+		});
 }
 
 void FaceIndentify::RemoveUnidentified() {
-	
+	int errorCode;
 	if (lastUserUnidentified != 0)
 	{
-		if (removeUser(lastUserUnidentified) == 0) {
-			cout << "REMOVE UNIDENTIFIED OK" << endl;
-		}
-		else
-		{
-			cout << "REMOVE UNIDENTIFIED ERROR" << endl;
-		}
+		
+		errorCode = faceIdkit->RemoveUser(lastUserUnidentified);
+		error->CheckError(errorCode, error->medium);
+		
 	}
+}
+
+void FaceIndentify::CloseConnection() {
+	faceIdkit->CloseConnection();
+	templateForMatch = NULL;
 }

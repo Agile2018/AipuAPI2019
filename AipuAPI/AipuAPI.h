@@ -28,17 +28,19 @@ public:
 	void CloseWindow();
 	void Terminate();
 	void ReRunVideo(int option); // throw single
-
-	
+	void SetColourTextFrameOne(float red, float green, float blue);
+	void SetColourTextFrameTwo(float red, float green, float blue);
+	void SetColourTextFrameThree(float red, float green, float blue);
+	void SetColourTextFrameFour(float red, float green, float blue);
 	void ReloadRecognitionFace();
-	
+	void AddCollectionOfImages(string folder, int client, int doing);
 	void RecognitionFaceFiles(string file, int client);
 	void SetIsFinishLoadFiles(int option, bool value);
 	bool GetIsFinishLoadFiles(int option);
 	void ResetPerformance(int option);
 	void SavePerformance(int option);
-
-
+	void SetTaskIdentify(int value, int option);
+	void ResetEnrollVideo(int option);
 	void StatePlay(int option); // single
 	void StatePaused(int option); // single
 	void SetFinishLoop(int option); // single

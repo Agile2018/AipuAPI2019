@@ -62,21 +62,21 @@ void InitWindow() {
 	std::thread togl(ThreadRunWindow);
 	togl.detach();
 	pipe1->SetFrameView(&windowOGL);
-	//pipe1->SetDatabase(&databaseMongo);
+	
 }
 
 void InitWindowTwo() {
 	std::thread togl(ThreadRunWindowTwo);
 	togl.detach();
 	pipe1->SetFrameView(&windowOGL);
-	//pipe1->SetDatabase(&databaseMongo);
+	
 }
 
 void InitWindowFour() {
 	std::thread togl(ThreadRunWindowFour);
 	togl.detach();
 	pipe1->SetFrameView(&windowOGL);
-	//pipe1->SetDatabase(&databaseMongo);
+	
 }
 
 void LoadConfigurationVideoOne() {
@@ -521,23 +521,23 @@ void AipuAPI::Terminate() {
 	if (pipe1->GetIsLoadConfig())
 	{
 		pipe1->RemoveUnidentified();
-		
+		pipe1->CloseConnection();
 	}
 
 	if (pipe2->GetIsLoadConfig())
 	{
 		pipe2->RemoveUnidentified();
-		
+		pipe2->CloseConnection();
 	}
 	if (pipe3->GetIsLoadConfig())
 	{
 		pipe3->RemoveUnidentified();
-		
+		pipe3->CloseConnection();
 	}
 	if (pipe4->GetIsLoadConfig())
 	{
 		pipe4->RemoveUnidentified();
-		
+		pipe4->CloseConnection();
 	}	
 
 	listUser.clear();
@@ -546,13 +546,29 @@ void AipuAPI::Terminate() {
 
 	if (isOpenWindow)
 	{
-		cout << "CLOSE WINDOW" << endl;
+		//cout << "CLOSE WINDOW AIPUAPI" << endl;
 		windowOGL.DestroyWindow();
 		
 	}
 	
 	//isLoadIdentify = false;
 	//flowVideo->Terminate();
+}
+
+void AipuAPI::SetColourTextFrameOne(float red, float green, float blue) {
+	windowOGL.SetColourTextFrameOne(red, green, blue);
+}
+
+void AipuAPI::SetColourTextFrameTwo(float red, float green, float blue) {
+	windowOGL.SetColourTextFrameTwo(red, green, blue);
+}
+
+void AipuAPI::SetColourTextFrameThree(float red, float green, float blue) {
+	windowOGL.SetColourTextFrameThree(red, green, blue);
+}
+
+void AipuAPI::SetColourTextFrameFour(float red, float green, float blue) {
+	windowOGL.SetColourTextFrameFour(red, green, blue);
 }
 
 void AipuAPI::InitLibrary()
@@ -761,6 +777,66 @@ void AipuAPI::SetFinishLoop(int option) {
 		break;
 	case 4:
 		pipe4->SetFinishLoop();
+		break;
+	default:
+		break;
+	}
+}
+
+void AipuAPI::SetTaskIdentify(int value, int option) {
+	switch (option)
+	{
+	case 1:
+		pipe1->SetTaskIdentify(value);
+		break;
+	case 2:
+		pipe2->SetTaskIdentify(value);
+		break;
+	case 3:
+		pipe3->SetTaskIdentify(value);
+		break;
+	case 4:
+		pipe4->SetTaskIdentify(value);
+		break;
+	default:
+		break;
+	}
+}
+
+void AipuAPI::ResetEnrollVideo(int option) {
+	switch (option)
+	{
+	case 1:
+		pipe1->ResetEnrollVideo();
+		break;
+	case 2:
+		pipe2->ResetEnrollVideo();
+		break;
+	case 3:
+		pipe3->ResetEnrollVideo();
+		break;
+	case 4:
+		pipe4->ResetEnrollVideo();
+		break;
+	default:
+		break;
+	}
+}
+
+void AipuAPI::AddCollectionOfImages(string folder, int client, int doing) {
+	switch (client)
+	{
+	case 1:
+		pipe1->AddCollectionOfImages(folder, client, doing);
+		break;
+	case 2:
+		pipe2->AddCollectionOfImages(folder, client, doing);
+		break;
+	case 3:
+		pipe3->AddCollectionOfImages(folder, client, doing);
+		break;
+	case 4:
+		pipe4->AddCollectionOfImages(folder, client, doing);
 		break;
 	default:
 		break;

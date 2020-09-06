@@ -1,25 +1,21 @@
 #ifndef FACEIDENTIFY_H
 #define FACEIDENTIFY_H
 
-#include "ConfigurationIdentify.h"
 #include "ErrorIdKitLib.h"
 #include "Molded.h"
 #include "User.h"
-#include "AFaceAPI.h"
 #include "Format.h"
+#include "FaceIdkit.h"
 
 class FaceIndentify
 {
 public:
 	FaceIndentify();
 	~FaceIndentify();
-	void LoadConnection();
-	void EnrollUser(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void LoadConnection();	
 	void RemoveUnidentified();
-	/*void SetIsRegister(bool option) {
-		isRegister = option;
-	}*/
-
+	void CloseConnection();	
+	void ForkTask(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
 	bool GetFlagEnroll() {
 		return flagEnroll;
 	}
@@ -40,8 +36,24 @@ public:
 		return countNewUser;
 	}
 
-	void SetParamsIdentify();
-	ConfigurationIdentify* configuration = new ConfigurationIdentify();
+	
+	void SetNameDirectory(string directoryConfiguration) {
+		faceIdkit->configuration->SetNameDirectory(directoryConfiguration);
+	}
+
+	void SetNameFileConfiguration(string name) {
+		faceIdkit->configuration->SetNameFileConfiguration(name);
+	}
+
+	void ParseJSONToObject() {
+		faceIdkit->configuration->ParseJSONToObject();
+	}
+
+	void ResetEnrollVideo() {
+		lastQualityVideo = 0;
+		countModelSendVideo = 0;
+	}
+
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	Rx::subject<User*> userSubject;
@@ -53,14 +65,27 @@ private:
 	Rx::subscriber<User*> shootUser = userSubject.get_subscriber();
 	bool flagEnroll = false;
 	Format* format = new Format();
-	//bool isRegister = true;
+	FaceIdkit* faceIdkit = new FaceIdkit();
+	void EnrollUser(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void EnrollUserAndTempletes(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void EnrollUserTheBestScore(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void EnrollUserVideo(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void BuildUserDatabase(std::tuple<char*, vector<unsigned char>, int*> modelImage, 
+		int client, int userId);
+	void GetFaceTemplateUser();
+	void MatchUsers(const unsigned char* templateIn, int sizeIn);
 	void ObserverError();
 	int countRepeatUser = 0;
 	int countNewUser = 0;
-	int lastUserUnidentified = 0;
-	//int countLastUserUnidentified = 0;
+	int lastUserUnidentified = 0;	
 	int countRepeatFrame = 0;
-	//int countUserNothing = -1;
+	
+	int lastId = 0;
+	const unsigned char* templateForMatch = NULL;
+	int lenghtMatch = 0;
+
+	int lastQualityVideo = 0;
+	int countModelSendVideo = 0;
 };
 
 

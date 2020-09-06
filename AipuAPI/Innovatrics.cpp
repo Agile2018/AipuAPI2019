@@ -26,6 +26,14 @@ void Innovatrics::ObserverError() {
 	auto subscriptionError = observerError.subscribe([this](Either* either) {
 		shootError.on_next(either);
 	});
+
+	auto faceIdkitError = faceIdkit->observableError.map([](Either* either) {
+		return either;
+		});
+
+	auto subscriptionFaceIdkitError = faceIdkitError.subscribe([this](Either* either) {
+		shootError.on_next(either);
+		});
 }
 
 void Innovatrics::InitLibrary() {
@@ -35,28 +43,16 @@ void Innovatrics::InitLibrary() {
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->gross);
 	}
-	cout << "initLibrary IFACE_Init " << errorCode << endl;
+	cout << "INIT IFACE_Init " << errorCode << endl;
 	
-	auto initData = "{\"licenseFile\":\"iengine.lic\"}";
-	errorCode = initLibrary(initData);
+	errorCode = faceIdkit->InitLibrary();
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->gross);
 	}
-	cout << "initLibrary " << errorCode << endl;
-	std::string str = "iengine.db";
-	errorCode = connectToDatabase(str.c_str());
-	cout << "connectToDatabase returns " << errorCode << endl;	
+	cout << "INIT FACEIDKIT: " << errorCode << endl;
+		
 }
 
-//void Innovatrics::InitLibraryIdentify() {
-//	/*int errorCode;
-//	auto initData = "{\"licenseFile\":\"iengine.lic\"}";
-//	errorCode = initLibrary(initData);
-//	if (errorCode != IFACE_OK) {
-//		error->CheckError(errorCode, error->gross);
-//	}
-//	cout << "initLibrary initLibrary " << errorCode << endl;*/
-//}
 
 bool Innovatrics::InitParamsGraphicProcessor() {
 	int errorCode;
@@ -114,9 +110,9 @@ void Innovatrics::Terminate() {
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->gross);
 	}
-	
-	errorCode = endLibrary();
+	errorCode = faceIdkit->TerminateLibrary();
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->gross);
 	}
+	
 }

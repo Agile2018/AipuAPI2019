@@ -199,8 +199,6 @@ void FlowVideo::DrawRectangles() {
 
 }
 
-
-
 void FlowVideo::RunTracking(std::vector<unsigned char> buffer, int index) {
 	if (!tracking->GetFlagTracking() && index == indexFrame)
 	{

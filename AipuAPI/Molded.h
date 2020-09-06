@@ -80,6 +80,21 @@ public:
 		idClient = id;
 	}
 
+	void SetWhatDoing(int value) {
+		whatDoing = value;
+	}
+
+	int GetWhatDoing() {
+		return whatDoing;
+	}
+
+	void SetLocation(int value) {
+		location = value;
+	}
+
+	int GetLocation() {
+		return location;
+	}
 
 private:
 	char* moldImage;
@@ -88,7 +103,11 @@ private:
 	int moldSize, cropWidth, cropHeight, cropLength;
 	string pathImage;
 	int idClient;
-
+	int whatDoing = 0; 
+	// 0 estoy solo puedo registrarme o hacerme buscar
+	//1 - Estoy con varios para registrarnos si o si.
+	//2 - Estoy con varios y sólo se registraran los más lindos.
+	int location = 0;
 };
 
 

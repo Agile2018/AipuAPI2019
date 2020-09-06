@@ -68,12 +68,12 @@ bool GraphicProcessor::ThereIsGraphicProcessor() {
 			deviceProp.multiProcessorCount);
 
 		description += format->FormatString("GPU Max Clock rate: %.0f MHz (%0.2f GHz)\n",
-			deviceProp.clockRate * 1e-3f, deviceProp.clockRate * 1e-6f);
+			float(deviceProp.clockRate * 1e-3f), float(deviceProp.clockRate * 1e-6f));
 
 #if CUDART_VERSION >= 5000
 		// This is supported in CUDA 5.0 (runtime API device properties)
 		description += format->FormatString("Memory Clock rate:  %.0f Mhz\n",
-			deviceProp.memoryClockRate * 1e-3f);
+			float(deviceProp.memoryClockRate * 1e-3f));
 
 		description += format->FormatString("Memory Bus Width: %d-bit\n",
 			deviceProp.memoryBusWidth);

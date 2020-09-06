@@ -136,11 +136,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;AIPUAPI_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;AIPUAPI_EXPORTS;_WINDOWS;_USRDLL;_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>F:\freeglut\include;F:\glew-2.2.0\include;F:\SOIL2-master\src\SOIL2;D:\mongo-c-driver\include\libmongoc-1.0;D:\mongo-c-driver\include\libbson-1.0;D:\mongo-cxx-driver\install\include\bsoncxx\v_noabi;D:\mongo-cxx-driver\install\include\mongocxx\v_noabi;D:\boost_1_70_0;F:\install\Innovatrics SDKs\1.0.0.2\include;C:\Program Files\Innovatrics\IDKit SDK\include;D:\opencv\include;F:\gstreamer\1.0\x86_64\include;F:\gstreamer\1.0\x86_64\lib\glib-2.0\include;F:\gstreamer\1.0\x86_64\include\glib-2.0;F:\gstreamer\1.0\x86_64\include\gstreamer-1.0;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;D:\Program Files %28x86%29\JSONCPP\include;C:\Program Files\Innovatrics\IFace SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\freeglut\include;F:\glew-2.2.0\include;F:\SOIL2-master\src\SOIL2;D:\mongo-c-driver\include\libmongoc-1.0;D:\mongo-c-driver\include\libbson-1.0;D:\mongo-cxx-driver\install\include\bsoncxx\v_noabi;D:\mongo-cxx-driver\install\include\mongocxx\v_noabi;C:\local\boost_1_74_0;C:\Program Files\Innovatrics\IDKit SDK\include;D:\opencv\include;F:\gstreamer\1.0\x86_64\include;F:\gstreamer\1.0\x86_64\lib\glib-2.0\include;F:\gstreamer\1.0\x86_64\include\glib-2.0;F:\gstreamer\1.0\x86_64\include\gstreamer-1.0;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;D:\Program Files %28x86%29\JSONCPP\include;C:\Program Files\Innovatrics\IFace SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,8 +148,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>F:\freeglut\lib\x64;F:\glew-2.2.0\lib\Release\x64;F:\SOIL2-master\lib\windows;D:\mongo-cxx-driver\install\lib;F:\install\Innovatrics SDKs\1.0.0.2\lib;C:\Program Files\Innovatrics\IDKit SDK\lib;D:\opencv\x64\vc16\lib;F:\gstreamer\1.0\x86_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64;D:\Program Files %28x86%29\JSONCPP\lib;C:\Program Files\Innovatrics\IFace SDK\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iface.lib;idkit.lib;jsoncpp.lib;cudart_static.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;gstapp-1.0.lib;opencv_world420.lib;AFaceAPI.lib;bsoncxx.lib;mongocxx.lib;glew32.lib;freeglut.lib;soil2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\local\boost_1_74_0\stage\lib;F:\freeglut\lib\x64;F:\glew-2.2.0\lib\Release\x64;F:\SOIL2-master\lib\windows;D:\mongo-cxx-driver\install\lib;C:\Program Files\Innovatrics\IDKit SDK\lib;D:\opencv\x64\vc16\lib;F:\gstreamer\1.0\x86_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64;D:\Program Files %28x86%29\JSONCPP\lib;C:\Program Files\Innovatrics\IFace SDK\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>iface.lib;idkit.lib;jsoncpp.lib;cudart_static.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;gstapp-1.0.lib;opencv_world420.lib;bsoncxx.lib;mongocxx.lib;glew32.lib;freeglut.lib;soil2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -169,6 +169,7 @@
     <ClInclude Include="ErrorFaceLib.h" />
     <ClInclude Include="ErrorIdKitLib.h" />
     <ClInclude Include="FaceIdentify.h" />
+    <ClInclude Include="FaceIdkit.h" />
     <ClInclude Include="FaceModel.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="FlowVideo.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="SafeQueue.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Tracking.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
@@ -202,6 +204,7 @@
     <ClCompile Include="ErrorFaceLib.cpp" />
     <ClCompile Include="ErrorIdKitLib.cpp" />
     <ClCompile Include="FaceIdentify.cpp" />
+    <ClCompile Include="FaceIdkit.cpp" />
     <ClCompile Include="FaceModel.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FlowVideo.cpp" />

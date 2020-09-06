@@ -45,7 +45,11 @@ public:
 	bool GetIsLoadConfig() {
 		return isLoadConfig;
 	}
+	void SetTaskIdentify(int value);
+	void ResetEnrollVideo();
 	void RemoveUnidentified();
+	void CloseConnection();
+	void AddCollectionOfImages(string folder, int client, int doing);
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	/*Rx::subject<string> userDetected;

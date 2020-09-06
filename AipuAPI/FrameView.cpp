@@ -8,6 +8,10 @@ GLuint idTexture1 = 0, idTexture2 = 0, idTexture3 = 0, idTexture4 = 0;
 GLushort pattern = 0x5555;
 GLint factorStipple = 10;
 GLfloat lineWidth = 3.0f;
+GLfloat colourRfo = 0.0, colourGfo = 0.0, colourBfo = 0.0;
+GLfloat colourRft = 0.0, colourGft = 0.0, colourBft = 0.0;
+GLfloat colourRfth = 0.0, colourGfth = 0.0, colourBfth = 0.0;
+GLfloat colourRff = 0.0, colourGff = 0.0, colourBff = 0.0;
 std::string lblOne = "Video 1";
 std::string lblTwo = "Video 2";
 std::string lblThree = "Video 3";
@@ -606,8 +610,6 @@ void DrawRectangleFour() {
 
 }
 
-
-
 //void DrawRegularPolygon(int index) {
 //    for (int i = 0; i < NUM_RECTANGLES; i++) {
 //        if (frames[index].GetRatioWidth(i) != 0.0f) {
@@ -675,10 +677,10 @@ void DisplayFrameOne() {
     DrawRectangleOne();
    
     glEnable(GL_BLEND);
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3f(colourRfo, colourGfo, colourBfo);
     glRasterPos2f(-0.9f, 0.8f);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)"Video 1");
+        (unsigned char*)lblOne.c_str());
     glDisable(GL_BLEND);
     
     //DrawRegularPolygon();
@@ -714,10 +716,10 @@ void DisplayFrameTwo() {
     DrawRectangleTwo();
 
     glEnable(GL_BLEND);
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3f(colourRft, colourGft, colourBft);
     glRasterPos2f(-0.9f, 0.8f);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)"Video 2");
+        (unsigned char*)lblTwo.c_str());
     glDisable(GL_BLEND);
 
     //DrawRegularPolygon();
@@ -753,10 +755,10 @@ void DisplayFrameThree() {
     DrawRectangleThree();
 
     glEnable(GL_BLEND);
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3f(colourRfth, colourGfth, colourBfth);
     glRasterPos2f(-0.9f, 0.8f);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)"Video 3");
+        (unsigned char*)lblThree.c_str());
     glDisable(GL_BLEND);
 
     //DrawRegularPolygon();
@@ -792,10 +794,10 @@ void DisplayFrameFour() {
     DrawRectangleFour();
 
     glEnable(GL_BLEND);
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3f(colourRff, colourGff, colourBff);
     glRasterPos2f(-0.9f, 0.8f);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)"Video 4");
+        (unsigned char*)lblFour.c_str());
     glDisable(GL_BLEND);
 
     //DrawRegularPolygon();
@@ -951,6 +953,29 @@ void reshapeFour(int w, int h)
     glutReshapeWindow(width, height);
 }
 
+void FrameView::SetColourTextFrameOne(float red, float green, float blue) {
+    colourRfo = red;
+    colourGfo = green;
+    colourBfo = blue;
+}
+
+void FrameView::SetColourTextFrameTwo(float red, float green, float blue) {
+    colourRft = red;
+    colourGft = green;
+    colourBft = blue;
+}
+
+void FrameView::SetColourTextFrameThree(float red, float green, float blue) {
+    colourRfth = red;
+    colourGfth = green;
+    colourBfth = blue;
+}
+
+void FrameView::SetColourTextFrameFour(float red, float green, float blue) {
+    colourRff = red;
+    colourGff = green;
+    colourBff = blue;
+}
 
 void FrameView::RunFour(int argc, char** argv) {
     glutInit(&argc, argv);

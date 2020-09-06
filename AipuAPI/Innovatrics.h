@@ -3,8 +3,7 @@
 
 #include "ErrorFaceLib.h"
 #include "GraphicProcessor.h"
-#include "AFaceAPI.h"
-//#include "idkit.h"
+#include "FaceIdkit.h"
 
 class Innovatrics
 {
@@ -12,7 +11,7 @@ public:
 	Innovatrics();
 	~Innovatrics();
 	void InitLibrary();
-	//void InitLibraryIdentify();
+	
 	void SetIsGraphicProcessor(bool processor) {
 		isGraphicProcessor = processor;
 	}
@@ -25,11 +24,13 @@ public:
 private:
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	ErrorFaceLib* error = new ErrorFaceLib();
+	FaceIdkit* faceIdkit = new FaceIdkit();
 	bool InitParamsGraphicProcessor();
 	bool isGraphicProcessor = false;
 	void ObserverError();
 	GraphicProcessor* graphicProcessor = new GraphicProcessor();
 	void VerifyProcessorGraphic();
+	string connectDatabase = "iengine.db";
 };
 
 

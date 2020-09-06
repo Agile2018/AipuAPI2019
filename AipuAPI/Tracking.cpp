@@ -228,7 +228,28 @@ void Tracking::ResetCoordinates() {
 	}
 }
 
-void Tracking::CreateTemplate(void* face, Molded* model) {
+void Tracking::RunTask(void* face, Molded* model) {
+	switch (taskIdentify)
+	{
+	case -1:
+		cout << "TASK: " << taskIdentify << endl;
+		break;
+	case 0:
+		FaceCropImage(face, model);
+		CreateTemplate(face, model, 0);
+		cout << "TASK: " << taskIdentify << endl;
+		break;
+	case 3:
+		FaceCropImage(face, model);
+		CreateTemplate(face, model, 3);
+		cout << "TASK: " << taskIdentify << endl;
+		break;
+	default:
+		break;
+	}
+}
+
+void Tracking::CreateTemplate(void* face, Molded* model, int task) {
 	int errorCode, majorVersion, minorVersion, quality;
 	int templateSize;
 	
@@ -241,17 +262,19 @@ void Tracking::CreateTemplate(void* face, Molded* model) {
 			error->CheckError(errorCode, error->medium);
 		}
 		else
-		{
+		{			
 			errorCode = IFACE_GetTemplateInfo(faceHandlerTracking,
 				templateData, &majorVersion, &minorVersion, &quality);
+			
 			if (quality > configuration->GetQualityModel()) {
-				//model->SetMoldSize(templateSize);
-				//model->SetMoldImage(templateData);
-				int sizeImage[4];
+				
+				int sizeImage[6];
 				sizeImage[0] = model->GetMoldCropWidth();
 				sizeImage[1] = model->GetMoldCropHeight();
 				sizeImage[2] = templateSize;
 				sizeImage[3] = quality;
+				sizeImage[4] = task;
+				sizeImage[5] = 0;
 
 				auto tupleTemplateFace = std::make_tuple(templateData,
 					model->GetCropImageData(), sizeImage);
@@ -297,7 +320,6 @@ void Tracking::CreateFaceOfObject(int indexTracking) {
 	int errorCode;	
 	void* face = nullptr;	
 	
-
 	//IFACE_TRACKED_OBJECT_FACE_TYPE_LAST_DISCOVERY
 	//IFACE_TRACKED_OBJECT_FACE_TYPE_BEST_DISCOVERY
 	//IFACE_TRACKED_OBJECT_FACE_TYPE_LAST    IFACE_PARAMETER_TRACK_DEEP_TRACK = true	
@@ -308,10 +330,12 @@ void Tracking::CreateFaceOfObject(int indexTracking) {
 		objectHandler, face, IFACE_TRACKED_OBJECT_FACE_TYPE_BEST_DISCOVERY);
 	error->CheckError(errorCode, error->medium);	
 	
-	if (errorCode == IFACE_OK) {
+	if (errorCode == IFACE_OK) {		
 		Molded* model = new Molded();
-		FaceCropImage(face, model);		
-		CreateTemplate(face, model);				
+		/*FaceCropImage(face, model);		
+		CreateTemplate(face, model);*/		
+		RunTask(face, model);
+
 		delete model;
 		/*if (errorCode == IFACE_OK) {
 
@@ -417,7 +441,7 @@ void Tracking::TrackObjectState() {
 		if (trackedState == IFACE_TRACKED_OBJECT_STATE_TRACKED) {			
 			std::thread tcf(&Tracking::CreateFaceOfObject, this, trackedObjectIndex);
 			tcf.detach();
-			       			
+						       			
 		}
 	}
 	countFrameTracking++;
