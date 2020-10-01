@@ -7,10 +7,10 @@
 
 #include <string>
 
-#define PIPE_ONE 1
-#define PIPE_TWO 2
-#define PIPE_THREE 3
-#define PIPE_FOUR 4
+//#define PIPE_ONE 1
+//#define PIPE_TWO 2
+//#define PIPE_THREE 3
+//#define PIPE_FOUR 4
 
 using namespace std;
 
@@ -34,7 +34,7 @@ public:
 	void SetColourTextFrameFour(float red, float green, float blue);
 	void ReloadRecognitionFace();
 	void AddCollectionOfImages(string folder, int client, int doing);
-	void RecognitionFaceFiles(string file, int client);
+	void RecognitionFaceFiles(string file, int client, int task);
 	void SetIsFinishLoadFiles(int option, bool value);
 	bool GetIsFinishLoadFiles(int option);
 	void ResetPerformance(int option);
@@ -47,6 +47,8 @@ public:
 	string GetUserJSON();
 	string GetMessageError();
 	
+
+	void SetNumberPipelines(int value);
 	
 private:
 	void ObserverError();

@@ -160,6 +160,7 @@
     <ClInclude Include="ConfigurationDatabase.h" />
     <ClInclude Include="ConfigurationFile.h" />
     <ClInclude Include="ConfigurationFlowVideo.h" />
+    <ClInclude Include="ConfigurationGlobal.h" />
     <ClInclude Include="ConfigurationIdentify.h" />
     <ClInclude Include="ConfigurationIFace.h" />
     <ClInclude Include="ConfigurationTracking.h" />
@@ -184,7 +185,6 @@
     <ClInclude Include="SafeQueue.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Tracking.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
@@ -194,6 +194,7 @@
     <ClCompile Include="ConfigurationDatabase.cpp" />
     <ClCompile Include="ConfigurationFile.cpp" />
     <ClCompile Include="ConfigurationFlowVideo.cpp" />
+    <ClCompile Include="ConfigurationGlobal.cpp" />
     <ClCompile Include="ConfigurationIdentify.cpp" />
     <ClCompile Include="ConfigurationIFace.cpp" />
     <ClCompile Include="ConfigurationTracking.cpp" />

@@ -10,15 +10,8 @@ public:
 	ConfigurationIdentify();
 	~ConfigurationIdentify();
 	void ParseJSONToObject();
-	void ParseMapToJSON();
-	string ParseMapToJSONForIdentify();
-
-	void SetMinEyeDistance(int minDistance) {
-		minEyeDistance = minDistance;
-	}
-	void SetMaxEyeDistance(int maxDistance) {
-		maxEyeDistance = maxDistance;
-	}
+	//void ParseMapToJSON();
+	//string ParseMapToJSONForIdentify();
 
 	void SetIdentificationSpeed(int speed) {
 		identificationSpeed = speed;
@@ -51,23 +44,7 @@ public:
 
 	int GetFaceDetectionForced() {
 		return faceDetectionForced;
-	}
-
-	int GetMinEyeDistance() {
-		return minEyeDistance;
-	}
-
-	int GetMaxEyeDistance() {
-		return maxEyeDistance;
-	}
-
-	int GetBiometricLogLevel() {
-		return biometricLogLevel;
-	}
-
-	void SetBiometricLogLevel(int value) {
-		biometricLogLevel = value;
-	}
+	}		
 
 	int GetIgnoreMultipleFaces() {
 		return ignoreMultipleFaces;
@@ -83,15 +60,7 @@ public:
 
 	void SetFaceDetectionMode(int value) {
 		faceDetectionMode = value;
-	}
-
-	int GetSearchExtractionThreads() {
-		return searchExtractionThreads;
-	}
-
-	void SetSearchExtractionThreads(int value) {
-		searchExtractionThreads = value;
-	}
+	}	
 
 	int GetFaceExtractionMode() {
 		return faceExtractionMode;
@@ -102,61 +71,136 @@ public:
 	}
 
 	int GetIsRegister() {
-		return isRegister;
+		return isEnroll;
+	}
+	
+	int GetDetectionThreshold() {
+		return detectionThreshold;
+	}	
+
+	int GetSimilarityThresholdDeduplication() {
+		return similarityThresholdDeduplication;
 	}
 
-	void SetNameFileConfiguration(string name) {
-		configuration->SetNameFileConfiguration(name);
+	void SetSimilarityThresholdDeduplication(int value) {
+		similarityThresholdDeduplication = value;
 	}
-	void SetNameDirectory(string name) {
-		configuration->SetNameDirectory(name);
+
+	int GetIsDeduplication() {
+		return isDeduplication;
+	}
+
+	void SetIsDeduplication(int value) {
+		isDeduplication = value;
+	}
+
+
+
+	void SetStringJSON(string stringJson) {
+		configuration->SetStringJSON(stringJson);
+	}
+
+	int GetMaximumConcatenateTemplates() {
+		return maximumConcatenateTemplates;
+	}
+
+	int GetIsConcatenateTemplates() {
+		return isConcatenateTemplates;
+	}
+
+	void SetIsConcatenateTemplates(int value) {
+		isConcatenateTemplates = value;
+	}
+
+	int GetConcatenateMode() {
+		return concatenateMode;
+	}
+
+	void SetConcatenateMode(int value) {
+		concatenateMode = value;
+	}
+
+	int GetVerificationScore() {
+		return verificationScore;
+	}
+
+	void SetVerificationScore(int value) {
+		verificationScore = value;
+	}
+
+	int GetConcatenationMinimumScore() {
+		return score_min;
+	}
+
+	void SetConcatenationMinimumScore(int value) {
+		score_min = value;
+	}
+
+	int GetConcatenationMaximumScore() {
+		return score_max;
+	}
+
+	void SetConcatenationMaximumScore(int value) {
+		score_max = value;
+	}
+
+	int GetIdentificationThreshold() {
+		return identificationThreshold;
+	}
+
+	void SetIdentificationThreshold(int value) {
+		identificationThreshold = value;
 	}
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 private:
-	const int MIN_EYE_DISTANCE = 25;
-	const int MAX_EYE_DISTANCE = 250;
-	const int IDENTIFICATION_SPEED = 0; //*
-	const int FACE_DETECTION_FORCED = 0;
-	const int SIMILARITY_THRESHOLD = 40; //0..1000 *
-	const int BEST_MATCHED_CANDIDATES = 1; //*
-	const int BIOMETRIC_LOG_LEVEL = 0;
-	const int IGNORE_MULTIPLE_FACES = 0;
-	const int FACE_DETECTION_MODE = 1;
-	const int SEARCH_EXTRACTION_THREADS = 0;
-	const int FACE_EXTRACTION_MODE = 1;
-	const int IS_REGISTER = 1;
+	
+	const string CONFIGURATION = "configurationEnrollmentProcessing";
+	const string IDENTIFY_CONFIGURATION = "Enrollment processing";
 
-	const string CONFIGURATION = "configuration";
-	const string IDENTIFY_CONFIGURATION = "identify_configuration";
+	const string PARAMS = "paramsEnrollmentProcessing";
 
-	const string PARAMS = "Params";
-	const string IDENTIFICATIONSPEED = "A_IdentificationSpeed";
-	const string FACEDETECTIONFORCED = "A_FaceDetectionForced";	
-	const string AMINEYE = "A_MinEyeDist";
-	const string AMAXEYE = "A_MaxEyeDist";
-	const string SIMILARITYTHRESHOLD = "A_SimilarityThreshold";
-	const string BESTMATCHEDCANDIDATES = "A_BestMatchedCandidates";
-	const string BIOMETRICLOGLEVEL = "A_BiometricLogLevel";
-	const string IGNOREMULTIPLEFACES = "A_IgnoreMultipleFaces";
-	const string FACEDETECTIONMODE = "A_FaceDetectionMode";
-	const string SEARCHEXTRACTIONTHREADS = "A_SearchorExtractionThreads";
-	const string FACEEXTRACTIONMODE = "A_FaceExtractionMode";
-	const string ISREGISTER = "is_register";
+	const string CFG_BEST_CANDIDATES_COUNT = "CFG_BEST_CANDIDATES_COUNT";
+	const string CFG_SIMILARITY_THRESHOLD = "CFG_SIMILARITY_THRESHOLD";	
+	const string CFG_IDENTIFICATION_SPEED = "CFG_IDENTIFICATION_SPEED";
+	const string CFG_IFACE_DETECT_FORCED = "CFG_IFACE_DETECT_FORCED";
+	const string CFG_IFACE_IGNORE_MULTIPLE_FACES = "CFG_IFACE_IGNORE_MULTIPLE_FACES";
+	const string CFG_IFACE_DETECTION_MODE = "CFG_IFACE_DETECTION_MODE";
+	const string CFG_IFACE_EXTRACTION_MODE = "CFG_IFACE_EXTRACTION_MODE";
+	const string CFG_IFACE_DETECTION_THRESHOLD = "CFG_IFACE_DETECTION_THRESHOLD";
+	const string AFACE_PARAMETER_SCORE_MIN = "AFACE_PARAMETER_SCORE_MIN";
+	const string AFACE_PARAMETER_SCORE_MAX = "AFACE_PARAMETER_SCORE_MAX";
+	const string AFACE_PARAMETER_ENROLL = "AFACE_PARAMETER_ENROLL";
+	/// <summary>
+	/// //
+	/// </summary>
+	const string CFG_SIMILARITY_THRESHOLD_DEDUPLICATION = "CFG_SIMILARITY_THRESHOLD_DEDUPLICATION";
+	const string AFACE_PARAMETER_DEDUPLICATION = "AFACE_PARAMETER_DEDUPLICATION";
+	const string AFACE_PARAMETER_CONCATENATE_TEMPLATES = "AFACE_PARAMETER_CONCATENATE_TEMPLATES";
+	const string AFACE_PARAMETER_MAXIMUM_TEMPLATES = "AFACE_PARAMETER_MAXIMUM_TEMPLATES";
+	const string AFACE_PARAMETER_CONCATENATION_MODE = "AFACE_PARAMETER_CONCATENATION_MODE";
+	const string AFACE_PARAMETER_VERIFICATION_SCORE = "AFACE_PARAMETER_VERIFICATION_SCORE";
 
-	int minEyeDistance = MIN_EYE_DISTANCE;
-	int maxEyeDistance = MAX_EYE_DISTANCE;
-	int identificationSpeed = IDENTIFICATION_SPEED;
-	int faceDetectionForced = FACE_DETECTION_FORCED;
-	int similarityThreshold = SIMILARITY_THRESHOLD;
-	int bestMatchedCandidates = BEST_MATCHED_CANDIDATES;
-	int biometricLogLevel = BIOMETRIC_LOG_LEVEL;
-	int ignoreMultipleFaces = IGNORE_MULTIPLE_FACES;
-	int faceDetectionMode = FACE_DETECTION_MODE;
-	int searchExtractionThreads = SEARCH_EXTRACTION_THREADS;
-	int faceExtractionMode = FACE_EXTRACTION_MODE;
-	int isRegister = IS_REGISTER;
+	int identificationSpeed = 0;
+	int faceDetectionForced = 1;
+	int similarityThreshold = 40;
+	int identificationThreshold = 40;
+	int bestMatchedCandidates = 1;
+	int detectionThreshold = 400;
+	int score_min = 30;
+	int score_max = 60;
+	int isEnroll = 1;
+	int ignoreMultipleFaces = 1;
+	int faceDetectionMode = 2;
+	int faceExtractionMode = 2;
+	int similarityThresholdDeduplication = 0;
+	int isDeduplication = 1;
+	int maximumConcatenateTemplates = -1;
+	int isConcatenateTemplates = 1;
+	int concatenateMode = 0;
+	int verificationScore = 20;
+	
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	ErrorFaceLib* error = new ErrorFaceLib();
 	Configuration* configuration = new Configuration();

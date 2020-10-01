@@ -23,6 +23,10 @@ public:
 	int AddFaceTemplate(const unsigned char* templateModel, int size, int userID);
 	void CloseConnection();	
 	unsigned char* GetFaceTemplate(int userId, int* lenght);
+	void SetStringJSON(string stringJson) {
+		configuration->SetStringJSON(stringJson);
+	}
+
 	ConfigurationIdentify* configuration = new ConfigurationIdentify();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();

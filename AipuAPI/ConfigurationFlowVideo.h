@@ -43,6 +43,10 @@ public:
 		return configuration->GetStringJSON();
 	}
 
+	void SetStringJSON(string jsonString) {
+		configuration->SetStringJSON(jsonString);
+	}
+
 private:
 	int sourceFlow = 1;
 	string ipCamera = "";
@@ -50,14 +54,14 @@ private:
 	string deviceVideo = "/dev/video0";	
 	int videoScaleMethod = 1; //3 1
 
-	const string PARAMS = "Params";
+	const string PARAMS = "paramsFlow";
 	const string SOURCEFLOW = "sourceFlow";
 	const string IPCAMERA = "ipCamera";
 	const string FILEVIDEO = "fileVideo";
 	const string DEVICEVIDEO = "deviceVideo";
 	const string VIDEOSCALEMETHOD = "videoScaleMethod";	
-	const string CONFIGURATION = "configuration";
-	const string FLOWVIDEO_CONFIGURATION = "flowvideo_configuration";
+	const string CONFIGURATION = "configurationFlowVideo";
+	const string FLOWVIDEO_CONFIGURATION = "Flow video";
 	Configuration* configuration = new Configuration();
 	void SetValueJSONToConfiguration();
 };

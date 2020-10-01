@@ -20,6 +20,7 @@ FrameData* frameOne = new FrameData();
 FrameData* frameTwo = new FrameData();
 FrameData* frameThree = new FrameData();
 FrameData* frameFour = new FrameData();
+
 //FrameData* frames = new FrameData[NUM_FRAMES];
 //FrameData frames[NUM_FRAMES];
 //float colourR[NUM_RECTANGLES] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };

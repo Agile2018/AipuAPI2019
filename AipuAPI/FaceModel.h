@@ -67,10 +67,19 @@ public:
 	
 	void Terminate();		
 	
-	void RecognitionFaceFiles(string file, int client);
+	void RecognitionFaceFiles(string file, int client, int task);
 	void AddCollectionOfImages(string folder, int client, int doing);
 	void InitHandle();
 	void TerminateHandle();	
+
+	void SetStringJSON(string jsonString) {
+		configuration->SetStringJSON(jsonString);
+	}
+
+	void ParseJSONToObject() {
+		configuration->ParseJSONToObject();
+	}
+
 	ConfigurationIFace* configuration = new ConfigurationIFace();
 	Rx::subject<std::tuple<char*, vector<unsigned char>, int*>> templateImage;
 	Rx::observable<std::tuple<char*, vector<unsigned char>, int*>> observableTemplate = templateImage.get_observable();
@@ -98,9 +107,9 @@ private:
 	int DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 		std::vector<std::vector<unsigned char>> bufferOfImagesBatch, int client, int doing);
 	int GetBatchModels(int countFacesDetected, void* facesDetected[BATCH_TOTAL_SIZE]);
-	void CreateTemplate(void* face, Molded* model, int client);
-	int GetOneModel(unsigned char* rawImage, int width, int height, int client);
-	int ModelOneToOne(vector<unsigned char> buffer, int client);
+	void CreateTemplate(void* face, Molded* model, int client, int task);
+	int GetOneModel(unsigned char* rawImage, int width, int height, int client, int task);
+	//int ModelOneToOne(vector<unsigned char> buffer, int client);
 	void ObserverError();
 	vector<string> LoadFilesForBatch(string folder);
 	void LoadImagesForBatch(vector<string> listFiles);

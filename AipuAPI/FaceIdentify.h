@@ -36,23 +36,19 @@ public:
 		return countNewUser;
 	}
 
-	
-	void SetNameDirectory(string directoryConfiguration) {
-		faceIdkit->configuration->SetNameDirectory(directoryConfiguration);
-	}
-
-	void SetNameFileConfiguration(string name) {
-		faceIdkit->configuration->SetNameFileConfiguration(name);
-	}
+	void SetStringJSON(string stringJson) {
+		faceIdkit->configuration->SetStringJSON(stringJson);
+	}	
 
 	void ParseJSONToObject() {
 		faceIdkit->configuration->ParseJSONToObject();
 	}
 
 	void ResetEnrollVideo() {
-		lastQualityVideo = 0;
+		
 		countModelSendVideo = 0;
 	}
+
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
@@ -66,9 +62,10 @@ private:
 	bool flagEnroll = false;
 	Format* format = new Format();
 	FaceIdkit* faceIdkit = new FaceIdkit();
-	void EnrollUser(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
-	void EnrollUserAndTempletes(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
-	void EnrollUserTheBestScore(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	
+	void EnrollUserAndTemplates(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void ImportUsers(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void ControlEntry(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);	
 	void EnrollUserVideo(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
 	void BuildUserDatabase(std::tuple<char*, vector<unsigned char>, int*> modelImage, 
 		int client, int userId);
@@ -78,13 +75,10 @@ private:
 	int countRepeatUser = 0;
 	int countNewUser = 0;
 	int lastUserUnidentified = 0;	
-	int countRepeatFrame = 0;
-	
+	int countRepeatFrame = 0;	
 	int lastId = 0;
 	const unsigned char* templateForMatch = NULL;
-	int lenghtMatch = 0;
-
-	int lastQualityVideo = 0;
+	int lenghtMatch = 0;	
 	int countModelSendVideo = 0;
 };
 

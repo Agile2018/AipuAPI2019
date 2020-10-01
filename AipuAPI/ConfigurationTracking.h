@@ -9,31 +9,7 @@ public:
 	ConfigurationTracking();
 	~ConfigurationTracking();
 	void ParseJSONToObject();
-	void ParseMapToJSON();
-
-	void SetMinEyeDistance(int value) {
-		minEyeDistance = value;
-	}
-
-	int GetMinEyeDistance() {
-		return minEyeDistance;
-	}
-
-	void SetMaxEyeDistance(int value) {
-		maxEyeDistance = value;
-	}
-
-	int GetMaxEyeDistance() {
-		return maxEyeDistance;
-	}
-
-	void SetFaceConfidenceThresh(int value) {
-		faceConfidenceThresh = value;
-	}
-
-	int GetFaceConfidenceThresh() {
-		return faceConfidenceThresh;
-	}
+	//void ParseMapToJSON();	
 
 	void SetTrackingMode(int mode) {
 		trackingMode = mode;
@@ -59,19 +35,19 @@ public:
 		return motionOptimization;
 	}
 
-	void SetRefreshInterval(int value) {
-		refreshInterval = value;
+	void SetDiscoveryFrequenceMS(int value) {
+		discoveryFrequenceMS = value;
 	}
 
-	int GetRefreshInterval() {
-		return refreshInterval;
+	int GetDiscoveryFrequenceMS() {
+		return discoveryFrequenceMS;
 	}
 
-	void SetDeepTrack(int value) {
+	void SetDeepTrack(string value) {
 		deepTrack = value;
 	}
 
-	int GetDeepTrack() {
+	string GetDeepTrack() {
 		return deepTrack;
 	}
 
@@ -99,48 +75,36 @@ public:
 	int GetMaxFaces() {
 		return maxFaces;
 	}
-
-	void SetNameFileConfiguration(string name) {
-		configuration->SetNameFileConfiguration(name);
+	
+	void SetStringJSON(string jsonString) {
+		configuration->SetStringJSON(jsonString);
 	}
-	void SetNameDirectory(string name) {
-		configuration->SetNameDirectory(name);
-	}
-
-	void SetQualityModel(int value) {
-		qualityModel = value;
+	
+	int GetCountRedetectTimeDelta() {
+		return countRedetectTimeDelta;
 	}
 
-	int GetQualityModel() {
-		return qualityModel;
-	}
-
-private:
-	int minEyeDistance = 20;          // minimal eye distance in input image
-	int maxEyeDistance = 200;         // maximal eye distance in input image
-	int faceConfidenceThresh = 450;         // face detection confidence threshold		
-	int trackingMode = 1;
+private:	
+	int trackingMode = 2;
 	int trackSpeed = 2;
 	int motionOptimization = 2;
-	int deepTrack = 1;
+	int discoveryFrequenceMS = 2000;
+	string deepTrack = "true";
+	int countRedetectTimeDelta = 0;
+
 	int sequenceFps = 30;                   // fps of video	
-	int timeDeltaMs = 1000 / sequenceFps;
-	int refreshInterval = 2000;
+	int timeDeltaMs = 1000 / sequenceFps;	
 	int maxFaces = 5;
-	int qualityModel = 60;
-	const string PARAMS = "Params";
-	const string MAXFACES = "maxfaces";
-	const string MINEYE = "mineye";
-	const string MAXEYE = "maxeye";
-	const string FACE_DISCOVERY_FREQUENCE_MS = "refreshInterval";
-	const string FACEDET_CONFIDENCE_THRESHOLD = "faceConfidenceThresh";
-	const string TRACK_TRACKING_MODE = "trackingMode";
-	const string TRACK_SPEED_ACCURACY_MODE = "trackSpeed";
-	const string TRACK_MOTION_OPTIMIZATION = "motionOptimization";
-	const string TRACK_DEEP_TRACK = "deepTrack";
-	const string QUALITYMODEL = "qualitymodel";
-	const string CONFIGURATION = "configuration";
-	const string TRACKING_CONFIGURATION = "tracking_configuration";
+
+	const string PARAMS = "Tracking processing";
+	const string FACE_DISCOVERY_FREQUENCE_MS = "TRACK_FACE_DISCOVERY_FREQUENCE_MS";
+	const string COUNT_REDETECT_TIME_DELTA = "COUNT_REDETECT_TIME_DELTA";
+	const string TRACK_TRACKING_MODE = "TRACK_TRACKING_MODE";
+	const string TRACK_SPEED_ACCURACY_MODE = "TRACK_SPEED_ACCURACY_MODE";
+	const string TRACK_MOTION_OPTIMIZATION = "TRACK_MOTION_OPTIMIZATION";
+	const string TRACK_DEEP_TRACK = "TRACK_DEEP_TRACK";
+	const string CONFIGURATION = "configurationTrackingProcessing";
+	const string TRACKING_CONFIGURATION = "Tracking processing";	
 	Configuration* configuration = new Configuration();
 	void SetValueJSONToConfiguration();
 	

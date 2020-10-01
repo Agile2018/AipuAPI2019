@@ -74,8 +74,8 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 				
 		errorCode = IFACE_DetectFaces(&buffer[0],
 			dimensionsImages[i][0], dimensionsImages[i][1],
-			(float)configuration->GetMinEyeDistance(),
-			(float)configuration->GetMaxEyeDistance(),
+			(float)configuration->GetMinFaceSize(),
+			(float)configuration->GetMaxFaceSize(),
 			faceHandlerGlobal, &detectedFaces, faceTemp);		
 		error->CheckError(errorCode, error->medium);
 		
@@ -84,14 +84,10 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 		if (detectedFaces != EMPTY_FACE)
 		{
 			for (int j = 0; j < detectedFaces; j++) {
-				/*float rightEyeX, rightEyeY, leftEyeX, leftEyeY;
-				float faceConfidence;*/
+				
 				void* face = faceTemp[j];
 				
-				/*errorCode = IFACE_GetFaceBasicInfo(face, faceHandlerGlobal,
-					&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
-				error->CheckError(errorCode, error->medium);
-				cout << "CONFIDENCE: " << faceConfidence << endl;*/
+				
 				if (countFacesDetected < BATCH_TOTAL_SIZE)
 				{					
 					errorCode = IFACE_CloneEntity(face,
@@ -126,35 +122,82 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 	return countFacesDetected;
 }
 
-//void FaceModel::GetFaceCropRectangle(void* face) {
-//	float cropRect[8];
-//	int errorCode;
-//	void* faceHandler;
-//	errorCode = IFACE_CreateFaceHandler(&faceHandler);
-//	error->CheckError(errorCode, error->medium);
-//
-//	errorCode = IFACE_GetFaceCropRectangle(face, faceHandler,
-//		IFACE_FACE_CROP_METHOD_FULL_FRONTAL, cropRect);
-//	error->CheckError(errorCode, error->medium);
-//	if (errorCode == IFACE_OK) {
-//		shootCoordinates.on_next(cropRect);
-//	}
-//	errorCode = IFACE_ReleaseEntity(faceHandler);
-//	error->CheckError(errorCode, error->medium);
-//}
 
 void FaceModel::FaceCropImage(void* face, Molded* model) {
-	int cropWidth, cropHeight, cropLength, errorCode;
+	int cropWidth = -1, cropHeight = -1, cropLength = -1, errorCode = -1;
 
-	errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
-		IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
-		&cropWidth, &cropHeight, &cropLength, NULL);
-	error->CheckError(errorCode, error->medium);
+	switch (configuration->GetGetFaceCropImage())
+	{
+	case 0:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 1:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 2:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 3:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_TOKEN_NOT_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 4:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	default:
+		break;
+	}	
 	unsigned char* cropImageData = new unsigned char[cropLength];
-	errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal, 
-		IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
-		&cropWidth, &cropHeight, &cropLength, cropImageData);
-	error->CheckError(errorCode, error->medium);
+	
+	switch (configuration->GetGetFaceCropImage())
+	{
+	case 0:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 1:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 2:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 3:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_TOKEN_NOT_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 4:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerGlobal,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	default:
+		break;
+	}	
 
 	if (errorCode == IFACE_OK) {
 		model->SetMoldCropLength(cropLength);
@@ -290,37 +333,6 @@ unsigned char* FaceModel::LoadImage(vector<unsigned char> buffer, int *width, in
 
 }
 
-int FaceModel::ModelOneToOne(vector<unsigned char> buffer, int client) {
-	int lenght, width, height, errorCode, templates = 0;
-	const char* imgData = reinterpret_cast<const char*> (&buffer[0]);
-
-	if (imgData != NULL) {
-		errorCode = IFACE_LoadImageFromMemory(imgData, (unsigned int)buffer.size(), &width,
-			&height, &lenght, NULL);
-		if (errorCode == IFACE_OK)
-		{
-
-			unsigned char* rawImage = new unsigned char[lenght];
-			errorCode = IFACE_LoadImageFromMemory(imgData, (unsigned int)buffer.size(), &width,
-				&height, &lenght, rawImage);
-			if (errorCode != IFACE_OK)
-			{
-				error->CheckError(errorCode, error->medium);
-			}
-			else
-			{
-				templates = GetOneModel(rawImage, width, height, client);
-			}
-			delete[] rawImage;
-		}
-		else {
-			error->CheckError(errorCode, error->medium);
-		}
-	}
-
-	return templates;
-}
-
 vector<string> FaceModel::LoadFilesForBatch(string folder) {	
 	vector<string> listPathFile;
 	std::set<std::string> targetExtensions;
@@ -378,14 +390,14 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 			
 }
 
-void FaceModel::RecognitionFaceFiles(string file, int client) {
+void FaceModel::RecognitionFaceFiles(string file, int client, int task) {
 	int lenght, width, height, templates;
 	
 	isFinishLoadFiles = false;	
-	cout << "FILE OF THE IMAGE: " << file << endl;
+	//cout << "FILE OF THE IMAGE: " << file << endl;
 	unsigned char* rawImage = LoadFileImage(file, &width, &height, &lenght);
 	if (rawImage != NULL) {
-		templates = GetOneModel(rawImage, width, height, client);
+		templates = GetOneModel(rawImage, width, height, client, task);
 	}
 	delete[] rawImage;
 	
@@ -415,7 +427,7 @@ unsigned char* FaceModel::LoadFileImage(string image, int *width, int *height, i
 	return imageData;
 }
 
-void FaceModel::CreateTemplate(void* face, Molded* model, int client) {
+void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) {
 	int errorCode, majorVersion, minorVersion, quality;
 	int templateSize;
 	
@@ -440,7 +452,7 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client) {
 				sizeImage[1] = model->GetMoldCropHeight();
 				sizeImage[2] = templateSize;
 				sizeImage[3] = quality;
-				sizeImage[4] = 0; // doing
+				sizeImage[4] = task; // doing
 				sizeImage[5] = 0; // priority of template
 
 				auto tupleTemplateFace = std::make_tuple(templateData,
@@ -463,27 +475,57 @@ void FaceModel::InitHandle() {
 	errorCode = IFACE_CreateFaceHandler(&faceHandlerGlobal);
 	error->CheckError(errorCode, error->medium);
 
-	if (configuration->GetExtractionMode() == 0) {
+	if (configuration->GetFaceTemplextspeedAccurancyMode() == 0) {
+		errorCode = IFACE_SetParam(faceHandlerGlobal,
+			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
+			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_DEFAULT);
+		error->CheckError(errorCode, error->medium);
+	}
+	if (configuration->GetFaceTemplextspeedAccurancyMode() == 1) {
+		errorCode = IFACE_SetParam(faceHandlerGlobal,
+			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
+			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_BALANCED);
+		error->CheckError(errorCode, error->medium);
+	}
+
+	if (configuration->GetFaceTemplextspeedAccurancyMode() == 2) {
 		errorCode = IFACE_SetParam(faceHandlerGlobal,
 			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
 			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_ACCURATE);
 		error->CheckError(errorCode, error->medium);
 	}
-	if (configuration->GetExtractionMode() == 1) {
+
+	if (configuration->GetFaceTemplextspeedAccurancyMode() == 3) {
 		errorCode = IFACE_SetParam(faceHandlerGlobal,
 			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
 			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_FAST);
 		error->CheckError(errorCode, error->medium);
 	}
 
-	if (configuration->GetModeDetect() == 0)
+
+	if (configuration->GetSpeedAccurancyMode() == 0)
+	{
+		errorCode = IFACE_SetParam(faceHandlerGlobal,
+			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
+			IFACE_FACEDET_SPEED_ACCURACY_MODE_DEFAULT);
+		error->CheckError(errorCode, error->medium);
+	}
+	if (configuration->GetSpeedAccurancyMode() == 1)
 	{
 		errorCode = IFACE_SetParam(faceHandlerGlobal,
 			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
 			IFACE_FACEDET_SPEED_ACCURACY_MODE_BALANCED);
 		error->CheckError(errorCode, error->medium);
 	}
-	if (configuration->GetModeDetect() == 1)
+
+	if (configuration->GetSpeedAccurancyMode() == 2)
+	{
+		errorCode = IFACE_SetParam(faceHandlerGlobal,
+			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
+			IFACE_FACEDET_SPEED_ACCURACY_MODE_ACCURATE);
+		error->CheckError(errorCode, error->medium);
+	}
+	if (configuration->GetSpeedAccurancyMode() == 3)
 	{
 		errorCode = IFACE_SetParam(faceHandlerGlobal,
 			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
@@ -493,14 +535,24 @@ void FaceModel::InitHandle() {
 
 	errorCode = IFACE_SetParam(faceHandlerGlobal,
 		IFACE_PARAMETER_FACEDET_CONFIDENCE_THRESHOLD,
-		IntToStr(configuration->GetPrecision()).c_str());
+		IntToStr(configuration->GetConfidenceThreshold()).c_str());
 	error->CheckError(errorCode, error->medium);
 	
-
+	//errorCode = IFACE_SetParam(faceHandlerGlobal,
+	//	IFACE_PARAMETER_TRACK_MAX_FACE_SIZE,
+	//	IntToStr(configuration->GetMaxFaceSize()).c_str()); //IFACE_TRACK_MAX_FACE_SIZE_DEFAULT 400
+	//error->CheckError(errorCode, error->medium);
+	//
+	//errorCode = IFACE_SetParam(faceHandlerGlobal,
+	//	IFACE_PARAMETER_TRACK_MIN_FACE_SIZE,
+	//	IntToStr(configuration->GetMinFaceSize()).c_str()); //IFACE_TRACK_MIN_FACE_SIZE_DEFAULT 18
+	//error->CheckError(errorCode, error->medium);
+	
+	
 }
 
 int FaceModel::GetOneModel(unsigned char* rawImage,
-	int width, int height, int client) {
+	int width, int height, int client, int task) {
 	int maxFaces = configuration->GetMaxDetect();
 	int detectedFaces = configuration->GetMaxDetect();
 	int errorCode;
@@ -512,7 +564,7 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 	}
 
 	errorCode = IFACE_DetectFaces(rawImage, width, height,
-		(float)configuration->GetMinEyeDistance(), (float)configuration->GetMaxEyeDistance(),
+		(float)configuration->GetMinFaceSize(), (float)configuration->GetMaxFaceSize(),
 		faceHandlerGlobal, &detectedFaces, faceTemp);
 
 	if (errorCode == IFACE_OK) {
@@ -528,12 +580,12 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 					&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
 				error->CheckError(errorCode, error->medium);
 				cout << "CONFIDENCE: " << faceConfidence << endl;
-				if (faceConfidence > configuration->GetPrecision())
+				if (faceConfidence > configuration->GetConfidenceThreshold())
 				{
-					cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetPrecision() << endl;
+					cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetConfidenceThreshold() << endl;
 					Molded* model = new Molded();
 					FaceCropImage(face, model);
-					CreateTemplate(face, model, client);
+					CreateTemplate(face, model, client, task);
 					delete model;
 					countDetect++;
 				}

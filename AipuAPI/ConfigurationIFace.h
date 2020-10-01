@@ -11,30 +11,22 @@ public:
 	ConfigurationIFace();
 	~ConfigurationIFace();
 	void ParseJSONToObject();
-	void ParseMapToJSON();
+	//void ParseMapToJSON();
 
-	void SetMinEyeDistance(int minDistance) {
-		minEyeDistance = minDistance;
+	void SetMinFaceSize(int value) {
+		minFaceSize = value;
 	}
-	void SetMaxEyeDistance(int maxDistance) {
-		maxEyeDistance = maxDistance;
+	void SetMaxFaceSize(int value) {
+		maxFaceSize = value;
 	}
 
 	void SetMaxDetect(int maxFacesDetect) {
-		maxDetect = maxFacesDetect;
+		maxfaceDetect = maxFacesDetect;
 	}
 
-	void SetPrecision(int precision) {
-		accuracy = precision;
-	}
-
-	void SetModeDetect(int mode) {
-		modeDetect = mode;
+	void SetConfidenceThreshold(int precision) {
+		confidenceThreshold = precision;
 	}	
-
-	void SetExtractionMode(int mode) {
-		extractionMode = mode;
-	}
 
 	void SetQualityModel(int value) {
 		qualityModel = value;
@@ -44,69 +36,65 @@ public:
 		return qualityModel;
 	}
 
-	int GetMinEyeDistance() {
-		return minEyeDistance;
+	int GetMinFaceSize() {
+		return minFaceSize;
 	}
 
-	int GetMaxEyeDistance() {
-		return maxEyeDistance;
+	int GetMaxFaceSize() {
+		return maxFaceSize;
 	}
 
 	int GetMaxDetect() {
-		return maxDetect;
+		return maxfaceDetect;
 	}
 
-	int GetPrecision() {
-		return accuracy;
+	int GetConfidenceThreshold() {
+		return confidenceThreshold;
+	}
+	
+	int GetGetFaceCropImage() {
+		return getFaceCropImage;
 	}
 
-	int GetModeDetect() {
-		return modeDetect;
-	}
-		
-	int GetExtractionMode() {
-		return extractionMode;
+	int GetSpeedAccurancyMode() {
+		return speedAccurancyMode;
 	}
 
-	void SetNameFileConfiguration(string name) {
-		configuration->SetNameFileConfiguration(name);
-	}
-	void SetNameDirectory(string name) {
-		configuration->SetNameDirectory(name);
+	int GetFaceTemplextspeedAccurancyMode() {
+		return faceTemplextspeedAccurancyMode;
+	}	
+
+	void SetStringJSON(string jsonString) {
+		configuration->SetStringJSON(jsonString);
 	}
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 private:
-	const int MAX_DETECT = 1;
-	const int MIN_EYE_DISTANCE = 25;
-	const int MAX_EYE_DISTANCE = 200;
-	const int ACCURACY = 600;
-	const int MODE_DETECT = 1;		
-	const int EXTRACTION_MODE = 1;
-	const int QUALITY_MODEL = 60;
-
+	
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	ErrorFaceLib* error = new ErrorFaceLib();
 	Configuration* configuration = new Configuration();
-	int minEyeDistance = MIN_EYE_DISTANCE;
-	int maxEyeDistance = MAX_EYE_DISTANCE;
-	int maxDetect = MAX_DETECT;
-	int accuracy = ACCURACY;
-	int modeDetect = MODE_DETECT;
-	int extractionMode = EXTRACTION_MODE;
-	int qualityModel = QUALITY_MODEL;
+	int minFaceSize = 25;
+	int maxFaceSize = 200;
+	int maxfaceDetect = 1;
+	int confidenceThreshold = 600;	
+	int qualityModel = 60;
+	int getFaceCropImage = 1;
+	int speedAccurancyMode = 0;
+	int faceTemplextspeedAccurancyMode = 0;
 
-	const string PARAMS = "Params";
-	const string MAXFACES = "maxfaces";
-	const string MINEYE = "mineye";
-	const string MAXEYE = "maxeye";
-	const string PRECISION = "accuracy";
-	const string MODEDETECT = "modedetect";	
-	const string EXTRACTIONMODE = "extractionmode";
-	const string CONFIGURATION = "configuration";
-	const string DETECT_CONFIGURATION = "detect_configuration";
-	const string QUALITYMODEL = "qualitymodel";
+	const string PARAMS = "paramsFaceProcessing";
+	const string MAXFACESDETECT = "FACE_MAX_DETECT";
+	const string MINFACE = "TRACK_MIN_FACE_SIZE";
+	const string MAXFACE = "TRACK_MAX_FACE_SIZE";
+	const string CONFIDENCE_THRESHOLD = "FACEDET_CONFIDENCE_THRESHOLD";
+	const string SPEED_ACCURACY_MODE = "FACEDET_SPEED_ACCURACY_MODE";
+	const string FACETMPLEXT_SPEED_ACCURACY_MODE = "FACETMPLEXT_SPEED_ACCURACY_MODE";
+	const string FACE_CROP_IMAGE = "IFACE_GetFaceCropImage";
+	const string CONFIGURATION = "configurationFaceProcessing";
+	const string FACE_CONFIGURATION = "Face processing";
+	const string QUALITYMODEL = "QUALITY_MODEL";
 
 
 	void SetValueJSONToConfiguration();

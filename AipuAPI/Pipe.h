@@ -17,7 +17,7 @@ public:
 	Pipe();
 	~Pipe();
 	void LoadConfiguration();
-	void SetDirectoryConfiguration();
+	//void SetDirectoryConfiguration();
 	void RunFlowVideo();
 	void StatePlay();
 	void StatePaused();
@@ -25,13 +25,17 @@ public:
 	void SetNameDirectoryConfiguration(string directory) {
 		directoryConfiguration = directory;
 	}
+	void SetNameFileConfiguration(string file) {
+		fileConfiguration = file;
+	}
+
 	void SetClient(int value) {
 		client = value;
 	}
 	void SetFrameView(FrameView* frame);
 	void SetIndexFrame(int value);
 	void SetDatabase(Database* db);
-	void RecognitionFaceFiles(string file, int client);
+	void RecognitionFaceFiles(string file, int client, int task);
 	void SetIsFinishLoadFiles(bool value);
 	bool GetIsFinishLoadFiles();
 	void ResetLowScore();
@@ -55,7 +59,7 @@ public:
 	/*Rx::subject<string> userDetected;
 	Rx::observable<string> observableUserJSON = userDetected.get_observable();*/
 private:
-	const string fileConfiguration = "directory.txt";
+	string fileConfiguration = "";
 	const string filePerformance = "performance.txt";
 	string directoryConfiguration = "configuration";
 	int client = 1;
@@ -72,11 +76,11 @@ private:
 	void ObserverIdentifyFace();
 	//void ObserverDatabase();
 	void ObserverTrackingFace();	
-	void SetNameFileConfigurationFace(string name);
-	void SetNameFileConfigurationIdentify(string name);
+	//void SetNameFileConfigurationFace(string name);
+	//void SetNameFileConfigurationIdentify(string name);
 	//void SetNameFileConfigurationDatabase(string name);
-	void SetNameFileConfigurationTracking(string name);
-	void SetNameFileConfigurationFlowVideo(string name);
+	//void SetNameFileConfigurationTracking(string name);
+	//void SetNameFileConfigurationFlowVideo(string name);
 };
 
 #endif // !Pipe_h

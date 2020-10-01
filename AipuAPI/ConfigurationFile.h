@@ -10,9 +10,9 @@ public:
 	ConfigurationFile();
 	~ConfigurationFile();
 	void ParseJSONToObject();
-	void ParseMapToJSON();
+	//void ParseMapToJSON();
 
-	void SetNameFileConfigurationVideo(string name) {
+	/*void SetNameFileConfigurationVideo(string name) {
 		nameFileConfigurationVideo = name;
 	}
 
@@ -26,17 +26,17 @@ public:
 
 	string GetNameFileConfigurationFaceModel() {
 		return nameFileConfigurationFaceModel;
-	}
+	}*/
 
-	void SetNameDirectoryTempWork(string name) {
+	/*void SetNameDirectoryTempWork(string name) {
 		nameDirectoryTempWork = name;
 	}
 
 	string GetNameDirectoryTempWork() {
 		return nameDirectoryTempWork;
-	}
+	}*/
 
-	void SetNameDirectoryTraining(string name) {
+	/*void SetNameDirectoryTraining(string name) {
 		nameDirectoryTraining = name;
 	}
 
@@ -75,13 +75,17 @@ public:
 
 	string GetNameFileConfigurationFlow() {
 		return nameFileConfigurationFlow;
-	}
+	}*/
 
 	void SetNameFileConfiguration(string name) {
 		configuration->SetNameFileConfiguration(name);
 	}
 	void SetNameDirectory(string name) {
 		configuration->SetNameDirectory(name);
+	}
+
+	string GetStringJSON() {
+		return configuration->GetStringJSON();
 	}
 
 	Rx::subject<Either*> errorSubject;
@@ -93,8 +97,8 @@ private:
 	Configuration* configuration = new Configuration();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	void ObserverError();
-	void SetValueJSONToConfiguration();
-	string nameFileConfigurationVideo;
+	//void SetValueJSONToConfiguration();
+	/*string nameFileConfigurationVideo;
 	string nameFileConfigurationFaceModel;
 	string nameFileConfigurationIdentify;
 	string nameDirectoryTempWork;
@@ -103,8 +107,8 @@ private:
 	string nameDirectoryConfiguration;
 	string nameFileConfigurationDatabase;
 	string nameFileConfigurationTracking;
-	string nameFileConfigurationFlow;
-	const string PARAMS = "Params";
+	string nameFileConfigurationFlow;*/
+	/*const string PARAMS = "Params";
 	const string FILEVIDEO = "file_video";
 	const string FILEFACE = "file_face";
 	const string FILEDATABASE = "file_database";
@@ -114,7 +118,7 @@ private:
 	const string FILE_CONFIGURATION = "files_configuration";
 	const string FILEIDENTIFY = "file_identify";
 	const string FILETRACKING = "file_tracking";
-	const string FILEFLOW = "file_flow";
+	const string FILEFLOW = "file_flow";*/
 };
 
 

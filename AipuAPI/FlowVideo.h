@@ -20,8 +20,8 @@ public:
 	~FlowVideo();
 
 	void RunFlowVideo();
-	void SetNameDirectoryTracking(string name);
-	void SetNameFileConfigurationTracking(string name);
+	void SetStringJSONTracking(string stringJson);
+	
 	void SetFrameView(FrameView* frame);
 	ConfigurationFlowVideo* configuration = new ConfigurationFlowVideo();	
 	void SetFinishLoop();	
@@ -34,6 +34,10 @@ public:
 	void SetTaskIdentify(int value) {
 		tracking->SetTaskIdentify(value);
 	}	
+
+	void SetConfigurationIFace(ConfigurationIFace* config) {
+		tracking->SetConfigurationIFace(config);
+	}
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();

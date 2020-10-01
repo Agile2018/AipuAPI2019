@@ -27,16 +27,6 @@ void Pipe::SetDatabase(Database* db) {
 	database = db;
 }
 
-void Pipe::SetDirectoryConfiguration() {
-	faceModel->configuration->SetNameDirectory(directoryConfiguration);
-	/*faceIdentify->configuration->SetNameDirectory(directoryConfiguration);*/
-	faceIdentify->SetNameDirectory(directoryConfiguration);
-	configurationFile->SetNameDirectory(directoryConfiguration);	
-	flowVideo->SetNameDirectoryTracking(directoryConfiguration);
-	flowVideo->configuration->SetNameDirectory(directoryConfiguration);
-	configurationPerformance->SetNameDirectory(directoryConfiguration);
-}
-
 void Pipe::ResetPerformance() {
 	faceModel->ResetLowScore();
 	faceModel->ResetCountNotDetect();
@@ -73,12 +63,25 @@ void Pipe::SavePerformance() {
 }
 
 void Pipe::LoadConfiguration() {
+	configurationFile->SetNameDirectory(directoryConfiguration);
 	configurationFile->SetNameFileConfiguration(fileConfiguration);
 	configurationFile->ParseJSONToObject();
-	SetNameFileConfigurationFace(configurationFile->GetNameFileConfigurationFaceModel());
-	SetNameFileConfigurationIdentify(configurationFile->GetNameFileConfigurationIdentify());		
-	SetNameFileConfigurationTracking(configurationFile->GetNameFileConfigurationTracking());
-	SetNameFileConfigurationFlowVideo(configurationFile->GetNameFileConfigurationFlow());
+	
+	flowVideo->configuration->SetStringJSON(configurationFile->GetStringJSON());
+	flowVideo->configuration->ParseJSONToObject();
+	
+	faceModel->SetStringJSON(configurationFile->GetStringJSON());
+	faceModel->ParseJSONToObject();
+	
+	faceModel->InitHandle();
+	
+	flowVideo->SetStringJSONTracking(configurationFile->GetStringJSON());
+	flowVideo->SetConfigurationIFace(faceModel->configuration);
+	
+	faceIdentify->SetStringJSON(configurationFile->GetStringJSON());	
+	faceIdentify->ParseJSONToObject();
+	faceIdentify->LoadConnection();	
+
 	configurationPerformance->SetNameFileConfiguration(filePerformance);
 	isLoadConfig = true;
 }
@@ -87,8 +90,8 @@ void Pipe::RunFlowVideo() {
 	flowVideo->RunFlowVideo();
 }
 
-void Pipe::RecognitionFaceFiles(string file, int client) {
-	faceModel->RecognitionFaceFiles(file, client);
+void Pipe::RecognitionFaceFiles(string file, int client, int task) {
+	faceModel->RecognitionFaceFiles(file, client, task);
 }
 
 void Pipe::SetIsFinishLoadFiles(bool value) {
@@ -136,32 +139,6 @@ void Pipe::SetFinishLoop() {
 
 void Pipe::SetTaskIdentify(int value) {
 	flowVideo->SetTaskIdentify(value);
-}
-
-void Pipe::SetNameFileConfigurationFace(string name) {
-	faceModel->configuration->SetNameFileConfiguration(name);
-	faceModel->configuration->ParseJSONToObject();
-	faceModel->InitHandle();
-}
-
-void Pipe::SetNameFileConfigurationIdentify(string name) {
-	//faceIdentify->configuration->SetNameFileConfiguration(name);
-	faceIdentify->SetNameFileConfiguration(name);
-	/*faceIdentify->configuration->ParseJSONToObject();*/
-	faceIdentify->ParseJSONToObject();
-	faceIdentify->LoadConnection();
-}
-
-
-void Pipe::SetNameFileConfigurationTracking(string name) {	
-	flowVideo->SetNameFileConfigurationTracking(name);
-}
-
-void Pipe::SetNameFileConfigurationFlowVideo(string name) {
-	flowVideo->configuration->SetNameFileConfiguration(name);
-	flowVideo->configuration->ParseJSONToObject();
-	//flowVideo->configuration->ParseMapToJSON();
-	//cout << flowVideo->configuration->GetStringJSON().c_str() << endl;
 }
 
 void Pipe::SetIndexFrame(int value)

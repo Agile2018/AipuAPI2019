@@ -7,7 +7,7 @@
 #include "ErrorFaceLib.h"
 #include "ConfigurationTracking.h"
 #include "Molded.h"
-
+#include "ConfigurationIFace.h"
 
 #define NUM_TRACKED_OBJECTS	5
 #define COORDINATES_X_ALL_IMAGES 20
@@ -39,7 +39,7 @@ public:
 	void ReCalculateSizeVideoStream(int fps) {
 		
 		configuration->SetSequenceFps(fps);
-		sizeVideoStream = configuration->GetRefreshInterval() / configuration->GetTimeDeltaMs();
+		sizeVideoStream = configuration->GetDiscoveryFrequenceMS() / configuration->GetTimeDeltaMs();
 		
 	}
 
@@ -53,9 +53,14 @@ public:
 		//countModelSend = 0;
 	}
 
+	void SetConfigurationIFace(ConfigurationIFace* config) {
+		configurationIFaceProcessing = config;
+	}
+
 	void ClearAllCoordinatesImage();
 	float* GetCoordiantesRectangle();
 	float* GetColorRectangle();
+	
 	ConfigurationTracking* configuration = new ConfigurationTracking();
 	Rx::subject<std::tuple<char*, vector<unsigned char>, int*>> faceSubject;
 	Rx::observable<std::tuple<char*, vector<unsigned char>, int*>> observableTrackingFace = faceSubject.get_observable();
@@ -94,6 +99,7 @@ private:
 	//void CreateTemplateAndSendVariation(void* face, Molded* model);
 	void FaceCropImage(void* face, Molded* model);
 	void RunTask(void* face, Molded* model);
+	ConfigurationIFace* configurationIFaceProcessing;
 };
 
 #endif // !TRACKING_H

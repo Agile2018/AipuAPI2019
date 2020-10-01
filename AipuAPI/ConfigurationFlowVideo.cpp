@@ -42,13 +42,14 @@ void ConfigurationFlowVideo::SetValueJSONToConfiguration() {
 
 void ConfigurationFlowVideo::ParseJSONToObject() {
 	configuration->jsonBody.clear();
-	configuration->stringJSON = configuration->manageFile->ReadFileText();
+	//configuration->stringJSON = configuration->manageFile->ReadFileText();
+	
 	bool parsingSuccessful = configuration->reader.parse(configuration->stringJSON, configuration->jsonBody);
 	if (parsingSuccessful)
 	{
 		SetValueJSONToConfiguration();
 	}
-
+	configuration->stringJSON = configuration->stringJSON.empty();
 }
 
 void ConfigurationFlowVideo::ParseMapToJSON() {

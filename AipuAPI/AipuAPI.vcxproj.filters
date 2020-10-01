@@ -114,7 +114,7 @@
     <ClInclude Include="FaceIdkit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadPool.h">
+    <ClInclude Include="ConfigurationGlobal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -204,6 +204,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FaceIdkit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationGlobal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

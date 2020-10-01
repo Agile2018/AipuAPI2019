@@ -33,14 +33,11 @@ int FlowVideo::GetIndexFrame() {
 	return indexFrame;
 }
 
-void FlowVideo::SetNameFileConfigurationTracking(string name) {
-	tracking->configuration->SetNameFileConfiguration(name);
+void FlowVideo::SetStringJSONTracking(string stringJson) {
+	tracking->configuration->SetStringJSON(stringJson);
 	tracking->configuration->ParseJSONToObject();
 }
 
-void FlowVideo::SetNameDirectoryTracking(string name) {
-	tracking->configuration->SetNameDirectory(name);
-}
 
 void FlowVideo::SetFrameView(FrameView* frame) {
 	frameView = frame;

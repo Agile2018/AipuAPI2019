@@ -35,25 +35,35 @@ void FaceIdkit::SetParameters() {
 	errorCode = IEngine_SetParameter(CFG_IDENTIFICATION_SPEED, 
 		configuration->GetIdentificationSpeed());	
 	error->CheckError(errorCode, error->medium);
+	
 	errorCode = IEngine_SetParameter(CFG_IFACE_DETECT_FORCED, 
 		configuration->GetFaceDetectionForced());
 	error->CheckError(errorCode, error->medium);
+	
 	errorCode = IEngine_SetParameter(CFG_SIMILARITY_THRESHOLD,
 		configuration->GetSimilarityThreshold());
 	error->CheckError(errorCode, error->medium);
+	
 	errorCode = IEngine_SetParameter(CFG_BEST_CANDIDATES_COUNT,
 		configuration->GetBestMatchedCandidates());
 	error->CheckError(errorCode, error->medium);
+	
 	errorCode = IEngine_SetParameter(CFG_IFACE_IGNORE_MULTIPLE_FACES,
 		configuration->GetIgnoreMultipleFaces());
 	error->CheckError(errorCode, error->medium);
+	
 	errorCode = IEngine_SetParameter(CFG_IFACE_DETECTION_MODE,
 		configuration->GetFaceDetectionMode());
 	error->CheckError(errorCode, error->medium);
+	
 	errorCode = IEngine_SetParameter(CFG_IFACE_EXTRACTION_MODE,
 		configuration->GetFaceExtractionMode());
 	error->CheckError(errorCode, error->medium);
-
+	
+	errorCode = IEngine_SetParameter(CFG_IFACE_DETECTION_THRESHOLD,
+		configuration->GetDetectionThreshold());
+	error->CheckError(errorCode, error->medium);
+	
 }
 
 void FaceIdkit::Connection() {
@@ -72,8 +82,7 @@ void FaceIdkit::Connection() {
 			error->CheckError(errorCode, error->medium);
 			
 		}
-		
-				
+						
 	}
 	else {
 		cout << "IEngine_InitConnection ERROR" << endl;
@@ -97,15 +106,22 @@ int FaceIdkit::FindUser(const unsigned char* templateModel,
 
 	errorCode = IEngine_AddFaceTemplate(user, templateModel, size);
 	if (errorCode == IENGINE_E_NOERROR) {
+				
 		errorCode = IEngine_SelectConnection(handleConnect);
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {			
-			int bestCandidatesCount = -1;
+			int bestCandidatesCount = configuration->GetBestMatchedCandidates();
+			
+			int st = -1;
+			errorCode = IEngine_GetParameter(CFG_SIMILARITY_THRESHOLD, &st);
+			cout << "SIMILARITY_THRESHOLD: " << st << endl;
+
 			errorCode = IEngine_GetParameter(CFG_BEST_CANDIDATES_COUNT, &bestCandidatesCount);
 			memset(userId, sizeof(int) * bestCandidatesCount, 0);
 			memset(score, sizeof(int) * bestCandidatesCount, 0);
 			errorCode = IEngine_FindUser(user, userId, score);
 			error->CheckError(errorCode, error->medium);
+			cout << "SCORE: " << *score << endl;
 		}
 		
 	}		
@@ -165,9 +181,12 @@ int FaceIdkit::MatchUsers(const unsigned char* templateModelOne,
 			errorCode = IEngine_SelectConnection(handleConnect);
 			error->CheckError(errorCode, error->medium);
 			if (errorCode == IENGINE_E_NOERROR) {
+				
+				error->CheckError(errorCode, error->medium);
 				errorCode = IEngine_MatchUsersModalities(user, userAux, 
 					IENGINE_MATCHING_MODALITY::MODALITY_FACE, score);
 				error->CheckError(errorCode, error->medium);
+				cout << "MatchUsers SCORE: " << *score << endl;
 			}
 		}
 	}

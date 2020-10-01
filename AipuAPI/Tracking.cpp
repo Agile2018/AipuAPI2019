@@ -1,8 +1,5 @@
 #include "Tracking.h"
 
-//unsigned long int countFlowFrames = 0;
-//float colorRectangle[NUM_TRACKED_OBJECTS] = {};
-//float imageCoordinatesFollowed[COORDINATES_X_ALL_IMAGES];
 
 Tracking::Tracking()
 {
@@ -20,17 +17,79 @@ void Tracking::InitITracking() {
 
 	errorCode = IFACE_CreateFaceHandler(&faceHandlerTracking);
 	error->CheckError(errorCode, error->medium);
-	//////
+
+	if (configurationIFaceProcessing->GetFaceTemplextspeedAccurancyMode() == 0) {
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
+			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_DEFAULT);
+		error->CheckError(errorCode, error->medium);
+	}
+	if (configurationIFaceProcessing->GetFaceTemplextspeedAccurancyMode() == 1) {
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
+			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_BALANCED);
+		error->CheckError(errorCode, error->medium);
+	}
+
+	if (configurationIFaceProcessing->GetFaceTemplextspeedAccurancyMode() == 2) {
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
+			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_ACCURATE);
+		error->CheckError(errorCode, error->medium);
+	}
+
+	if (configurationIFaceProcessing->GetFaceTemplextspeedAccurancyMode() == 3) {
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
+			IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_FAST);
+		error->CheckError(errorCode, error->medium);
+	}
+
+
+	if (configurationIFaceProcessing->GetSpeedAccurancyMode() == 0)
+	{
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
+			IFACE_FACEDET_SPEED_ACCURACY_MODE_DEFAULT);
+		error->CheckError(errorCode, error->medium);
+	}
+	if (configurationIFaceProcessing->GetSpeedAccurancyMode() == 1)
+	{
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
+			IFACE_FACEDET_SPEED_ACCURACY_MODE_BALANCED);
+		error->CheckError(errorCode, error->medium);
+	}
+
+	if (configurationIFaceProcessing->GetSpeedAccurancyMode() == 2)
+	{
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
+			IFACE_FACEDET_SPEED_ACCURACY_MODE_ACCURATE);
+		error->CheckError(errorCode, error->medium);
+	}
+	if (configurationIFaceProcessing->GetSpeedAccurancyMode() == 3)
+	{
+		errorCode = IFACE_SetParam(faceHandlerTracking,
+			IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
+			IFACE_FACEDET_SPEED_ACCURACY_MODE_FAST);
+		error->CheckError(errorCode, error->medium);
+	}
+
 	errorCode = IFACE_SetParam(faceHandlerTracking,
-		IFACE_PARAMETER_FACETMPLEXT_SPEED_ACCURACY_MODE,
-		IFACE_FACETMPLEXT_SPEED_ACCURACY_MODE_FAST);
+		IFACE_PARAMETER_FACEDET_CONFIDENCE_THRESHOLD,
+		IntToStr(configurationIFaceProcessing->GetConfidenceThreshold()).c_str());
+	error->CheckError(errorCode, error->medium);
+
+	/*errorCode = IFACE_SetParam(faceHandlerTracking,
+		IFACE_PARAMETER_TRACK_MAX_FACE_SIZE,
+		IFACE_TRACK_MAX_FACE_SIZE_DEFAULT);
 	error->CheckError(errorCode, error->medium);
 
 	errorCode = IFACE_SetParam(faceHandlerTracking,
-		IFACE_PARAMETER_FACEDET_SPEED_ACCURACY_MODE,
-		IFACE_FACEDET_SPEED_ACCURACY_MODE_FAST);
-	error->CheckError(errorCode, error->medium);
-	//////
+		IFACE_PARAMETER_TRACK_MIN_FACE_SIZE,
+		IFACE_TRACK_MIN_FACE_SIZE_DEFAULT);
+	error->CheckError(errorCode, error->medium);*/
 
 	errorCode = IFACE_CreateObjectHandler(&objectHandler, faceHandlerTracking);
 	error->CheckError(errorCode, error->medium);
@@ -44,21 +103,9 @@ void Tracking::InitITracking() {
 
 	errorCode = IFACE_SetParam(objectHandler,
 		IFACE_PARAMETER_TRACK_FACE_DISCOVERY_FREQUENCE_MS,
-		IntToStr(configuration->GetRefreshInterval()).c_str());
+		IntToStr(configuration->GetDiscoveryFrequenceMS()).c_str());
 	error->CheckError(errorCode, error->medium);
-	errorCode = IFACE_SetParam(objectHandler,
-		IFACE_PARAMETER_TRACK_MIN_FACE_SIZE,
-		IntToStr(configuration->GetMinEyeDistance()).c_str());
-	error->CheckError(errorCode, error->medium);
-	errorCode = IFACE_SetParam(objectHandler,
-		IFACE_PARAMETER_TRACK_MAX_FACE_SIZE,
-		IntToStr(configuration->GetMaxEyeDistance()).c_str());
-	error->CheckError(errorCode, error->medium);
-	errorCode = IFACE_SetParam(faceHandlerTracking,
-		IFACE_PARAMETER_FACEDET_CONFIDENCE_THRESHOLD,
-		IntToStr(configuration->GetFaceConfidenceThresh()).c_str()); //
-	error->CheckError(errorCode, error->medium);
-
+		
 	if (configuration->GetTrackingMode() == 0)
 	{
 		errorCode = IFACE_SetParam(objectHandler,
@@ -135,27 +182,13 @@ void Tracking::InitITracking() {
 		error->CheckError(errorCode, error->medium);
 	}
 
-	if (configuration->GetDeepTrack() == 1)
-	{
-		errorCode = IFACE_SetParam(objectHandler,
-			IFACE_PARAMETER_TRACK_DEEP_TRACK,
-			"true"); // IFACE_TRACK_DEEP_TRACK_DEFAULT
-		error->CheckError(errorCode, error->medium);
-	}
-
-	if (configuration->GetDeepTrack() == 0)
-	{
-		errorCode = IFACE_SetParam(objectHandler,
-			IFACE_PARAMETER_TRACK_DEEP_TRACK,
-			"false"); // IFACE_TRACK_DEEP_TRACK_DEFAULT
-		error->CheckError(errorCode, error->medium);
-	}
+	errorCode = IFACE_SetParam(objectHandler,
+		IFACE_PARAMETER_TRACK_DEEP_TRACK,
+		configuration->GetDeepTrack().c_str()); 
+	error->CheckError(errorCode, error->medium);	
 
 	flagTracking = false;
-	//flagFirstDetect = false;
-
-	//sizeVideoStream = configuration->GetRefreshInterval() / configuration->GetTimeDeltaMs();
-	//countFlowFrames = 0;
+	
 }
 
 void Tracking::FaceTracking(std::vector<unsigned char> vectorData) {
@@ -179,15 +212,6 @@ void Tracking::FaceTracking(std::vector<unsigned char> vectorData) {
 	vectorData.clear();
 }
 
-//void Tracking::AdvanceVideoStream() {
-//	int positionVideoStream = (countFrameTracking / sizeVideoStream) + 1;
-//	int positionFrameMaxVideoStream = sizeVideoStream * positionVideoStream;
-//
-//	if (countFrameTracking < positionFrameMaxVideoStream)
-//	{
-//		countFrameTracking = positionFrameMaxVideoStream;
-//	}
-//}
 
 void Tracking::BuildCoordinatesImage(float x, float y, float width, 
 	float height, int indexTracked) {
@@ -234,10 +258,14 @@ void Tracking::RunTask(void* face, Molded* model) {
 	case -1:
 		cout << "TASK: " << taskIdentify << endl;
 		break;
-	case 0:
+	case 0: //Import user
 		FaceCropImage(face, model);
 		CreateTemplate(face, model, 0);
 		cout << "TASK: " << taskIdentify << endl;
+		break;
+	case 1: // Control entry
+		FaceCropImage(face, model);
+		CreateTemplate(face, model, 1);
 		break;
 	case 3:
 		FaceCropImage(face, model);
@@ -250,8 +278,7 @@ void Tracking::RunTask(void* face, Molded* model) {
 }
 
 void Tracking::CreateTemplate(void* face, Molded* model, int task) {
-	int errorCode, majorVersion, minorVersion, quality;
-	int templateSize;
+	int errorCode, templateSize;	
 	
 	errorCode = IFACE_CreateTemplate(face, faceHandlerTracking, 0, &templateSize, NULL);
 	if (errorCode == IFACE_OK) {
@@ -263,12 +290,14 @@ void Tracking::CreateTemplate(void* face, Molded* model, int task) {
 		}
 		else
 		{			
+			int majorVersion, minorVersion, quality;
 			errorCode = IFACE_GetTemplateInfo(faceHandlerTracking,
 				templateData, &majorVersion, &minorVersion, &quality);
-			
-			if (quality > configuration->GetQualityModel()) {
+			cout << "QUALITY: " << quality << " CONFIGURATION QUALITY: " << configurationIFaceProcessing->GetQualityModel() << endl;
+			if (quality > configurationIFaceProcessing->GetQualityModel()) {
 				
-				int sizeImage[6];
+				int sizeImage[6]; 
+
 				sizeImage[0] = model->GetMoldCropWidth();
 				sizeImage[1] = model->GetMoldCropHeight();
 				sizeImage[2] = templateSize;
@@ -293,17 +322,82 @@ void Tracking::CreateTemplate(void* face, Molded* model, int task) {
 }
 
 void Tracking::FaceCropImage(void* face, Molded* model) {
-	int cropWidth, cropHeight, cropLength, errorCode;	
+	int cropWidth = -1, cropHeight = -1, cropLength = -1, errorCode = -1;
 
-	errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
-		IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
-		&cropWidth, &cropHeight, &cropLength, NULL);
-	error->CheckError(errorCode, error->medium);
+	switch (configurationIFaceProcessing->GetGetFaceCropImage())
+	{
+	case 0:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 1:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 2:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 3:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_TOKEN_NOT_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 4:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, NULL);
+		error->CheckError(errorCode, error->medium);
+		break;
+	default:
+		break;
+	}
+
 	unsigned char* cropImageData = new unsigned char[cropLength];
-	errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
-		IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
-		&cropWidth, &cropHeight, &cropLength, cropImageData);
-	error->CheckError(errorCode, error->medium);
+
+	switch (configurationIFaceProcessing->GetGetFaceCropImage())
+	{
+	case 0:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 1:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 2:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_FULL_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 3:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_TOKEN_NOT_FRONTAL,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	case 4:
+		errorCode = IFACE_GetFaceCropImage(face, faceHandlerTracking,
+			IFACE_FACE_CROP_METHOD_TOKEN_FRONTAL_EXTENDED,
+			&cropWidth, &cropHeight, &cropLength, cropImageData);
+		error->CheckError(errorCode, error->medium);
+		break;
+	default:
+		break;
+	}
+
 
 	if (errorCode == IFACE_OK) {
 		model->SetMoldCropLength(cropLength);
@@ -332,39 +426,11 @@ void Tracking::CreateFaceOfObject(int indexTracking) {
 	
 	if (errorCode == IFACE_OK) {		
 		Molded* model = new Molded();
-		/*FaceCropImage(face, model);		
-		CreateTemplate(face, model);*/		
+				
 		RunTask(face, model);
 
 		delete model;
-		/*if (errorCode == IFACE_OK) {
-
-			cropSize[0] = cropWidth;
-			cropSize[1] = cropHeight;
-			cropSize[2] = cropLength;
-
-			errorCode = IFACE_SerializeEntity(face, NULL,
-				&serializedEntitySize);
-			error->CheckError(errorCode, error->medium);
-
-			char* serializedEntity = new char[serializedEntitySize];
-
-			errorCode = IFACE_SerializeEntity(face, serializedEntity,
-				&serializedEntitySize);
-			error->CheckError(errorCode, error->medium);
-			if (errorCode == IFACE_OK && serializedEntity != NULL) {
-				cropSize[3] = serializedEntitySize;
-				auto tupleSerializeFace = std::make_tuple(serializedEntity, 
-					cropImageData, cropSize);
-				shootFace.on_next(tupleSerializeFace);
-			}
-			else
-			{
-				delete[] serializedEntity;
-				delete[] cropImageData;
-			}
-		}*/
-		
+				
 	}
 	errorCode = IFACE_ReleaseEntity(face); 
 	error->CheckError(errorCode, error->medium);
@@ -386,12 +452,6 @@ void Tracking::TrackObjectState() {
 		error->CheckError(errorCode, error->medium);
 		if (trackedState == IFACE_TRACKED_OBJECT_STATE_CLEAN) {
 
-
-			//countDesolation++;
-			//if (countDesolation == NUM_TRACKED_OBJECTS && !flagFirstDetect)
-			//{
-			//	//AdvanceVideoStream();
-			//}
 			errorCode = IFACE_CleanObject(objects[trackedObjectIndex], objectHandler);
 			error->CheckError(errorCode, error->medium);
 			continue;
@@ -400,7 +460,7 @@ void Tracking::TrackObjectState() {
 		switch (trackedState)
 		{
 		case IFACE_TRACKED_OBJECT_STATE_TRACKED:
-			//flagFirstDetect = true;
+			
 			float objectScore;
 			errorCode = IFACE_GetObjectBoundingBox(objects[trackedObjectIndex],
 				objectHandler, &bbX, &bbY, &bbWidth, &bbHeight);
@@ -430,7 +490,7 @@ void Tracking::TrackObjectState() {
 			void* newObj;
 			errorCode = IFACE_CreateObject(&newObj);
 			objects[trackedObjectIndex] = newObj;
-			//flagFirstDetect = false;			
+						
 
 			break;
 		case IFACE_TRACKED_OBJECT_STATE_CLEAN:
@@ -515,9 +575,7 @@ void Tracking::TerminateTracking() {
 
 	errorCode = IFACE_ReleaseEntity(faceHandlerTracking);
 	error->CheckError(errorCode, error->less);
-	
-	//errorCode = IFACE_ReleaseEntity(faceTrack); //faceHandler
-	//error->CheckError(errorCode, error->medium);
+		
 }
 
 void Tracking::ObserverError() {
