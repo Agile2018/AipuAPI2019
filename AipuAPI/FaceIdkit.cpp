@@ -79,6 +79,7 @@ void FaceIdkit::Connection() {
 			errorCode = IEngine_Connect(connectDatabase.c_str());
 			user = IEngine_InitUser();
 			userAux = IEngine_InitUser();
+			userAuxMatch = IEngine_InitUser();
 			error->CheckError(errorCode, error->medium);
 			
 		}
@@ -94,41 +95,68 @@ void FaceIdkit::CloseConnection() {
 	int errorCode;
 	errorCode = IEngine_FreeUser(user);
 	errorCode = IEngine_FreeUser(userAux);
+	errorCode = IEngine_FreeUser(userAuxMatch);
 	error->CheckError(errorCode, error->medium);
 	errorCode = IEngine_CloseConnection(handleConnect);
 	error->CheckError(errorCode, error->medium);
 }
 
+int FaceIdkit::GetSimilarityThreshold() {
+	int errorCode = IENGINE_E_NOERROR, paramSimilarity = -1;
+	
+	errorCode = IEngine_SelectConnection(handleConnect);
+	error->CheckError(errorCode, error->medium);
+
+	if (errorCode == IENGINE_E_NOERROR) {
+		errorCode = IEngine_GetParameter(CFG_SIMILARITY_THRESHOLD, &paramSimilarity);
+		error->CheckError(errorCode, error->medium);
+	}
+	return paramSimilarity;
+}
+
 int FaceIdkit::FindUser(const unsigned char* templateModel,
-	int size, int* userId, int* score) {
+	int size, int* userId, int* score, string* tracer) {
 	int errorCode = IENGINE_E_NOERROR;
 	int errorClear;	
 
-	errorCode = IEngine_AddFaceTemplate(user, templateModel, size);
+	errorCode = IEngine_AddFaceTemplate(userAux, templateModel, size);
 	if (errorCode == IENGINE_E_NOERROR) {
 				
 		errorCode = IEngine_SelectConnection(handleConnect);
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {			
-			int bestCandidatesCount = configuration->GetBestMatchedCandidates();
-			
-			int st = -1;
-			errorCode = IEngine_GetParameter(CFG_SIMILARITY_THRESHOLD, &st);
-			cout << "SIMILARITY_THRESHOLD: " << st << endl;
+			int bestCandidatesCount = configuration->GetBestMatchedCandidates();			
+			/*int paramSimilarity = -1;
+			errorCode = IEngine_GetParameter(CFG_SIMILARITY_THRESHOLD, &paramSimilarity);			
+			*tracer += " PARAM SIMILARITY THRESHOLD: " + to_string(paramSimilarity) + ", ";*/
 
 			errorCode = IEngine_GetParameter(CFG_BEST_CANDIDATES_COUNT, &bestCandidatesCount);
 			memset(userId, sizeof(int) * bestCandidatesCount, 0);
 			memset(score, sizeof(int) * bestCandidatesCount, 0);
-			errorCode = IEngine_FindUser(user, userId, score);
+
+			errorCode = IEngine_FindUser(userAux, userId, score);
 			error->CheckError(errorCode, error->medium);
-			cout << "SCORE: " << *score << endl;
+			//*tracer += " BEST CANDIDATES: " + to_string(bestCandidatesCount) + ", ";
+			for (int i = 0; i < bestCandidatesCount; i++)
+			{
+				*tracer += "(" + to_string(userId[i]) + "-" + to_string(score[i]) + ") ";
+				//cout << "BEST CANDIDATES SCORE: " << score[i] << endl;
+			}
+			//*tracer += ", ";
 		}
 		
 	}		
-	errorClear = IEngine_ClearUser(user);		
+	errorClear = IEngine_ClearUser(userAux);
 	error->CheckError(errorClear, error->medium);
 			
 	return errorCode;
+}
+
+void FaceIdkit::ClearUser() {
+	int errorCode = IENGINE_E_NOERROR;
+	errorCode = IEngine_ClearUser(user);
+	error->CheckError(errorCode, error->medium);
+
 }
 
 int FaceIdkit::RegisterUser(const unsigned char* templateModel,
@@ -143,6 +171,8 @@ int FaceIdkit::RegisterUser(const unsigned char* templateModel,
 		if (errorCode == IENGINE_E_NOERROR) {
 			errorCode = IEngine_RegisterUser(user, userId);
 			error->CheckError(errorCode, error->medium);
+
+			cout << "IEngine_RegisterUser ERROR:" << errorCode << " USERID: " << *userId << endl;
 		}
 		
 	}
@@ -170,7 +200,7 @@ int FaceIdkit::MatchUsers(const unsigned char* templateModelOne,
 	int sizeOne, const unsigned char* templateModelTwo, int sizeTwo, int* score) {
 	int errorCode = IENGINE_E_NOERROR, errorClear;
 	
-	errorCode = IEngine_AddFaceTemplate(user, templateModelOne, sizeOne);
+	errorCode = IEngine_AddFaceTemplate(userAuxMatch, templateModelOne, sizeOne);
 	error->CheckError(errorCode, error->medium);
 	if (errorCode == IENGINE_E_NOERROR) {
 		
@@ -180,17 +210,15 @@ int FaceIdkit::MatchUsers(const unsigned char* templateModelOne,
 			
 			errorCode = IEngine_SelectConnection(handleConnect);
 			error->CheckError(errorCode, error->medium);
-			if (errorCode == IENGINE_E_NOERROR) {
-				
-				error->CheckError(errorCode, error->medium);
-				errorCode = IEngine_MatchUsersModalities(user, userAux, 
+			if (errorCode == IENGINE_E_NOERROR) {								
+				errorCode = IEngine_MatchUsersModalities(userAuxMatch, userAux,
 					IENGINE_MATCHING_MODALITY::MODALITY_FACE, score);
 				error->CheckError(errorCode, error->medium);
-				cout << "MatchUsers SCORE: " << *score << endl;
+				//cout << "MatchUsers SCORE: " << *score << endl;
 			}
 		}
 	}
-	errorClear = IEngine_ClearUser(user);
+	errorClear = IEngine_ClearUser(userAuxMatch);
 	errorClear = IEngine_ClearUser(userAux);
 	return errorCode;
 
@@ -202,13 +230,29 @@ int FaceIdkit::AddFaceTemplate(const unsigned char* templateModel,
 	errorCode = IEngine_SelectConnection(handleConnect);
 	error->CheckError(errorCode, error->medium);
 	if (errorCode == IENGINE_E_NOERROR) {
+		
 		errorCode = IEngine_GetUser(user, userID);
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {
 			errorCode = IEngine_AddFaceTemplate(user, templateModel, size);
+			cout << "ADD TEMPLATE ERROR: " << errorCode << endl;
 		}
 	}
 	errorClear = IEngine_ClearUser(user);
+	return errorCode;
+}
+
+int FaceIdkit::AddFaceTemplate(const unsigned char* templateModel, int size) {
+	int errorCode;
+	errorCode = IEngine_SelectConnection(handleConnect);
+	error->CheckError(errorCode, error->medium);
+	if (errorCode == IENGINE_E_NOERROR) {
+		
+		errorCode = IEngine_AddFaceTemplate(user, templateModel, size);
+		//cout << "ADD TEMPLATE ERROR: " << errorCode << endl;
+		
+	}
+	
 	return errorCode;
 }
 
@@ -233,24 +277,25 @@ int FaceIdkit::RegisterUserWithData(const unsigned char* templateModel, int size
 	return errorCode;
 }
 
-unsigned char* FaceIdkit::GetFaceTemplate(int userId, int* lenght) {
+unsigned char* FaceIdkit::GetFaceTemplate(int userId, int* lenght, int index) {
 	int errorCode, errorClear;
 	errorCode = IEngine_SelectConnection(handleConnect);
 	error->CheckError(errorCode, error->medium);
 	if (errorCode == IENGINE_E_NOERROR) {
-		errorCode = IEngine_GetUser(user, userId);
+		errorCode = IEngine_GetUser(userAux, userId);
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {
-			errorCode = IEngine_GetFaceTemplate(user, 0, NULL, lenght);
+			errorCode = IEngine_GetFaceTemplate(userAux, index, NULL, lenght);
 			error->CheckError(errorCode, error->medium);			
 			unsigned char*  templateReturn = new unsigned char[*lenght];
-			errorCode = IEngine_GetFaceTemplate(user, 0, templateReturn, lenght);
+			errorCode = IEngine_GetFaceTemplate(userAux, index, templateReturn, lenght);
 			error->CheckError(errorCode, error->medium);
-			errorClear = IEngine_ClearUser(user);
+			
+			errorClear = IEngine_ClearUser(userAux);
 			return templateReturn;
 			
 		}
-		errorClear = IEngine_ClearUser(user);
+		errorClear = IEngine_ClearUser(userAux);
 	}
 		
 	return NULL;

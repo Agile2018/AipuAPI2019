@@ -4,6 +4,7 @@
 //#define BATCH_SIZE	5
 #define BATCH_TOTAL_SIZE 30
 #define EMPTY_FACE	0
+#define TOTAL_FACE_DETECTED 50
 //#define TRACKED_OBJECTS	5
 //#define SIZE_COORDINATES 20
 //#define NUMBER_COORDINATES_IMAGES  4
@@ -67,7 +68,7 @@ public:
 	
 	void Terminate();		
 	
-	void RecognitionFaceFiles(string file, int client, int task);
+	void RecognitionFaceFiles(string namefile, int client, int task);
 	void AddCollectionOfImages(string folder, int client, int doing);
 	void InitHandle();
 	void TerminateHandle();	
@@ -81,8 +82,8 @@ public:
 	}
 
 	ConfigurationIFace* configuration = new ConfigurationIFace();
-	Rx::subject<std::tuple<char*, vector<unsigned char>, int*>> templateImage;
-	Rx::observable<std::tuple<char*, vector<unsigned char>, int*>> observableTemplate = templateImage.get_observable();
+	Rx::subject<std::tuple<char*, vector<unsigned char>, int*, string>> templateImage;
+	Rx::observable<std::tuple<char*, vector<unsigned char>, int*, string>> observableTemplate = templateImage.get_observable();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	
@@ -92,21 +93,26 @@ private:
 	ErrorFaceLib* error = new ErrorFaceLib();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	
-	Rx::subscriber<std::tuple<char*, vector<unsigned char>, int*>> templateOut = templateImage.get_subscriber();
+	Rx::subscriber<std::tuple<char*, vector<unsigned char>, int*, string>> templateOut = templateImage.get_subscriber();
 	std::vector<Molded*> modelsDetected;
 	std::vector<std::vector<unsigned char>> bufferOfImagesBatch;
-	std::vector<vector<int>> dimensionsImages;
+	std::vector<vector<int>> dimensionsImages;	
+
 	bool isFinishLoadFiles = true;	
 	void* faceHandlerGlobal = nullptr;	
 	int countLowScore = 0;
 	int countNotDetect = 0;
 	int countErrorDetect = 0;
 	int countDetect = 0;
+	string tracerImage;
+	std::vector<string> tracerProcess;
+	File* file = new File();
 	int ModelByBatch(int client, int doing);
 	void FaceCropImage(void* face, Molded* model);
-	int DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
+	int DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
 		std::vector<std::vector<unsigned char>> bufferOfImagesBatch, int client, int doing);
-	int GetBatchModels(int countFacesDetected, void* facesDetected[BATCH_TOTAL_SIZE]);
+	int DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED], int client, int doing);
+	int GetBatchModels(int countFacesDetected, void* facesDetected[TOTAL_FACE_DETECTED]);
 	void CreateTemplate(void* face, Molded* model, int client, int task);
 	int GetOneModel(unsigned char* rawImage, int width, int height, int client, int task);
 	//int ModelOneToOne(vector<unsigned char> buffer, int client);
@@ -115,7 +121,7 @@ private:
 	void LoadImagesForBatch(vector<string> listFiles);
 	unsigned char* LoadImage(vector<unsigned char> buffer, int *width, int *height);
 	unsigned char* LoadFileImage(string image, int *width, int *height, int *length);
-	
+	string BuildTracerString();
 	std::string IntToStr(int num);
 };
 

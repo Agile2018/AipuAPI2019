@@ -16,6 +16,13 @@ void File::SetNameFile(string name) {
 	nameFile = name;
 }
 
+string File::GetNameFile() {
+	return nameFile;
+}
+string File::GetNameLog() {
+	return nameLog;
+}
+
 void File::WriteFile(string content) {
 	CreateDirectory();
 	string path = nameDirectory + "/" + nameFile;
@@ -23,7 +30,7 @@ void File::WriteFile(string content) {
 	file_obj.open(path, ios::app);
 	file_obj.write(content.c_str(), sizeof(char)*content.size());
 	file_obj.close();
-
+	
 }
 
 bool File::DeleteFile() {

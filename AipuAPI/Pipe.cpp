@@ -193,12 +193,12 @@ void Pipe::ObserverError() {
 void Pipe::ObserverTrackingFace()
 {
 	auto templateObservable = flowVideo->observableTrackedFace
-		.map([](std::tuple<char*, vector<unsigned char>, int*> modelImage) {
+		.map([](std::tuple<char*, vector<unsigned char>, int*, string> modelImage) {
 		return modelImage;
 	});
 
 	auto subscriptionTemplate = templateObservable
-		.subscribe([this](std::tuple<char*, vector<unsigned char>, int*> modelImage) {
+		.subscribe([this](std::tuple<char*, vector<unsigned char>, int*, string> modelImage) {
 		
 		faceIdentify->ForkTask(modelImage, client);
 		
@@ -211,12 +211,12 @@ void Pipe::ObserverTrackingFace()
 void Pipe::ObserverTemplateImage()
 {
 	auto templateObservable = faceModel->observableTemplate.map([](std::tuple<char*, 
-		vector<unsigned char>, int*> modelImage) {
+		vector<unsigned char>, int*, string> modelImage) {
 		return modelImage;
 		});
 
 	auto subscriptionTemplate = templateObservable.subscribe([this](std::tuple<char*, 
-		vector<unsigned char>, int*> modelImage) {
+		vector<unsigned char>, int*, string> modelImage) {
 		
 		faceIdentify->ForkTask(modelImage, client);
 		
@@ -247,6 +247,10 @@ void Pipe::AddCollectionOfImages(string folder, int client, int doing) {
 	faceModel->AddCollectionOfImages(folder, client, doing);
 }
 
-void Pipe::ResetEnrollVideo() {
-	faceIdentify->ResetEnrollVideo();
+void Pipe::ResetEnrollVideo(int value) {
+	faceIdentify->ResetEnrollVideo(value);
+}
+
+void Pipe::AddUserEnrollVideo() {
+	faceIdentify->AddUserEnrollVideo();
 }

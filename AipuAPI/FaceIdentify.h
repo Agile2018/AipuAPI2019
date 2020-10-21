@@ -15,7 +15,7 @@ public:
 	void LoadConnection();	
 	void RemoveUnidentified();
 	void CloseConnection();	
-	void ForkTask(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
+	void ForkTask(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
 	bool GetFlagEnroll() {
 		return flagEnroll;
 	}
@@ -44,11 +44,12 @@ public:
 		faceIdkit->configuration->ParseJSONToObject();
 	}
 
-	void ResetEnrollVideo() {
+	void ResetEnrollVideo(int value) {
 		
-		countModelSendVideo = 0;
+		countModelSendVideo = value;
 	}
 
+	void AddUserEnrollVideo();
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
@@ -62,24 +63,45 @@ private:
 	bool flagEnroll = false;
 	Format* format = new Format();
 	FaceIdkit* faceIdkit = new FaceIdkit();
-	
-	void EnrollUserAndTemplates(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
-	void ImportUsers(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
-	void ControlEntry(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);	
-	void EnrollUserVideo(std::tuple<char*, vector<unsigned char>, int*> modelImage, int client);
-	void BuildUserDatabase(std::tuple<char*, vector<unsigned char>, int*> modelImage, 
+	File* file = new File();
+	string tracerImage;
+	string tracerPrevImage = "";
+	string tracerMatch = "";
+	string tracerHeadImage = "";
+	std::vector<string> tracerProcess;
+	void EnrollUserAndTemplates(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
+	void ImportUsers(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
+	void ControlEntry(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
+	void EnrollUserVideo(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
+	void BuildUserDatabase(std::tuple<char*, vector<unsigned char>, int*, string> modelImage,
 		int client, int userId);
-	void GetFaceTemplateUser();
+	void GetFaceTemplateUser(int idUser, int index);
 	void MatchUsers(const unsigned char* templateIn, int sizeIn);
+	void ConcatenateModeAuto(const unsigned char* templateIn, int sizeIn);
+	void ConcatenateModeForce(const unsigned char* templateIn, int sizeIn);
 	void ObserverError();
+	void WithDeduplication(const unsigned char* data, int sizeImage);
+	void WithoutDeduplication(const unsigned char* data, int sizeImage);
+	void WriteHeadLog();
+	//void WriteHeadLog(string tracer);
+	void WithoutTemplatesRegisterUserWithDeduplication(std::tuple<char*, vector<unsigned char>,
+		int*, string> modelImage, int client);
+	void WithoutTemplatesRegisterUserWithoutDeduplication(std::tuple<char*, vector<unsigned char>,
+		int*, string> modelImage, int client);
+	void FinishRegisterUserAndTemplates();
+	void BuildTracerPrevious(string previous);
+	string BuildTracerString();
 	int countRepeatUser = 0;
 	int countNewUser = 0;
 	int lastUserUnidentified = 0;	
-	int countRepeatFrame = 0;	
-	int lastId = 0;
-	const unsigned char* templateForMatch = NULL;
-	int lenghtMatch = 0;	
+	int countAddFaceTemplate = 0;
+	//int countRepeatFrame = 0;	
+	int lastId = 1;
+	//const unsigned char* templateForMatch = NULL;
+	//int lenghtMatch = 0;	
 	int countModelSendVideo = 0;
+	User* userForDatabase = nullptr;
+	vector<unsigned char> templateGuide;
 };
 
 

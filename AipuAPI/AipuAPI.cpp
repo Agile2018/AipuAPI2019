@@ -402,9 +402,9 @@ void AipuAPI::SetTaskIdentify(int value, int option) {
 	pipelines[index]->SetTaskIdentify(value);	
 }
 
-void AipuAPI::ResetEnrollVideo(int option) {
+void AipuAPI::ResetEnrollVideo(int option, int value) {
 	int index = option - 1;
-	pipelines[index]->ResetEnrollVideo();
+	pipelines[index]->ResetEnrollVideo(value);
 	
 }
 
@@ -412,4 +412,9 @@ void AipuAPI::AddCollectionOfImages(string folder, int client, int doing) {
 	int index = client - 1;
 	pipelines[index]->AddCollectionOfImages(folder, client, doing);
 
+}
+
+void AipuAPI::AddUserEnrollVideo(int channel) {
+	int index = channel - 1;
+	pipelines[index]->AddUserEnrollVideo();
 }

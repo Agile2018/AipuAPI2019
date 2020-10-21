@@ -20,11 +20,13 @@ public:
 	bool DeleteFile(string filePath);
 	void CreateDirectory();
 	string GetNameDirectory();
+	string GetNameFile();
+	string GetNameLog();
 	string ReadFileText();
 private:
-	string nameDirectory;
-	string nameFile;
-
+	string nameDirectory = "";
+	string nameFile = "";
+	string nameLog = "logChannel_";
 };
 
 

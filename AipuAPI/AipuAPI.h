@@ -40,7 +40,8 @@ public:
 	void ResetPerformance(int option);
 	void SavePerformance(int option);
 	void SetTaskIdentify(int value, int option);
-	void ResetEnrollVideo(int option);
+	void ResetEnrollVideo(int option, int value);
+	void AddUserEnrollVideo(int channel);
 	void StatePlay(int option); // single
 	void StatePaused(int option); // single
 	void SetFinishLoop(int option); // single

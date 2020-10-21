@@ -30,7 +30,7 @@ public:
 	virtual void ParseMapToJSON() {};*/
 	Json::Value jsonParams;
 	Json::Value jsonBody;
-	Json::Reader reader;
+	Json::Reader reader;	
 	File* manageFile = new File();
 	string stringJSON;
 

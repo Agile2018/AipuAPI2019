@@ -3,7 +3,7 @@
 
 Tracking::Tracking()
 {
-	
+	file->SetNameDirectory("Logs");
 	ObserverError();
 }
 
@@ -277,9 +277,32 @@ void Tracking::RunTask(void* face, Molded* model) {
 	}
 }
 
+string Tracking::BuildHeadTracer() {
+	char buff[20];	
+	time_t now = time(NULL);
+	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+	string timeInit(buff);	
+	string tracerImage = timeInit + ", " + to_string(client) + ", frame, 1, ";
+	return tracerImage;
+}
+
 void Tracking::CreateTemplate(void* face, Molded* model, int task) {
 	int errorCode, templateSize;	
 	
+	float rightEyeX, rightEyeY, leftEyeX, leftEyeY;
+	float faceConfidence;
+
+	errorCode = IFACE_GetFaceBasicInfo(face, faceHandlerTracking,
+		&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
+	error->CheckError(errorCode, error->medium);
+
+	string tracerImage = BuildHeadTracer() + 
+		"(" + to_string(model->GetMoldCropWidth()) + "-" + to_string(model->GetMoldCropHeight()) + "), " + 
+		to_string(faceConfidence) + ", " + 
+		to_string(configurationIFaceProcessing->GetConfidenceThreshold()) + ", 1, ";
+
+
 	errorCode = IFACE_CreateTemplate(face, faceHandlerTracking, 0, &templateSize, NULL);
 	if (errorCode == IFACE_OK) {
 		char* templateData = new char[templateSize];
@@ -293,9 +316,10 @@ void Tracking::CreateTemplate(void* face, Molded* model, int task) {
 			int majorVersion, minorVersion, quality;
 			errorCode = IFACE_GetTemplateInfo(faceHandlerTracking,
 				templateData, &majorVersion, &minorVersion, &quality);
-			cout << "QUALITY: " << quality << " CONFIGURATION QUALITY: " << configurationIFaceProcessing->GetQualityModel() << endl;
+			//cout << "QUALITY: " << quality << " CONFIGURATION QUALITY: " << configurationIFaceProcessing->GetQualityModel() << endl;
+			tracerImage += to_string(quality) + ", " + to_string(configurationIFaceProcessing->GetQualityModel()) + ", ";
 			if (quality > configurationIFaceProcessing->GetQualityModel()) {
-				
+				tracerImage += "1, ";
 				int sizeImage[6]; 
 
 				sizeImage[0] = model->GetMoldCropWidth();
@@ -306,12 +330,16 @@ void Tracking::CreateTemplate(void* face, Molded* model, int task) {
 				sizeImage[5] = 0;
 
 				auto tupleTemplateFace = std::make_tuple(templateData,
-					model->GetCropImageData(), sizeImage);
+					model->GetCropImageData(), sizeImage, tracerImage);
 				
 				shootFace.on_next(tupleTemplateFace);
 				
 			}
-
+			else {
+				tracerImage += "0\n";
+				file->WriteFile(tracerImage);
+								
+			}
 		}
 		delete[] templateData;
 	}

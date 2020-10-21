@@ -2,6 +2,8 @@
 
 FaceModel::FaceModel()
 {
+	file->SetNameDirectory("Logs");
+	
 	ObserverError();
 }
 
@@ -47,16 +49,111 @@ void FaceModel::TerminateHandle() {
 	error->CheckError(errorCode, error->medium);
 }
 
+// size image equals
+int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED], int client, int doing) {
+	int errorCode, countFacesDetected = 0;
+	const size_t numOfImages = bufferOfImagesBatch.size();
+	const int maxFacesPerImage = configuration->GetMaxDetect();
+	void*** faces = new void** [numOfImages];
+	//int detectedFaces[11];
+	int* detectedFaces = new int[numOfImages];
+	//int* detectedFaces = (int*)calloc(numOfImages, sizeof(int));
+	/*void** faces = new void* [maxFacesPerImage];
+	for (int i = 0; i < maxFacesPerImage; i++)
+	{
+		errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(faces[i]));
+		error->CheckError(errorCode, error->medium);
+	}*/
 
-int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
+	for (int i = 0; i < TOTAL_FACE_DETECTED; i++)
+	{
+		errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(facesDetected[i]));
+		error->CheckError(errorCode, error->medium);
+	}
+
+	for (int i = 0; i < numOfImages; i++)
+	{
+		faces[i] = new void* [maxFacesPerImage];
+		for (int j = 0; j < maxFacesPerImage; j++)
+		{
+			errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(faces[i][j]));
+			error->CheckError(errorCode, error->medium);
+		}
+		detectedFaces[i] = maxFacesPerImage;
+		
+	}
+
+	unsigned char** rawImagesData = new unsigned char*[numOfImages];
+
+	for (int i = 0; i < numOfImages; i++)
+	{
+		vector<unsigned char> buffer = bufferOfImagesBatch[i];		
+		rawImagesData[i] = &buffer[0];
+	}
+
+	cout << "Before IFACE_DetectFacesBatch: " << endl;
+	errorCode = IFACE_DetectFacesBatch((int)numOfImages, rawImagesData, dimensionsImages[0][0],
+		dimensionsImages[0][1], (float)configuration->GetMinFaceSize(), 
+		(float)configuration->GetMaxFaceSize(), faceHandlerGlobal, detectedFaces, faces);
+	error->CheckError(errorCode, error->medium);
+	
+	cout << "DETECT FACES: " << errorCode << endl;
+
+	for (int imageIdx = 0; imageIdx < numOfImages; ++imageIdx)
+	{
+		cout << "INSIDE DETECT " << endl;
+		if (detectedFaces[imageIdx] != 0) {
+			for (int i = 0; i < detectedFaces[imageIdx]; i++)
+			{   
+				cout << "INSIDE DETECT FACES: " << detectedFaces[imageIdx] << endl;
+				void* face = faces[imageIdx][i];
+				cout << "OUT FACES " << imageIdx << " " << i << endl;
+				if (countFacesDetected < TOTAL_FACE_DETECTED)
+				{
+					errorCode = IFACE_CloneEntity(face,
+						facesDetected[countFacesDetected]);
+					error->CheckError(errorCode, error->medium);
+					cout << "ERROR FACES " << errorCode << endl;
+					Molded* model = new Molded();
+					model->SetIdClient(client);
+					model->SetWhatDoing(doing);
+					FaceCropImage(facesDetected[countFacesDetected], model);
+					modelsDetected.push_back(model);
+					countFacesDetected++;
+
+				}
+				
+			}
+		}
+
+	}
+
+	for (int i = 0; i < numOfImages; i++)
+	{
+		for (int j = 0; j < maxFacesPerImage; j++)
+		{
+			errorCode = IFACE_ReleaseEntity(faces[i][j]);
+			error->CheckError(errorCode, error->medium);
+		}
+		delete[] faces[i];
+		delete[] rawImagesData[i];
+		
+	}
+
+	return countFacesDetected;
+}
+
+// size image different
+int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
 	std::vector<std::vector<unsigned char>> bufferOfImagesBatch,
 	int client, int doing) {
 	int errorCode, countFacesDetected = 0;
 	int maxFaces = configuration->GetMaxDetect();
+	string tracerSize, tracerConfidence;
 
-	for (int i = 0; i < BATCH_TOTAL_SIZE; i++)
+	for (int i = 0; i < TOTAL_FACE_DETECTED; i++)
 	{
-		errorCode = IFACE_CreateFace(&(facesDetected[i]));
+		errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(facesDetected[i]));
 		error->CheckError(errorCode, error->medium);
 	}
 	
@@ -66,10 +163,10 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 		void** faceTemp = new void* [maxFaces];
 
 		for (int j = 0; j < maxFaces; j++) {
-			errorCode = IFACE_CreateFace(&(faceTemp[j]));
+			errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(faceTemp[j]));
 			error->CheckError(errorCode, error->medium);
 		}
-
+		
 		vector<unsigned char> buffer = bufferOfImagesBatch[i];
 				
 		errorCode = IFACE_DetectFaces(&buffer[0],
@@ -87,8 +184,18 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 				
 				void* face = faceTemp[j];
 				
+				float rightEyeX, rightEyeY, leftEyeX, leftEyeY;
+				float faceConfidence;
 				
-				if (countFacesDetected < BATCH_TOTAL_SIZE)
+				errorCode = IFACE_GetFaceBasicInfo(face, faceHandlerGlobal,
+					&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
+				error->CheckError(errorCode, error->medium);
+				tracerImage += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + "), ";
+				tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold()) + "\n";
+				
+				tracerSize += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + ")";
+				tracerConfidence += to_string(faceConfidence) + " ";
+				if (countFacesDetected < TOTAL_FACE_DETECTED)
 				{					
 					errorCode = IFACE_CloneEntity(face,
 						facesDetected[countFacesDetected]);
@@ -102,13 +209,17 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 					countFacesDetected++;
 
 				}
-				else {
-					countLowScore++;
-				}
+				
 			}
 
 		}
 		else {
+
+			tracerImage += "To refuse: (" + to_string(dimensionsImages[i][0]) +
+				"-" + to_string(dimensionsImages[i][1]) + "), CONFIDENCE THRESHOLD: " + 
+				to_string(configuration->GetConfidenceThreshold()) + "\n ";		
+			tracerSize += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + ")";
+			tracerConfidence += "(To refuse) ";
 			countNotDetect++;
 		}
 
@@ -117,8 +228,10 @@ int FaceModel::DetectByBatch(void* facesDetected[BATCH_TOTAL_SIZE],
 			error->CheckError(errorCode, error->medium);
 		}
 
-	}
-	
+	}	
+	tracerProcess.push_back(tracerSize);
+	tracerProcess.push_back(tracerConfidence);
+	tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
 	return countFacesDetected;
 }
 
@@ -212,15 +325,20 @@ void FaceModel::FaceCropImage(void* face, Molded* model) {
 
 int FaceModel::ModelByBatch(int client,  int doing) {
 	int errorCode, facesValid = 0;
-	void* facesDetected[BATCH_TOTAL_SIZE];
+	void* facesDetected[TOTAL_FACE_DETECTED];
+
 	int countFacesDetected = DetectByBatch(facesDetected, bufferOfImagesBatch, client, doing);
+	//int countFacesDetected = DetectByBatch(facesDetected, client, doing);
+	tracerImage += "Face detected: " + to_string(countFacesDetected) + "\n";
+	tracerProcess.push_back(to_string(countFacesDetected));
 	if (countFacesDetected != 0)
 	{
 		facesValid = GetBatchModels(countFacesDetected, facesDetected);
 	}
 
-	for (int i = 0; i < BATCH_TOTAL_SIZE; i++)
+	for (int i = 0; i < TOTAL_FACE_DETECTED; i++)
 	{
+
 		errorCode = IFACE_ReleaseEntity(facesDetected[i]);
 		error->CheckError(errorCode, error->medium);
 	}
@@ -230,16 +348,15 @@ int FaceModel::ModelByBatch(int client,  int doing) {
 }
 
 int FaceModel::GetBatchModels(int countFacesDetected, 
-	void* facesDetected[BATCH_TOTAL_SIZE]) {
-	int errorCode, majorVersion, minorVersion, quality;;
-	int templateBatchDataSize;
+	void* facesDetected[TOTAL_FACE_DETECTED]) {
+	int errorCode, majorVersion, minorVersion, quality, count, templateBatchDataSize;	
 	void** cloneFacesDetected = new void*[countFacesDetected];
 	char** batchTemplates = new char*[countFacesDetected];
-	
+	string tracerQuality = "";
 
 	for (int i = 0; i < countFacesDetected; i++)
 	{
-		errorCode = IFACE_CreateFace(&(cloneFacesDetected[i]));
+		errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(cloneFacesDetected[i]));		
 		error->CheckError(errorCode, error->medium);
 	}
 
@@ -265,33 +382,57 @@ int FaceModel::GetBatchModels(int countFacesDetected,
 		&templateBatchDataSize, batchTemplates);
 	error->CheckError(errorCode, error->medium);
 
-	int count = 0;
+	
+	std::vector<vector<int>> OrderQualityTemplate;
 
-	for (int i = 0; i < countFacesDetected; i++)
-	{		
+	for (int i = 0; i < countFacesDetected; i++) {
+
 		errorCode = IFACE_GetTemplateInfo(faceHandlerGlobal,
 			batchTemplates[i], &majorVersion, &minorVersion, &quality);
+		//cout << "QUALITY TEMPLATE: " << quality << " QUALITY TEMPLATE CONFIGURATION: " << configuration->GetQualityModel() << endl;
+		tracerImage += to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + "\n";
+		tracerQuality += to_string(quality) + " ";
 		if (quality > configuration->GetQualityModel()) {
-			int sizeImage[6];
-			sizeImage[0] = modelsDetected[i]->GetMoldCropWidth();
-			sizeImage[1] = modelsDetected[i]->GetMoldCropHeight();
-			sizeImage[2] = templateBatchDataSize;
-			sizeImage[3] = quality;
-			sizeImage[4] = modelsDetected[i]->GetWhatDoing();
-			sizeImage[5] = count;
-			
-			auto tupleTemplateFace = std::make_tuple(batchTemplates[i],
-				modelsDetected[i]->GetCropImageData(), sizeImage);
-			templateOut.on_next(tupleTemplateFace);
-			
-			if (count == 0)
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(20));
-			}
-			count++;
-		}		
-
+			std::vector<int> orderQuality = { quality, i};
+			OrderQualityTemplate.push_back(orderQuality);
+		}
+		
 	}
+
+	tracerProcess.push_back(tracerQuality);
+	tracerProcess.push_back(to_string(configuration->GetQualityModel()));
+
+	if (!OrderQualityTemplate.empty()) {
+		std::sort(OrderQualityTemplate.rbegin(), OrderQualityTemplate.rend());
+		count = (int)OrderQualityTemplate.size();
+		tracerImage += "Accepted models: " + to_string(count) + "\n";
+		tracerProcess.push_back(to_string(count));
+		tracerImage = BuildTracerString();
+		for (int i = 0; i < OrderQualityTemplate.size(); i++)
+		{
+			//cout << "ORDER QUALITY TEMPLATES: " << OrderQualityTemplate[i][0] << " " << OrderQualityTemplate[i][1] << endl;
+			int j = OrderQualityTemplate[i][1];
+			int qualityUp = OrderQualityTemplate[i][0];
+			int sizeImage[6];
+			sizeImage[0] = modelsDetected[j]->GetMoldCropWidth();
+			sizeImage[1] = modelsDetected[j]->GetMoldCropHeight();
+			sizeImage[2] = templateBatchDataSize;
+			sizeImage[3] = qualityUp;
+			sizeImage[4] = modelsDetected[j]->GetWhatDoing();
+			sizeImage[5] = (int)OrderQualityTemplate.size();
+
+			auto tupleTemplateFace = std::make_tuple(batchTemplates[j],
+				modelsDetected[j]->GetCropImageData(), sizeImage, tracerImage);
+			templateOut.on_next(tupleTemplateFace);
+
+		}
+	}
+	else {
+		count = 0;
+		tracerProcess.push_back(to_string(count));
+		tracerImage = BuildTracerString() + "\n";
+		file->WriteFile(tracerImage);
+	}	
 
 	for (int i = 0; i < countFacesDetected; ++i)
 	{
@@ -302,7 +443,7 @@ int FaceModel::GetBatchModels(int countFacesDetected,
 		errorCode = IFACE_ReleaseEntity(cloneFacesDetected[i]);
 		error->CheckError(errorCode, error->medium);
 	}
-	
+	OrderQualityTemplate.clear();
 	modelsDetected.clear();
 
 	return count;
@@ -366,9 +507,10 @@ void FaceModel::LoadImagesForBatch(vector<string> listFiles) {
 				&width, &height, &lenght);
 
 			if (rawImage != NULL && count < BATCH_TOTAL_SIZE) {
+
 				vector<unsigned char> bufferImage;
 				bufferImage.assign(rawImage, rawImage + lenght);
-				bufferOfImagesBatch.push_back(bufferImage);
+				bufferOfImagesBatch.push_back(bufferImage);							
 				std::vector<int> sizeImage = { width, height, lenght};				
 				dimensionsImages.push_back(sizeImage);
 				count++;
@@ -380,23 +522,63 @@ void FaceModel::LoadImagesForBatch(vector<string> listFiles) {
 }
 
 void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
+	tracerProcess.clear();
+	if (file->GetNameFile().length() == 0)
+	{
+		string nameFileTracer = file->GetNameLog() + to_string(client) + ".cvs";
+		file->SetNameFile(nameFileTracer);
+	}
+	char buff[20];
+	countNotDetect = 0;
+	time_t now = time(NULL);
+	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+	string timeInit(buff);
+	tracerImage = timeInit + ", " + to_string(client) + ", " + folder + ", ";
+	
+	tracerProcess.push_back(timeInit);
+	tracerProcess.push_back(to_string(client));
+	tracerProcess.push_back(folder);
 	vector<string> listFiles = LoadFilesForBatch(folder);
 	LoadImagesForBatch(listFiles);
 	if (!bufferOfImagesBatch.empty())
 	{		
+		tracerImage += to_string((int)bufferOfImagesBatch.size()) + "\n";
+		tracerProcess.push_back(to_string((int)bufferOfImagesBatch.size()));
 		int detectNumber = ModelByBatch(client, doing);
-		cout << "FACES DETECTED AND VALIDATED: " << detectNumber << endl;
+		//cout << "FACES DETECTED AND VALIDATED: " << detectNumber << endl;
 	}
-			
+	else {
+		//string tracer = tracerImage + "0\n";
+		tracerProcess.push_back("0");
+		tracerImage = BuildTracerString() + "\n";
+		file->WriteFile(tracerImage);
+	}
 }
 
-void FaceModel::RecognitionFaceFiles(string file, int client, int task) {
-	int lenght, width, height, templates;
+void FaceModel::RecognitionFaceFiles(string namefile, int client, int task) {
+	int lenght, width, height, templates;	
+	char buff[20];
+	countNotDetect = 0;
+	tracerProcess.clear();
+	if (file->GetNameFile().length() == 0)
+	{
+		string nameFileTracer = file->GetNameLog() + to_string(client) + ".cvs";
+		file->SetNameFile(nameFileTracer);
+	}
 	
-	isFinishLoadFiles = false;	
-	//cout << "FILE OF THE IMAGE: " << file << endl;
-	unsigned char* rawImage = LoadFileImage(file, &width, &height, &lenght);
+	time_t now = time(NULL);
+	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+	string timeInit(buff);
+	tracerProcess.push_back(timeInit);
+	tracerProcess.push_back(to_string(client));
+	tracerProcess.push_back(namefile);
+	tracerImage = timeInit + ", " + to_string(client) + ", " + namefile + ", ";
+	isFinishLoadFiles = false;		
+	unsigned char* rawImage = LoadFileImage(namefile, &width, &height, &lenght);
 	if (rawImage != NULL) {
+		tracerProcess.push_back("1");
+		tracerImage += "1, ";
 		templates = GetOneModel(rawImage, width, height, client, task);
 	}
 	delete[] rawImage;
@@ -423,8 +605,8 @@ unsigned char* FaceModel::LoadFileImage(string image, int *width, int *height, i
 		error->CheckError(errorCode, error->medium);
 		return NULL;
 	}
-
-	return imageData;
+	
+	return imageData; 
 }
 
 void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) {
@@ -443,10 +625,17 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 		{
 			errorCode = IFACE_GetTemplateInfo(faceHandlerGlobal,
 				templateData, &majorVersion, &minorVersion, &quality);
-			cout << "QUALITY MODEL: " << quality << endl;
-			cout << "CONFIGURATION MODEL: " << configuration->GetQualityModel() << endl;
+			//cout << "QUALITY MODEL: " << quality << endl;
+			//cout << "CONFIGURATION MODEL: " << configuration->GetQualityModel() << endl;
+			tracerProcess.push_back(to_string(quality));
+			tracerProcess.push_back(to_string(configuration->GetQualityModel()));
+
+			tracerImage +=  to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + ", ";
+
 			if (quality > configuration->GetQualityModel()) {
-				
+				tracerProcess.push_back("1");
+				tracerImage += "1, ";
+				tracerImage = BuildTracerString();
 				int sizeImage[6];
 				sizeImage[0] = model->GetMoldCropWidth();
 				sizeImage[1] = model->GetMoldCropHeight();
@@ -456,8 +645,14 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 				sizeImage[5] = 0; // priority of template
 
 				auto tupleTemplateFace = std::make_tuple(templateData,
-					model->GetCropImageData(), sizeImage);
+					model->GetCropImageData(), sizeImage, tracerImage);
 				templateOut.on_next(tupleTemplateFace);
+			}
+			else {
+				tracerProcess.push_back("0");
+				tracerImage = BuildTracerString() + "\n";
+				file->WriteFile(tracerImage);
+				
 			}
 			
 		}
@@ -469,6 +664,16 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 	
 
 }
+
+string FaceModel::BuildTracerString() {
+	string result = "";
+	for (string value : tracerProcess) {
+		result += value + ", ";
+	}
+	tracerProcess.clear();
+	return result;
+}
+
 void FaceModel::InitHandle() {
 	int errorCode;
 
@@ -557,20 +762,20 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 	int detectedFaces = configuration->GetMaxDetect();
 	int errorCode;
 	void** faceTemp = new void*[maxFaces];
-	
+
 	for (int i = 0; i < maxFaces; i++) {
-		errorCode = IFACE_CreateFace(&(faceTemp[i]));
+		errorCode = IFACE_CreateEntity(IFACE_ENTITY_TYPE_FACE, &(faceTemp[i]));
 		error->CheckError(errorCode, error->medium);
 	}
 
 	errorCode = IFACE_DetectFaces(rawImage, width, height,
 		(float)configuration->GetMinFaceSize(), (float)configuration->GetMaxFaceSize(),
 		faceHandlerGlobal, &detectedFaces, faceTemp);
-
+	
 	if (errorCode == IFACE_OK) {
 
 		if (detectedFaces != EMPTY_FACE)
-		{
+		{			
 			for (int i = 0; i < detectedFaces; i++) {
 				float rightEyeX, rightEyeY, leftEyeX, leftEyeY;
 				float faceConfidence;
@@ -579,30 +784,51 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 				errorCode = IFACE_GetFaceBasicInfo(face, faceHandlerGlobal,
 					&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
 				error->CheckError(errorCode, error->medium);
-				cout << "CONFIDENCE: " << faceConfidence << endl;
+				//cout << "CONFIDENCE: " << faceConfidence << endl;
+				tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ")");
+				tracerImage += "(" + to_string(width) + "-" + to_string(height) + "), ";
+
+				tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold());
+				tracerProcess.push_back(to_string(faceConfidence));
+				tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
 				if (faceConfidence > configuration->GetConfidenceThreshold())
 				{
-					cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetConfidenceThreshold() << endl;
+					tracerImage += ", 1, ";
+					tracerProcess.push_back("1");
+					//cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetConfidenceThreshold() << endl;
 					Molded* model = new Molded();
 					FaceCropImage(face, model);
 					CreateTemplate(face, model, client, task);
 					delete model;
 					countDetect++;
 				}
-				else {
-					countLowScore++;
+				else
+				{
+					tracerProcess.push_back("0");
+					tracerImage = BuildTracerString() + "\n";
+					file->WriteFile(tracerImage);
 				}
+				
 
 			}
 		}
 		else {
+			tracerImage += "To refuse: (" + to_string(width) +
+				", " + to_string(height) + "), CONFIDENCE THRESHOLD: " +
+				to_string(configuration->GetConfidenceThreshold()) + "\n";			
+			
 			countNotDetect++;
+			tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ")");
+			tracerProcess.push_back("To refuse");
+			tracerProcess.push_back("0");
+			tracerImage = BuildTracerString() + "\n";
+			file->WriteFile(tracerImage);
 		}
 	}
 	else {
 		error->CheckError(errorCode, error->medium);
 		countErrorDetect++;
-	}
+	}	
 
 	for (int i = 0; i < maxFaces; i++) {
 		errorCode = IFACE_ReleaseEntity(faceTemp[i]);

@@ -50,10 +50,11 @@ public:
 		return isLoadConfig;
 	}
 	void SetTaskIdentify(int value);
-	void ResetEnrollVideo();
+	void ResetEnrollVideo(int value);
 	void RemoveUnidentified();
 	void CloseConnection();
 	void AddCollectionOfImages(string folder, int client, int doing);
+	void AddUserEnrollVideo();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	/*Rx::subject<string> userDetected;

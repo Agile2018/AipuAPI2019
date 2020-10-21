@@ -57,13 +57,19 @@ public:
 		configurationIFaceProcessing = config;
 	}
 
+	void SetClient(int value) {
+		client = value;
+		string nameFileTracer = file->GetNameLog() + to_string(client) + ".cvs";
+		file->SetNameFile(nameFileTracer);
+	}
+
 	void ClearAllCoordinatesImage();
 	float* GetCoordiantesRectangle();
 	float* GetColorRectangle();
 	
 	ConfigurationTracking* configuration = new ConfigurationTracking();
-	Rx::subject<std::tuple<char*, vector<unsigned char>, int*>> faceSubject;
-	Rx::observable<std::tuple<char*, vector<unsigned char>, int*>> observableTrackingFace = faceSubject.get_observable();
+	Rx::subject<std::tuple<char*, vector<unsigned char>, int*, string>> faceSubject;
+	Rx::observable<std::tuple<char*, vector<unsigned char>, int*, string>> observableTrackingFace = faceSubject.get_observable();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 
@@ -74,31 +80,30 @@ private:
 	void* objectHandler = nullptr;
 	void* faceHandlerTracking = nullptr;
 	void* objects[NUM_TRACKED_OBJECTS] = {};	
-	//int lastQuality = 0;
-	//int countModelSend = 0;
-	
-	//bool flagFirstDetect = false;
+	int client = 0;	
 	bool flagTracking = false;
 	float colorRectangle[NUM_TRACKED_OBJECTS] = {};
-	float imageCoordinatesFollowed[COORDINATES_X_ALL_IMAGES];
+	float imageCoordinatesFollowed[COORDINATES_X_ALL_IMAGES];	
 	void SetColorRectangle(float score, int indexObject);
 	void BuildCoordinatesImage(float x, float y, float width, float height, int indexTracked);
 	void ClearCoordinatesImage(int indexTracked);
 	ErrorFaceLib* error = new ErrorFaceLib();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
-	Rx::subscriber<std::tuple<char*, vector<unsigned char>, int*>> shootFace = faceSubject.get_subscriber();
+	Rx::subscriber<std::tuple<char*, vector<unsigned char>, int*, string>> shootFace = faceSubject.get_subscriber();
+	File* file = new File();
 	string IntToStr(int num);
 	unsigned char* LoadImageOfMemory(vector<unsigned char> buffer,
 		int* width, int* height);
 	void CreateFaceOfObject(int indexTracking);
-	//void AdvanceVideoStream();	
+		
 	void ResetCoordinates();
 	void TrackObjectState();		
 	void ObserverError();
 	void CreateTemplate(void* face, Molded* model, int task);
-	//void CreateTemplateAndSendVariation(void* face, Molded* model);
+	
 	void FaceCropImage(void* face, Molded* model);
 	void RunTask(void* face, Molded* model);
+	string BuildHeadTracer();	
 	ConfigurationIFace* configurationIFaceProcessing;
 };
 

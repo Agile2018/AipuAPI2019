@@ -42,12 +42,12 @@ public:
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 
-	Rx::subject<std::tuple<char*, vector<unsigned char>, int*>> trackedFace;
-	Rx::observable<std::tuple<char*, vector<unsigned char>, int*>> observableTrackedFace = trackedFace.get_observable();
+	Rx::subject<std::tuple<char*, vector<unsigned char>, int*, string>> trackedFace;
+	Rx::observable<std::tuple<char*, vector<unsigned char>, int*, string>> observableTrackedFace = trackedFace.get_observable();
 
 private:
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
-	Rx::subscriber<std::tuple<char*, vector<unsigned char>, int*>> shootFace = trackedFace.get_subscriber();
+	Rx::subscriber<std::tuple<char*, vector<unsigned char>, int*, string>> shootFace = trackedFace.get_subscriber();
 	int indexFrame = 0;
 	bool isInitFrame = false;	
 	bool flagRate = false;

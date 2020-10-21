@@ -27,6 +27,7 @@ FlowVideo::~FlowVideo()
 
 void FlowVideo::SetIndexFrame(int value) {
 	indexFrame = value;
+	tracking->SetClient(value);
 }
 
 int FlowVideo::GetIndexFrame() {
@@ -58,12 +59,12 @@ void FlowVideo::InitParamsFrame(std::tuple<int, int, int, int> tupleParams) {
 
 void FlowVideo::ObserverFace() {
 	auto templateObservable = tracking->observableTrackingFace
-		.map([](std::tuple<char*, vector<unsigned char>, int*> model) {
+		.map([](std::tuple<char*, vector<unsigned char>, int*, string> model) {
 		return model;
 	});
 
 	auto subscriptionTemplate = templateObservable
-		.subscribe([this](std::tuple<char*, vector<unsigned char>, int*> model) {
+		.subscribe([this](std::tuple<char*, vector<unsigned char>, int*, string> model) {
 
 		shootFace.on_next(model);
 		
@@ -114,17 +115,7 @@ void FlowVideo::ObserverError() {
 		shootError.on_next(either);
 	});
 
-	/*auto observerDatabase = backRest->observableUserJSON.map([](string jsonUser) {
-		return jsonUser;
-	});
-
-	auto subscriptionDatabase = observerDatabase.subscribe([this](string jsonUser) {
-		
-		shootUserJSON.on_next(jsonUser);
-		
-	});
-
-	subscriptionDatabase.clear();*/
+	
 }
 
 void FlowVideo::SendImageScreen(unsigned char* data, int size, int index) {

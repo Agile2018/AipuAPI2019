@@ -439,8 +439,7 @@ void LoadImageOnTextureOne() {
         {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameOne->GetWidthImage(),
                 frameOne->GetHeightImage(), 0,
-                GL_RGB, GL_UNSIGNED_BYTE, image);
-            
+                GL_RGB, GL_UNSIGNED_BYTE, image);            
         }
         image = nullptr;
         free(image);
