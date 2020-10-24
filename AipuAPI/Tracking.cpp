@@ -526,13 +526,29 @@ void Tracking::TrackObjectState() {
 			break;
 		}
 
-		if (trackedState == IFACE_TRACKED_OBJECT_STATE_TRACKED) {			
-			std::thread tcf(&Tracking::CreateFaceOfObject, this, trackedObjectIndex);
-			tcf.detach();
-						       			
+		if (trackedState == IFACE_TRACKED_OBJECT_STATE_TRACKED) {	
+			if (taskIdentify == 3)
+			{
+				SendEnrollment(trackedObjectIndex);
+			}
+			else {
+				std::thread tcf(&Tracking::CreateFaceOfObject, this, trackedObjectIndex);
+				tcf.detach();
+			}									       			
 		}
 	}
 	countFrameTracking++;
+}
+
+void Tracking::SendEnrollment(int objectIndex) {
+	clock_t duration = clock() - timeStartEnroll;
+	int durationMs = int(1000 * ((float)duration) / CLOCKS_PER_SEC);
+	if (durationMs >= LAPSE_ENROLL_MS)
+	{
+		timeStartEnroll = clock();
+		std::thread tcf(&Tracking::CreateFaceOfObject, this, objectIndex);
+		tcf.detach();
+	}
 }
 
 unsigned char* Tracking::LoadImageOfMemory(vector<unsigned char> buffer,

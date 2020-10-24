@@ -12,6 +12,8 @@
 #define NUM_TRACKED_OBJECTS	5
 #define COORDINATES_X_ALL_IMAGES 20
 #define NUM_COORDINATES_X_IMAGE  4
+#define ENROLL_VIDEO 3
+#define LAPSE_ENROLL_MS 1000
 
 using namespace std;
 
@@ -49,8 +51,10 @@ public:
 
 	void SetTaskIdentify(int task) {
 		taskIdentify = task;
-		//lastQuality = 0;
-		//countModelSend = 0;
+		if (task == ENROLL_VIDEO)
+		{
+			timeStartEnroll = clock();
+		}
 	}
 
 	void SetConfigurationIFace(ConfigurationIFace* config) {
@@ -82,6 +86,7 @@ private:
 	void* objects[NUM_TRACKED_OBJECTS] = {};	
 	int client = 0;	
 	bool flagTracking = false;
+	clock_t timeStartEnroll;
 	float colorRectangle[NUM_TRACKED_OBJECTS] = {};
 	float imageCoordinatesFollowed[COORDINATES_X_ALL_IMAGES];	
 	void SetColorRectangle(float score, int indexObject);
@@ -104,6 +109,7 @@ private:
 	void FaceCropImage(void* face, Molded* model);
 	void RunTask(void* face, Molded* model);
 	string BuildHeadTracer();	
+	void SendEnrollment(int objectIndex);
 	ConfigurationIFace* configurationIFaceProcessing;
 };
 

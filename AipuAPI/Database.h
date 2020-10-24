@@ -73,7 +73,7 @@ private:
 	Base64* base64 = new Base64();
 	void AddUser(User* user);
 	//void AddRecordsUser(User* user);
-	void AddImageUser(vector<unsigned char> image, int rows, int cols, int idUser);
+	void AddImageUser(vector<unsigned char> image, int rows, int cols, int idUser, string log);
 	void ObserverError();
 	bool QueryUserByFace(int idFaceUser, int client, int score);
 	void BuildJSONUser(vector<std::string> values);
@@ -81,10 +81,9 @@ private:
 	string QueryImageOfUser(int idFaceUser);
 	string FileImageToStringBase64(vector<unsigned char> image, int rows, int cols);
 	void DeleteFileTempCropImage(string filePath);
-	void UpdateImageUser(int idFaceUser, vector<unsigned char> image, int rows, int cols);
+	void UpdateImageUser(int idFaceUser, vector<unsigned char> image, int rows, int cols, string log);
 	void InsertNewUser(User* user);
-	void FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
-		int rows, int cols, int client, int score);
+	void FindUserByIdFace(User* user);
 	
 };
 

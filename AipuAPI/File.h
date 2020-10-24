@@ -6,6 +6,8 @@
 #include <direct.h>
 #include <sstream> 
 
+#define TEMP_FILE "temp.txt"
+
 using namespace std;
 
 class File
@@ -16,6 +18,7 @@ public:
 	void SetNameDirectory(string name);
 	void SetNameFile(string name);
 	void WriteFile(string content);
+	void WriteFile(string path, string content);
 	bool DeleteFile();
 	bool DeleteFile(string filePath);
 	void CreateDirectory();
@@ -23,6 +26,7 @@ public:
 	string GetNameFile();
 	string GetNameLog();
 	string ReadFileText();
+	string ReadFileText(string path);
 private:
 	string nameDirectory = "";
 	string nameFile = "";

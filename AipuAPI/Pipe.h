@@ -17,7 +17,7 @@ public:
 	Pipe();
 	~Pipe();
 	void LoadConfiguration();
-	//void SetDirectoryConfiguration();
+	
 	void RunFlowVideo();
 	void StatePlay();
 	void StatePaused();
@@ -38,27 +38,19 @@ public:
 	void RecognitionFaceFiles(string file, int client, int task);
 	void SetIsFinishLoadFiles(bool value);
 	bool GetIsFinishLoadFiles();
-	void ResetLowScore();
-	int GetCountLowScore();
-	void ResetCountNotDetect();
-	int GetCountNotDetect();
-	void ResetCountRepeatUser();
-	int GetCountRepeatUser();
-	void SavePerformance();
-	void ResetPerformance();
+	
 	bool GetIsLoadConfig() {
 		return isLoadConfig;
 	}
 	void SetTaskIdentify(int value);
 	void ResetEnrollVideo(int value);
-	void RemoveUnidentified();
+	
 	void CloseConnection();
 	void AddCollectionOfImages(string folder, int client, int doing);
 	void AddUserEnrollVideo();
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
-	/*Rx::subject<string> userDetected;
-	Rx::observable<string> observableUserJSON = userDetected.get_observable();*/
+	
 private:
 	string fileConfiguration = "";
 	const string filePerformance = "performance.txt";
@@ -71,17 +63,13 @@ private:
 	FaceIndentify* faceIdentify = new FaceIndentify();
 	FlowVideo* flowVideo = new FlowVideo();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
-	//Rx::subscriber<string> shootUserJSON = userDetected.get_subscriber();
+	
 	void ObserverError();
 	void ObserverTemplateImage();
 	void ObserverIdentifyFace();
-	//void ObserverDatabase();
+	
 	void ObserverTrackingFace();	
-	//void SetNameFileConfigurationFace(string name);
-	//void SetNameFileConfigurationIdentify(string name);
-	//void SetNameFileConfigurationDatabase(string name);
-	//void SetNameFileConfigurationTracking(string name);
-	//void SetNameFileConfigurationFlowVideo(string name);
+	
 };
 
 #endif // !Pipe_h

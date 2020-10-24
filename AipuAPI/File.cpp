@@ -32,6 +32,12 @@ void File::WriteFile(string content) {
 	file_obj.close();
 	
 }
+void File::WriteFile(string path, string content) {
+	ofstream file_obj;
+	file_obj.open(path, ios::app);
+	file_obj.write(content.c_str(), sizeof(char) * content.size());
+	file_obj.close();
+}
 
 bool File::DeleteFile() {
 	string path = nameDirectory + "/" + nameFile;
@@ -56,7 +62,7 @@ bool File::DeleteFile(string filePath) {
 }
 
 void File::CreateDirectory() {
-	_mkdir((char *)&nameDirectory);
+	int result = _mkdir((char *)&nameDirectory);
 }
 
 string File::GetNameDirectory() {
@@ -76,4 +82,17 @@ string File::ReadFileText() {
 	}
 	return result;
 
+}
+
+string File::ReadFileText(string path) {
+	string result = "";
+	ifstream streamFile;
+	streamFile.open(path);
+	if (streamFile.good()) {
+		stringstream streamContent;
+		streamContent << streamFile.rdbuf();
+		result = streamContent.str();
+		streamFile.close();
+	}
+	return result;
 }

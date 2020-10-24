@@ -27,40 +27,7 @@ void Pipe::SetDatabase(Database* db) {
 	database = db;
 }
 
-void Pipe::ResetPerformance() {
-	faceModel->ResetLowScore();
-	faceModel->ResetCountNotDetect();
-	faceModel->ResetCountErrorDetect();
-	faceModel->ResetCountDetect();
-	faceIdentify->ResetCountRepeatUser();
-	faceIdentify->ResetCountNewUser();
-}
 
-void Pipe::SavePerformance() {
-	configurationPerformance->jsonBody.clear();
-	configurationPerformance->jsonParams.clear();
-	std::map<std::string, std::int16_t> params;
-
-	params.insert(std::pair<std::string, std::int16_t>("LowScore", faceModel->GetCountLowScore()));
-	params.insert(std::pair<std::string, std::int16_t>("NotDetect", faceModel->GetCountNotDetect()));
-	params.insert(std::pair<std::string, std::int16_t>("ErrorDetect", faceModel->GetCountErrorDetect()));
-	params.insert(std::pair<std::string, std::int16_t>("Detect", faceModel->GetCountDetect()));
-	params.insert(std::pair<std::string, std::int16_t>("RepeatUser", faceIdentify->GetCountRepeatUser()));
-	params.insert(std::pair<std::string, std::int16_t>("NewUser", faceIdentify->GetCountNewUser()));
-	
-	std::map<std::string, std::int16_t>::const_iterator it = params.begin(),
-		end = params.end();
-
-	for (; it != end; ++it) {
-		configurationPerformance->jsonParams[it->first] = it->second;
-
-	}
-
-	configurationPerformance->jsonBody["configuration"] = "performance_configuration";
-	configurationPerformance->jsonBody["Params"] = configurationPerformance->jsonParams;
-
-	configurationPerformance->SaveConfiguration();
-}
 
 void Pipe::LoadConfiguration() {
 	configurationFile->SetNameDirectory(directoryConfiguration);
@@ -102,29 +69,6 @@ bool Pipe::GetIsFinishLoadFiles() {
 	return faceModel->GetIsFinishLoadFiles();
 }
 
-void Pipe::ResetLowScore() {
-	faceModel->ResetLowScore();
-}
-
-int Pipe::GetCountLowScore() {
-	return faceModel->GetCountLowScore();
-}
-void Pipe::ResetCountNotDetect() {
-	faceModel->ResetCountNotDetect();
-}
-
-int Pipe::GetCountNotDetect() {
-	return faceModel->GetCountNotDetect();
-}
-
-void Pipe::ResetCountRepeatUser() {
-	faceIdentify->ResetCountRepeatUser();
-}
-
-int Pipe::GetCountRepeatUser() {
-	return faceIdentify->GetCountRepeatUser();
-}
-
 void Pipe::StatePlay() {
 	flowVideo->StatePlay();
 }
@@ -146,9 +90,6 @@ void Pipe::SetIndexFrame(int value)
 	flowVideo->SetIndexFrame(value);
 }
 
-void Pipe::RemoveUnidentified() {
-	faceIdentify->RemoveUnidentified();
-}
 
 void Pipe::ObserverError() {
 	auto faceModelError = faceModel->observableError.map([](Either* either) {

@@ -269,7 +269,7 @@ void AipuAPI::Terminate() {
 	{
 		if (pipelines[i]->GetIsLoadConfig())
 		{
-			pipelines[i]->RemoveUnidentified();
+			
 			pipelines[i]->CloseConnection();
 		}
 	}	
@@ -363,18 +363,6 @@ void AipuAPI::SetIsFinishLoadFiles(int option, bool value) {
 bool AipuAPI::GetIsFinishLoadFiles(int option) {
 	int index = option - 1;
 	return pipelines[index]->GetIsFinishLoadFiles();
-	
-}
-
-void AipuAPI::ResetPerformance(int option) {
-	int index = option - 1;
-	pipelines[index]->ResetPerformance();
-
-}
-
-void AipuAPI::SavePerformance(int option) {
-	int index = option - 1;
-	pipelines[index]->SavePerformance();
 	
 }
 

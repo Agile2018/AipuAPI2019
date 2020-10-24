@@ -6,36 +6,21 @@
 #include "User.h"
 #include "Format.h"
 #include "FaceIdkit.h"
+#include <random>
+
 
 class FaceIndentify
 {
 public:
 	FaceIndentify();
 	~FaceIndentify();
-	void LoadConnection();	
-	void RemoveUnidentified();
+	void LoadConnection();		
 	void CloseConnection();	
 	void ForkTask(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
 	bool GetFlagEnroll() {
 		return flagEnroll;
 	}
-
-	void ResetCountRepeatUser() {
-		countRepeatUser = 0;
-	}
-
-	int GetCountRepeatUser() {
-		return countRepeatUser;
-	}
-
-	void ResetCountNewUser() {
-		countNewUser = 0;
-	}
-
-	int GetCountNewUser() {
-		return countNewUser;
-	}
-
+	
 	void SetStringJSON(string stringJson) {
 		faceIdkit->configuration->SetStringJSON(stringJson);
 	}	
@@ -64,10 +49,10 @@ private:
 	Format* format = new Format();
 	FaceIdkit* faceIdkit = new FaceIdkit();
 	File* file = new File();
+	Configuration* turnIntoLogToJSON = new Configuration();
 	string tracerImage;
 	string tracerPrevImage = "";
-	string tracerMatch = "";
-	string tracerHeadImage = "";
+	string tracerMatch = "";	
 	std::vector<string> tracerProcess;
 	void EnrollUserAndTemplates(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
 	void ImportUsers(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
@@ -82,26 +67,27 @@ private:
 	void ObserverError();
 	void WithDeduplication(const unsigned char* data, int sizeImage);
 	void WithoutDeduplication(const unsigned char* data, int sizeImage);
-	void WriteHeadLog();
-	//void WriteHeadLog(string tracer);
+	
 	void WithoutTemplatesRegisterUserWithDeduplication(std::tuple<char*, vector<unsigned char>,
 		int*, string> modelImage, int client);
 	void WithoutTemplatesRegisterUserWithoutDeduplication(std::tuple<char*, vector<unsigned char>,
 		int*, string> modelImage, int client);
 	void FinishRegisterUserAndTemplates();
-	void BuildTracerPrevious(string previous);
+	
 	string BuildTracerString();
-	int countRepeatUser = 0;
-	int countNewUser = 0;
-	int lastUserUnidentified = 0;	
+	bool CheckUserUnidentified(const unsigned char* data, int size);
+	std::vector<string> TransformLogToVector(string content, string delimiter);
+	string BuildJSONLog(string prevContent);
 	int countAddFaceTemplate = 0;
-	//int countRepeatFrame = 0;	
+		
 	int lastId = 1;
-	//const unsigned char* templateForMatch = NULL;
-	//int lenghtMatch = 0;	
+		
 	int countModelSendVideo = 0;
 	User* userForDatabase = nullptr;
-	vector<unsigned char> templateGuide;
+	vector<unsigned char> templateGuide;		
+	std::default_random_engine generator;
+	std::uniform_int_distribution<int> distribution{ 1, 1000};
+	
 };
 
 

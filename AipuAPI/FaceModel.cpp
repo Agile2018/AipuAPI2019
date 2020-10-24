@@ -190,10 +190,10 @@ int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
 				errorCode = IFACE_GetFaceBasicInfo(face, faceHandlerGlobal,
 					&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
 				error->CheckError(errorCode, error->medium);
-				tracerImage += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + "), ";
-				tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold()) + "\n";
+				//tracerImage += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + "), ";
+				//tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold()) + "\n";
 				
-				tracerSize += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + ")";
+				tracerSize += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + ") ";
 				tracerConfidence += to_string(faceConfidence) + " ";
 				if (countFacesDetected < TOTAL_FACE_DETECTED)
 				{					
@@ -215,12 +215,12 @@ int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
 		}
 		else {
 
-			tracerImage += "To refuse: (" + to_string(dimensionsImages[i][0]) +
+			/*tracerImage += "To refuse: (" + to_string(dimensionsImages[i][0]) +
 				"-" + to_string(dimensionsImages[i][1]) + "), CONFIDENCE THRESHOLD: " + 
-				to_string(configuration->GetConfidenceThreshold()) + "\n ";		
-			tracerSize += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + ")";
-			tracerConfidence += "(To refuse) ";
-			countNotDetect++;
+				to_string(configuration->GetConfidenceThreshold()) + "\n ";		*/
+			tracerSize += "(" + to_string(dimensionsImages[i][0]) + "-" + to_string(dimensionsImages[i][1]) + ") ";
+			tracerConfidence += "(To_refuse) ";
+			
 		}
 
 		for (int j = 0; j < maxFaces; j++) {
@@ -329,7 +329,7 @@ int FaceModel::ModelByBatch(int client,  int doing) {
 
 	int countFacesDetected = DetectByBatch(facesDetected, bufferOfImagesBatch, client, doing);
 	//int countFacesDetected = DetectByBatch(facesDetected, client, doing);
-	tracerImage += "Face detected: " + to_string(countFacesDetected) + "\n";
+	//tracerImage += "Face detected: " + to_string(countFacesDetected) + "\n";
 	tracerProcess.push_back(to_string(countFacesDetected));
 	if (countFacesDetected != 0)
 	{
@@ -390,7 +390,7 @@ int FaceModel::GetBatchModels(int countFacesDetected,
 		errorCode = IFACE_GetTemplateInfo(faceHandlerGlobal,
 			batchTemplates[i], &majorVersion, &minorVersion, &quality);
 		//cout << "QUALITY TEMPLATE: " << quality << " QUALITY TEMPLATE CONFIGURATION: " << configuration->GetQualityModel() << endl;
-		tracerImage += to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + "\n";
+		//tracerImage += to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + "\n";
 		tracerQuality += to_string(quality) + " ";
 		if (quality > configuration->GetQualityModel()) {
 			std::vector<int> orderQuality = { quality, i};
@@ -405,7 +405,7 @@ int FaceModel::GetBatchModels(int countFacesDetected,
 	if (!OrderQualityTemplate.empty()) {
 		std::sort(OrderQualityTemplate.rbegin(), OrderQualityTemplate.rend());
 		count = (int)OrderQualityTemplate.size();
-		tracerImage += "Accepted models: " + to_string(count) + "\n";
+		//tracerImage += "Accepted models: " + to_string(count) + "\n";
 		tracerProcess.push_back(to_string(count));
 		tracerImage = BuildTracerString();
 		for (int i = 0; i < OrderQualityTemplate.size(); i++)
@@ -529,11 +529,11 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 		file->SetNameFile(nameFileTracer);
 	}
 	char buff[20];
-	countNotDetect = 0;
+	
 	time_t now = time(NULL);
 	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
 	string timeInit(buff);
-	tracerImage = timeInit + ", " + to_string(client) + ", " + folder + ", ";
+	//tracerImage = timeInit + ", " + to_string(client) + ", " + folder + ", ";
 	
 	tracerProcess.push_back(timeInit);
 	tracerProcess.push_back(to_string(client));
@@ -542,13 +542,13 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 	LoadImagesForBatch(listFiles);
 	if (!bufferOfImagesBatch.empty())
 	{		
-		tracerImage += to_string((int)bufferOfImagesBatch.size()) + "\n";
+		//tracerImage += to_string((int)bufferOfImagesBatch.size()) + "\n";
 		tracerProcess.push_back(to_string((int)bufferOfImagesBatch.size()));
 		int detectNumber = ModelByBatch(client, doing);
 		//cout << "FACES DETECTED AND VALIDATED: " << detectNumber << endl;
 	}
 	else {
-		//string tracer = tracerImage + "0\n";
+		
 		tracerProcess.push_back("0");
 		tracerImage = BuildTracerString() + "\n";
 		file->WriteFile(tracerImage);
@@ -558,7 +558,7 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 void FaceModel::RecognitionFaceFiles(string namefile, int client, int task) {
 	int lenght, width, height, templates;	
 	char buff[20];
-	countNotDetect = 0;
+	
 	tracerProcess.clear();
 	if (file->GetNameFile().length() == 0)
 	{
@@ -573,12 +573,12 @@ void FaceModel::RecognitionFaceFiles(string namefile, int client, int task) {
 	tracerProcess.push_back(timeInit);
 	tracerProcess.push_back(to_string(client));
 	tracerProcess.push_back(namefile);
-	tracerImage = timeInit + ", " + to_string(client) + ", " + namefile + ", ";
+	//tracerImage = timeInit + ", " + to_string(client) + ", " + namefile + ", ";
 	isFinishLoadFiles = false;		
 	unsigned char* rawImage = LoadFileImage(namefile, &width, &height, &lenght);
 	if (rawImage != NULL) {
 		tracerProcess.push_back("1");
-		tracerImage += "1, ";
+		//tracerImage += "1,";
 		templates = GetOneModel(rawImage, width, height, client, task);
 	}
 	delete[] rawImage;
@@ -630,11 +630,11 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 			tracerProcess.push_back(to_string(quality));
 			tracerProcess.push_back(to_string(configuration->GetQualityModel()));
 
-			tracerImage +=  to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + ", ";
+			//tracerImage +=  to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + ", ";
 
 			if (quality > configuration->GetQualityModel()) {
 				tracerProcess.push_back("1");
-				tracerImage += "1, ";
+				//tracerImage += "1, ";
 				tracerImage = BuildTracerString();
 				int sizeImage[6];
 				sizeImage[0] = model->GetMoldCropWidth();
@@ -785,22 +785,22 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 					&rightEyeX, &rightEyeY, &leftEyeX, &leftEyeY, &faceConfidence);
 				error->CheckError(errorCode, error->medium);
 				//cout << "CONFIDENCE: " << faceConfidence << endl;
-				tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ")");
-				tracerImage += "(" + to_string(width) + "-" + to_string(height) + "), ";
+				tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ") ");
+				//tracerImage += "(" + to_string(width) + "-" + to_string(height) + "), ";
 
-				tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold());
+				//tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold());
 				tracerProcess.push_back(to_string(faceConfidence));
 				tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
 				if (faceConfidence > configuration->GetConfidenceThreshold())
 				{
-					tracerImage += ", 1, ";
+					//tracerImage += ", 1, ";
 					tracerProcess.push_back("1");
 					//cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetConfidenceThreshold() << endl;
 					Molded* model = new Molded();
 					FaceCropImage(face, model);
 					CreateTemplate(face, model, client, task);
 					delete model;
-					countDetect++;
+					
 				}
 				else
 				{
@@ -813,13 +813,14 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 			}
 		}
 		else {
-			tracerImage += "To refuse: (" + to_string(width) +
+			/*tracerImage += "To refuse: (" + to_string(width) +
 				", " + to_string(height) + "), CONFIDENCE THRESHOLD: " +
-				to_string(configuration->GetConfidenceThreshold()) + "\n";			
+				to_string(configuration->GetConfidenceThreshold()) + "\n";*/			
 			
-			countNotDetect++;
+			
 			tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ")");
 			tracerProcess.push_back("To refuse");
+			tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
 			tracerProcess.push_back("0");
 			tracerImage = BuildTracerString() + "\n";
 			file->WriteFile(tracerImage);
@@ -827,7 +828,7 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 	}
 	else {
 		error->CheckError(errorCode, error->medium);
-		countErrorDetect++;
+		
 	}	
 
 	for (int i = 0; i < maxFaces; i++) {

@@ -45,12 +45,12 @@ public:
 		return lastNameUser;
 	}
 
-	void SetPathImageTemp(string path) {
-		pathImageTemp = path;
+	void SetLogProcess(string log) {
+		logProcess = log;
 	}
 
-	string GetPathImageTemp() {
-		return pathImageTemp;
+	string GetLogProcess() {
+		return logProcess;
 	}
 
 	void SetStateUser(int value) {
@@ -111,13 +111,13 @@ public:
 
 private:
 	string idDb;
-	int userIdIFace, cropWidth, cropHeight, score;
+	int userIdIFace = -1, cropWidth = -1, cropHeight = -1, score = -1;
 	string nameUser;
 	string lastNameUser;
 	string identificationUser;
-	string pathImageTemp;
+	string logProcess;
 	int state = 2; // 1 -> New, 2 -> enroll, 3 -> nothing
-	int client;
+	int client = 0;
 
 	vector<unsigned char> cropImageData;
 

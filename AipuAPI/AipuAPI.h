@@ -7,10 +7,6 @@
 
 #include <string>
 
-//#define PIPE_ONE 1
-//#define PIPE_TWO 2
-//#define PIPE_THREE 3
-//#define PIPE_FOUR 4
 
 using namespace std;
 
@@ -36,9 +32,7 @@ public:
 	void AddCollectionOfImages(string folder, int client, int doing);
 	void RecognitionFaceFiles(string file, int client, int task);
 	void SetIsFinishLoadFiles(int option, bool value);
-	bool GetIsFinishLoadFiles(int option);
-	void ResetPerformance(int option);
-	void SavePerformance(int option);
+	bool GetIsFinishLoadFiles(int option);	
 	void SetTaskIdentify(int value, int option);
 	void ResetEnrollVideo(int option, int value);
 	void AddUserEnrollVideo(int channel);

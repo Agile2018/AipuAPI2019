@@ -56,7 +56,7 @@ void Database::InsertNewUser(User* user) {
 	
 	AddUser(user);
 	AddImageUser(user->GetCropImageData(), user->GetMoldCropHeight(), user->GetMoldCropWidth(),
-		user->GetUserIdIFace());
+		user->GetUserIdIFace(), user->GetLogProcess());
 
 	/*std::thread(&Database::AddUser, this, user).join();
 	std::thread(&Database::AddImageUser, this,
@@ -167,7 +167,8 @@ void Database::AddUser(User* user) {
 
 }
 
-void Database::AddImageUser(vector<unsigned char> image, int rows, int cols, int idUser) {		
+
+void Database::AddImageUser(vector<unsigned char> image, int rows, int cols, int idUser, string log) {
 
 	try
 	{
@@ -181,7 +182,8 @@ void Database::AddImageUser(vector<unsigned char> image, int rows, int cols, int
 		bsoncxx::document::value builder = make_document(
 			kvp("id_face", idUser),
 			kvp("data_64", imageBase64.c_str()),
-			kvp("data_64_aux", "empty"));
+			kvp("data_64_aux", "empty"), 
+			kvp("log", log.c_str()));
 	
 		bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection.insert_one(std::move(builder));
 
@@ -276,13 +278,13 @@ void Database::ObserverError() {
 
 }
 
-void Database::FindUserByIdFace(int idFaceUser, vector<unsigned char> image,
-	int rows, int cols, int client, int score) {
-	
-	if (QueryUserByFace(idFaceUser, client, score))
+void Database::FindUserByIdFace(User* user) {	
+
+	if (QueryUserByFace(user->GetUserIdIFace(), user->GetClient(), user->GetMoldScore()))
 	{
 		
-		UpdateImageUser(idFaceUser, image, rows, cols);
+		UpdateImageUser(user->GetUserIdIFace(), user->GetCropImageData(), 
+			user->GetMoldCropHeight(), user->GetMoldCropWidth(), user->GetLogProcess());
 	}
 	/*std::thread(&Database::QueryUserByFace, this, idFaceUser, client).detach();
 	std::thread(&Database::UpdateImageUser, this, idFaceUser, image, rows, cols).detach();*/
@@ -357,7 +359,7 @@ bool Database::QueryUserByFace(int idFaceUser, int client, int score) {
 
 }
 
-void Database::UpdateImageUser(int idFaceUser, vector<unsigned char> image, int rows, int cols) {
+void Database::UpdateImageUser(int idFaceUser, vector<unsigned char> image, int rows, int cols, string log) {
 	
 	auto clientConnection = MongoAccess::instance().GetConnection();
 
@@ -373,7 +375,7 @@ void Database::UpdateImageUser(int idFaceUser, vector<unsigned char> image, int 
 
 			bsoncxx::stdx::optional<mongocxx::v_noabi::result::update> result = collection
 				.update_one(make_document(kvp("id_face", idFaceUser)),
-					make_document(kvp("$set", make_document(kvp("data_64_aux", imageBase64)))));
+					make_document(kvp("$set", make_document(kvp("data_64_aux", imageBase64), kvp("log", log)))));
 		}
 		catch (const mongocxx::exception& e)
 		{
@@ -441,11 +443,8 @@ void Database::ProcessUserDB(User* user) {
 	}
 	else if (user->GetStateUser() == 2) {
 		
-		FindUserByIdFace(user->GetUserIdIFace(),
-			user->GetCropImageData(), user->GetMoldCropHeight(),
-			user->GetMoldCropWidth(), user->GetClient(), user->GetMoldScore());
+		FindUserByIdFace(user);
 		
-
 	}
 	else if (user->GetStateUser() == 3) {
 		string name = "Unidentified";

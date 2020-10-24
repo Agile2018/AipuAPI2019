@@ -26,7 +26,7 @@ public:
 	FaceModel();
 	~FaceModel();
 	
-	void ResetLowScore() {
+	/*void ResetLowScore() {
 		countLowScore = 0;
 	}
 
@@ -56,7 +56,7 @@ public:
 
 	void ResetCountDetect() {
 		countDetect = 0;
-	}
+	}*/
 
 	void SetIsFinishLoadFiles(bool value) {
 		isFinishLoadFiles = value;
@@ -100,10 +100,10 @@ private:
 
 	bool isFinishLoadFiles = true;	
 	void* faceHandlerGlobal = nullptr;	
-	int countLowScore = 0;
+	/*int countLowScore = 0;
 	int countNotDetect = 0;
 	int countErrorDetect = 0;
-	int countDetect = 0;
+	int countDetect = 0;*/
 	string tracerImage;
 	std::vector<string> tracerProcess;
 	File* file = new File();

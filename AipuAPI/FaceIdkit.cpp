@@ -136,13 +136,13 @@ int FaceIdkit::FindUser(const unsigned char* templateModel,
 
 			errorCode = IEngine_FindUser(userAux, userId, score);
 			error->CheckError(errorCode, error->medium);
-			//*tracer += " BEST CANDIDATES: " + to_string(bestCandidatesCount) + ", ";
+			
 			for (int i = 0; i < bestCandidatesCount; i++)
 			{
 				*tracer += "(" + to_string(userId[i]) + "-" + to_string(score[i]) + ") ";
-				//cout << "BEST CANDIDATES SCORE: " << score[i] << endl;
+				
 			}
-			//*tracer += ", ";
+			
 		}
 		
 	}		
@@ -170,9 +170,7 @@ int FaceIdkit::RegisterUser(const unsigned char* templateModel,
 		error->CheckError(errorCode, error->medium);
 		if (errorCode == IENGINE_E_NOERROR) {
 			errorCode = IEngine_RegisterUser(user, userId);
-			error->CheckError(errorCode, error->medium);
-
-			cout << "IEngine_RegisterUser ERROR:" << errorCode << " USERID: " << *userId << endl;
+			error->CheckError(errorCode, error->medium);			
 		}
 		
 	}
@@ -214,7 +212,7 @@ int FaceIdkit::MatchUsers(const unsigned char* templateModelOne,
 				errorCode = IEngine_MatchUsersModalities(userAuxMatch, userAux,
 					IENGINE_MATCHING_MODALITY::MODALITY_FACE, score);
 				error->CheckError(errorCode, error->medium);
-				//cout << "MatchUsers SCORE: " << *score << endl;
+				
 			}
 		}
 	}
@@ -248,8 +246,7 @@ int FaceIdkit::AddFaceTemplate(const unsigned char* templateModel, int size) {
 	error->CheckError(errorCode, error->medium);
 	if (errorCode == IENGINE_E_NOERROR) {
 		
-		errorCode = IEngine_AddFaceTemplate(user, templateModel, size);
-		//cout << "ADD TEMPLATE ERROR: " << errorCode << endl;
+		errorCode = IEngine_AddFaceTemplate(user, templateModel, size);		
 		
 	}
 	
