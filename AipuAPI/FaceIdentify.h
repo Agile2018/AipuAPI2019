@@ -53,6 +53,11 @@ private:
 	string tracerImage;
 	string tracerPrevImage = "";
 	string tracerMatch = "";	
+	string collectionMatch = "";
+	string collectionFind = "";
+	string collectionSize = "";
+	string collectionConfidence = "";
+	string collectionQualityModel = "";
 	std::vector<string> tracerProcess;
 	void EnrollUserAndTemplates(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
 	void ImportUsers(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client);
@@ -78,6 +83,8 @@ private:
 	bool CheckUserUnidentified(const unsigned char* data, int size);
 	std::vector<string> TransformLogToVector(string content, string delimiter);
 	string BuildJSONLog(string prevContent);
+	void JoinedImageDetailVideo(string prevContent);
+	string BuildEndTracerPrevVideo(string prevContent);
 	int countAddFaceTemplate = 0;
 		
 	int lastId = 1;

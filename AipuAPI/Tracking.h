@@ -13,6 +13,8 @@
 #define COORDINATES_X_ALL_IMAGES 20
 #define NUM_COORDINATES_X_IMAGE  4
 #define ENROLL_VIDEO 3
+#define IMPORT_VIDEO 0
+#define CONTROL_ENTRY 1
 #define LAPSE_ENROLL_MS 1000
 
 using namespace std;
@@ -51,7 +53,7 @@ public:
 
 	void SetTaskIdentify(int task) {
 		taskIdentify = task;
-		if (task == ENROLL_VIDEO)
+		if (task == ENROLL_VIDEO || task == IMPORT_VIDEO || task == CONTROL_ENTRY)
 		{
 			timeStartEnroll = clock();
 		}

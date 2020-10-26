@@ -52,7 +52,7 @@ void FaceIndentify::WithDeduplication(const unsigned char* data, int sizeImage) 
 	
 	errorCode = faceIdkit->FindUser(data, sizeImage, &userID, &score, &tracerImage);
 	error->CheckError(errorCode, error->medium);
-
+	collectionFind += tracerImage;
 	if (userID == 0 && errorCode == IENGINE_E_NOERROR) {
 
 		if (lastId == 1)
@@ -108,6 +108,8 @@ void FaceIndentify::EnrollUserVideo(std::tuple<char*,
 
 		if (lastId == 1)
 		{
+			collectionMatch = "";
+			collectionFind = "";
 			faceIdkit->ClearUser();
 			BuildUserDatabase(modelImage, client, userID);
 			
@@ -169,17 +171,45 @@ void FaceIndentify::EnrollUserVideo(std::tuple<char*,
 		}
 		tracerFlow = tracerPrevImage + BuildTracerString() + "\n";
 		file->WriteFile(tracerFlow);
+		JoinedImageDetailVideo(tracerPrevImage);
 	}
-	
+	tracerProcess.clear();
 	templateData = NULL;
+}
+
+void FaceIndentify::JoinedImageDetailVideo(string prevContent) {
+	std::vector<string> tracerPrevious = TransformLogToVector(prevContent, ",");
+	if (!tracerPrevious.empty()) {
+		collectionSize += tracerPrevious[4] + " ";
+		collectionConfidence += tracerPrevious[5] + " ";
+		collectionQualityModel += tracerPrevious[8] + " ";
+	}
+}
+
+string FaceIndentify::BuildEndTracerPrevVideo(string prevContent) {
+	string result = "";
+	std::vector<string> tracerPrevious = TransformLogToVector(prevContent, ",");
+	if (!tracerPrevious.empty()) {
+		tracerPrevious[3] = to_string(countAddFaceTemplate + 1);
+		tracerPrevious[4] = collectionSize;
+		tracerPrevious[5] = collectionConfidence;
+		tracerPrevious[8] = collectionQualityModel;
+		
+		for (string value : tracerPrevious) {
+			result += value + ", ";
+		}				
+	}
+	return result;
 }
 
 void FaceIndentify::AddUserEnrollVideo() {
 	int errorCode, userID = -1;
 	string tracerFlow = "";
 	
+	tracerPrevImage = BuildEndTracerPrevVideo(tracerPrevImage);
+
 	tracerProcess.push_back("EnrollUserVideo");
-	tracerProcess.push_back("-1");
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));
 
 	if (!templateGuide.empty()) {
 		
@@ -202,13 +232,26 @@ void FaceIndentify::AddUserEnrollVideo() {
 		tracerFlow = "To refuse Register User";
 		delete userForDatabase;
 	}
-	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
+	if (collectionFind.empty())
+	{
+		tracerProcess.push_back("0");
+	}
+	else
+	{
+		tracerProcess.push_back(collectionFind);
+	}
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsConcatenateTemplates()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenateMode()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMaximumScore()));
+	if (collectionMatch.empty())
+	{
+		tracerProcess.push_back("0");
+	}
+	else {
+		tracerProcess.push_back(collectionMatch);
+	}
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);
 
@@ -230,8 +273,12 @@ void FaceIndentify::AddUserEnrollVideo() {
 	tracerImage = "";
 	tracerPrevImage = "";
 	tracerMatch = " ";
-	
+	collectionMatch = "";
 	countAddFaceTemplate = 0;
+	collectionSize = "";
+	collectionConfidence = "";
+	collectionQualityModel = "";
+	collectionFind = "";
 }
 
 void FaceIndentify::WithoutTemplatesRegisterUserWithDeduplication(std::tuple<char*, vector<unsigned char>,
@@ -379,6 +426,7 @@ void FaceIndentify::FinishRegisterUserAndTemplates() {
 	printf("   BUILD JASON LOG time: %d\n", durationMs1);*/
 	tracerProcess.clear();
 	tracerPrevImage = "";
+	collectionMatch = "";
 }
 
 void FaceIndentify::EnrollUserAndTemplates(std::tuple<char*,
@@ -471,6 +519,7 @@ void FaceIndentify::ConcatenateModeAuto(const unsigned char* templateIn, int siz
 		(int)templateGuide.size(), templatePtrNew, sizeIn, &score);
 	error->CheckError(errorCode, error->medium);
 	tracerMatch += to_string(score) + " ";
+	collectionMatch += to_string(score) + " ";
 	if (errorCode == IENGINE_E_NOERROR) {
 		if (score <= faceIdkit->configuration->GetConcatenationMaximumScore() &&
 			score >= faceIdkit->configuration->GetConcatenationMinimumScore())
@@ -543,7 +592,7 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
 	string tracerFlow = "";
 	tracerPrevImage = std::get<3>(modelImage);
-	
+	bool flagRegister = false;
 	
 	tracerProcess.push_back("ImportUsers");
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));
@@ -558,15 +607,18 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 		if (userID == 0 && errorCode == IENGINE_E_NOERROR) {	
 
 			errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
-			error->CheckError(errorCode, error->medium);	
-
-			/*tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
+			error->CheckError(errorCode, error->medium);				
+			tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
 			if (errorCode == IENGINE_E_NOERROR)
-			{								
-				BuildUserDatabase(modelImage, client, userID);
-				shootUser.on_next(userForDatabase);
-			}*/
+			{			
+				flagRegister = true;
+				//BuildUserDatabase(modelImage, client, userID);
+				//shootUser.on_next(userForDatabase);
+			}
 			
+		}
+		else {
+			tracerFlow = "User already exists.";
 		}
 
 	}
@@ -577,18 +629,18 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 		tracerProcess.push_back("-1");
 		errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
 		error->CheckError(errorCode, error->medium);
-		/*tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
+		
+		tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
 
 		if (errorCode == IENGINE_E_NOERROR)
 		{
-			
-			BuildUserDatabase(modelImage, client, userID);
-			shootUser.on_next(userForDatabase);
-		}*/
+			flagRegister = true;
+			//BuildUserDatabase(modelImage, client, userID);
+			//shootUser.on_next(userForDatabase);
+		}
 		
 	}
-		
-	tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
+			
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
@@ -599,7 +651,7 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 	tracerProcess.push_back(tracerFlow);
 	
 
-	if (errorCode == IENGINE_E_NOERROR)
+	if (errorCode == IENGINE_E_NOERROR && flagRegister)
 	{
 		string logJSON = BuildJSONLog(tracerPrevImage);		
 		BuildUserDatabase(modelImage, client, userID);
@@ -613,8 +665,6 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMaximumScore()));*/
 	
-
-
 	tracerFlow = tracerPrevImage + BuildTracerString() + "\n";
 	file->WriteFile(tracerFlow);
 	tracerProcess.clear();

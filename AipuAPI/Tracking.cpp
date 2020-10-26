@@ -527,14 +527,16 @@ void Tracking::TrackObjectState() {
 		}
 
 		if (trackedState == IFACE_TRACKED_OBJECT_STATE_TRACKED) {	
-			if (taskIdentify == 3)
+			if (taskIdentify == ENROLL_VIDEO || 
+				taskIdentify == IMPORT_VIDEO || 
+				taskIdentify == CONTROL_ENTRY)
 			{
 				SendEnrollment(trackedObjectIndex);
 			}
-			else {
+			/*else {
 				std::thread tcf(&Tracking::CreateFaceOfObject, this, trackedObjectIndex);
 				tcf.detach();
-			}									       			
+			}	*/								       			
 		}
 	}
 	countFrameTracking++;
