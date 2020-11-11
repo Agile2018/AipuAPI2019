@@ -204,6 +204,10 @@ void Tracking::FaceTracking(std::vector<unsigned char> vectorData) {
 		errorCode = IFACE_TrackObjects(objectHandler, rawImageData,
 			width, height, secuence, NUM_TRACKED_OBJECTS, objects);			
 		error->CheckError(errorCode, error->medium);
+		if (errorCode != IFACE_OK) {
+			cout << "..........ERRRRORORRRRRRR IFACE_TrackObjects.............................." << errorCode << endl;
+		}
+		
 		TrackObjectState();
 
 		delete[] rawImageData;

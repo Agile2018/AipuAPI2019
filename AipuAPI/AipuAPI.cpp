@@ -10,11 +10,14 @@ FrameView windowOGL;
 
 vector<Pipe*> pipelines;
 std::vector<std::thread> threadPipes;
-
+std::mutex mtx;
 string userJson;
 string messageError;
+//string templateJson;
 bool isOpenWindow = false;
 std::vector<string> listUser;
+std::vector<string> listTemplates;
+int countTemplates = 0;
 const string nameConfiguration =  "configuration";
 const string fileDatabaseConfiguration = "database.txt";
 const string fileGlobalConfiguration = "global.txt";
@@ -25,6 +28,11 @@ const char* fileConfigurations[4] = { "configPipeOne.txt", "configPipeTwo.txt",
 
 
 void AipuAPI::SetNumberPipelines(int value) {
+	for (int i = 0; i < pipelines.size(); i++)
+	{
+		pipelines[i]->DownConfigurationModel();
+		pipelines[i]->CloseConnectionIdentification();
+	}
 	pipelines.clear();
 	for (int i = 0; i < value; i++)
 	{
@@ -32,6 +40,7 @@ void AipuAPI::SetNumberPipelines(int value) {
 		pipelines.push_back(pipe);
 	}
 	ObserverError();
+	ObserverTemplateJson();
 	pipelines[0]->SetDatabase(&databaseMongo);
 }
 
@@ -107,6 +116,47 @@ void AipuAPI::LoadConfiguration(int option) {
 
 }
 
+bool AipuAPI::GetIsLoadConfiguration(int channel) {
+	int index = channel - 1;
+	return pipelines[index]->GetIsLoadConfig();
+}
+
+void AipuAPI::CloseConnectionIdentification(int channel) {
+	int index = channel - 1;
+
+	pipelines[index]->CloseConnectionIdentification();
+}
+
+void AipuAPI::LoadConnectionIdentification(int channel) {
+	int index = channel - 1;
+
+	pipelines[index]->LoadConnectionIdentification();
+}
+
+void AipuAPI::DownConfigurationModel(int channel) {
+	int index = channel - 1;
+
+	pipelines[index]->DownConfigurationModel();
+}
+
+void AipuAPI::LoadConfigurationModel(int channel) {
+	int index = channel - 1;
+
+	pipelines[index]->LoadConfigurationModel();
+}
+
+void AipuAPI::LoadConfigurationIdentify(int channel) {
+	int index = channel - 1;
+
+	pipelines[index]->LoadConfigurationIdentify();
+}
+
+void AipuAPI::LoadConfigurationTracking(int channel) {
+	int index = channel - 1;
+
+	pipelines[index]->LoadConfigurationTracking();
+}
+
 void AipuAPI::LoadConfigurationPipe(int pipeline) {
 	int index = pipeline - 1;
 
@@ -115,6 +165,12 @@ void AipuAPI::LoadConfigurationPipe(int pipeline) {
 		LoadOnlyOnePipe(index);
 	}
 
+}
+
+int AipuAPI::GetTaskIdentify(int channel) {
+	int index = channel - 1;
+
+	return pipelines[index]->GetTaskIdentify();
 }
 
 void AipuAPI::InitWindowMain(int option) {
@@ -173,6 +229,33 @@ void AipuAPI::ConnectDatabase() {
 
 }
 
+void AipuAPI::ObserverTemplateJson() {
+	vector<rxcpp::observable<string>> observersTemplates;
+	for (int i = 0; i < pipelines.size(); i++)
+	{
+		observersTemplates.push_back(pipelines[i]->observableCropImage.map([](string jsonTemplate) {
+			return jsonTemplate;
+		}));
+	}
+
+
+	vector<rxcpp::subscription> subscriptionsTemplates;
+	for (int i = 0; i < pipelines.size(); i++)
+	{
+		subscriptionsTemplates.push_back(observersTemplates[i].subscribe([this](string jsonTemplate) {
+			
+			//templateJson = jsonTemplate;
+			/*mtx.lock();
+			listTemplates.push_back(jsonTemplate);			
+			mtx.unlock();*/
+			std::lock_guard<std::mutex> guard(mtx);
+			listTemplates.push_back(jsonTemplate);
+			
+		}));
+
+	}
+}
+
 void AipuAPI::ObserverDatabase() {
 	auto databaseError = databaseMongo.observableError.map([](Either* either) {
 		return either;
@@ -196,7 +279,7 @@ void AipuAPI::ObserverDatabase() {
 		userJson = jsonUser;
 		listUser.push_back(userJson);
 
-		cout << userJson << endl;
+		
 	});
 
 	subscriptionDatabase.clear();
@@ -267,15 +350,18 @@ void AipuAPI::Terminate() {
 
 	for (int i = 0; i < pipelines.size(); i++)
 	{
-		if (pipelines[i]->GetIsLoadConfig())
+		/*if (pipelines[i]->GetIsLoadConfig())
 		{
 			
 			pipelines[i]->CloseConnection();
-		}
+		}*/
+		pipelines[i]->DownConfigurationModel();
+		pipelines[i]->CloseConnectionIdentification();
+
 	}	
 
 	listUser.clear();
-
+	listTemplates.clear();
 	innovatrics->Terminate();
 
 	if (isOpenWindow)
@@ -326,19 +412,52 @@ void AipuAPI::ReloadRecognitionFace() {
 	
 }
 
-
 string AipuAPI::GetUserJSON() {	
+
 
 	string user = "";
 
 	if (listUser.size() != 0)
 	{
 		user = *listUser.begin();
-		cout << user << endl;
+		//cout << user <<  endl;
 		listUser.erase(listUser.begin());
 	}
 
 	return user;
+}
+
+string AipuAPI::GetTemplateJSON() {
+	string templateImage = "";
+	
+	//if (mtx.try_lock())
+	//{
+	//	try
+	//	{
+	//		if (listTemplates.size() != 0)
+	//		{
+	//			//templateImage = *listTemplates.begin();
+	//			//cout << templateImage << " ...........LENGHT: " << templateImage.length() << endl;
+	//			//listTemplates.erase(listTemplates.begin());
+	//			templateImage = listTemplates[countTemplates];
+	//			countTemplates++;
+	//		}
+	//	}
+	//	catch (const std::exception& e)
+	//	{
+	//		cout << "ERROR GET TEMPLATE JSON: " << e.what() << endl;
+	//		
+	//	}
+	//	
+	//	
+	//	mtx.unlock();
+	//}
+	if (!listTemplates.empty())
+	{		
+		templateImage = listTemplates[countTemplates];
+		countTemplates++;
+	}
+	return templateImage;
 }
 
 string AipuAPI::GetMessageError() {
@@ -392,12 +511,20 @@ void AipuAPI::SetTaskIdentify(int value, int option) {
 
 void AipuAPI::ResetEnrollVideo(int option, int value) {
 	int index = option - 1;
+	if (value == 0)
+	{
+		listTemplates.clear();
+		countTemplates = value;
+	}
+		
 	pipelines[index]->ResetEnrollVideo(value);
 	
 }
 
 void AipuAPI::AddCollectionOfImages(string folder, int client, int doing) {
 	int index = client - 1;
+	listTemplates.clear();		
+	countTemplates = 0;
 	pipelines[index]->AddCollectionOfImages(folder, client, doing);
 
 }

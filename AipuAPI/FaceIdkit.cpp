@@ -87,8 +87,7 @@ void FaceIdkit::Connection() {
 	}
 	else {
 		cout << "IEngine_InitConnection ERROR" << endl;
-	}
-	
+	}	
 }
 
 void FaceIdkit::CloseConnection() {

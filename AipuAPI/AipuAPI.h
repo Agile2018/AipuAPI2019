@@ -35,18 +35,26 @@ public:
 	bool GetIsFinishLoadFiles(int option);	
 	void SetTaskIdentify(int value, int option);
 	void ResetEnrollVideo(int option, int value);
-	void AddUserEnrollVideo(int channel);
+	void AddUserEnrollVideo(int channel);	
 	void StatePlay(int option); // single
 	void StatePaused(int option); // single
 	void SetFinishLoop(int option); // single
 	string GetUserJSON();
 	string GetMessageError();
-	
-
+	string GetTemplateJSON();
+	void CloseConnectionIdentification(int channel);
+	void LoadConnectionIdentification(int channel);
 	void SetNumberPipelines(int value);
+	int GetTaskIdentify(int channel);
+	void DownConfigurationModel(int channel); 
+	void LoadConfigurationModel(int channel);
+	void LoadConfigurationIdentify(int channel); // CloseConnectionIdentification 
+	void LoadConfigurationTracking(int channel); // SetFinishLoop
+	bool GetIsLoadConfiguration(int channel);
 	
 private:
 	void ObserverError();
 	void ObserverDatabase();
+	void ObserverTemplateJson();
 	
 };

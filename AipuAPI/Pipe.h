@@ -45,29 +45,35 @@ public:
 	void SetTaskIdentify(int value);
 	void ResetEnrollVideo(int value);
 	
-	void CloseConnection();
+	void CloseConnectionIdentification();
+	void LoadConnectionIdentification();	
 	void AddCollectionOfImages(string folder, int client, int doing);
 	void AddUserEnrollVideo();
+	void DownConfigurationModel();
+	void LoadConfigurationModel();
+	void LoadConfigurationIdentify();
+	void LoadConfigurationTracking();
+	int GetTaskIdentify();
+	
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
-	
+	Rx::subject<string> cropImageSubject;
+	Rx::observable<string> observableCropImage = cropImageSubject.get_observable();
 private:
-	string fileConfiguration = "";
-	const string filePerformance = "performance.txt";
+	string fileConfiguration = "";	
 	string directoryConfiguration = "configuration";
 	int client = 1;
 	bool isLoadConfig = false;
-	ConfigurationFile* configurationFile = new ConfigurationFile();
-	Configuration* configurationPerformance = new Configuration();
+	ConfigurationFile* configurationFile = new ConfigurationFile();	
 	FaceModel* faceModel = new FaceModel();
 	FaceIndentify* faceIdentify = new FaceIndentify();
 	FlowVideo* flowVideo = new FlowVideo();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
-	
+	Rx::subscriber<string> shootCropImage = cropImageSubject.get_subscriber();
 	void ObserverError();
 	void ObserverTemplateImage();
 	void ObserverIdentifyFace();
-	
+	void ObserverCropImage();
 	void ObserverTrackingFace();	
 	
 };

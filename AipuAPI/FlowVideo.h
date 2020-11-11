@@ -35,9 +35,14 @@ public:
 		tracking->SetTaskIdentify(value);
 	}	
 
+	int GetTaskIdentify() {
+		return tracking->GetTaskIdentify();
+	}
+
 	void SetConfigurationIFace(ConfigurationIFace* config) {
 		tracking->SetConfigurationIFace(config);
 	}
+	
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();

@@ -1,13 +1,9 @@
 #ifndef FaceModel_h
 #define FaceModel_h
 
-//#define BATCH_SIZE	5
 #define BATCH_TOTAL_SIZE 30
 #define EMPTY_FACE	0
 #define TOTAL_FACE_DETECTED 50
-//#define TRACKED_OBJECTS	5
-//#define SIZE_COORDINATES 20
-//#define NUMBER_COORDINATES_IMAGES  4
 
 #include "ConfigurationIFace.h"
 #include "ErrorFaceLib.h"
@@ -24,39 +20,7 @@ class FaceModel
 {
 public:
 	FaceModel();
-	~FaceModel();
-	
-	/*void ResetLowScore() {
-		countLowScore = 0;
-	}
-
-	int GetCountLowScore() {
-		return countLowScore;
-	}
-
-	void ResetCountNotDetect() {
-		countNotDetect = 0;
-	}
-
-	int GetCountNotDetect() {
-		return countNotDetect;
-	}
-
-	int GetCountErrorDetect() {
-		return countErrorDetect;
-	}
-
-	void ResetCountErrorDetect() {
-		countErrorDetect = 0;
-	}
-
-	int GetCountDetect() {
-		return countDetect;
-	}
-
-	void ResetCountDetect() {
-		countDetect = 0;
-	}*/
+	~FaceModel();	
 
 	void SetIsFinishLoadFiles(bool value) {
 		isFinishLoadFiles = value;
@@ -64,9 +28,7 @@ public:
 
 	bool GetIsFinishLoadFiles() {
 		return isFinishLoadFiles;
-	}
-	
-	void Terminate();		
+	}			
 	
 	void RecognitionFaceFiles(string namefile, int client, int task);
 	void AddCollectionOfImages(string folder, int client, int doing);
@@ -100,10 +62,7 @@ private:
 
 	bool isFinishLoadFiles = true;	
 	void* faceHandlerGlobal = nullptr;	
-	/*int countLowScore = 0;
-	int countNotDetect = 0;
-	int countErrorDetect = 0;
-	int countDetect = 0;*/
+	
 	string tracerImage;
 	std::vector<string> tracerProcess;
 	File* file = new File();
@@ -114,8 +73,7 @@ private:
 	int DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED], int client, int doing);
 	int GetBatchModels(int countFacesDetected, void* facesDetected[TOTAL_FACE_DETECTED]);
 	void CreateTemplate(void* face, Molded* model, int client, int task);
-	int GetOneModel(unsigned char* rawImage, int width, int height, int client, int task);
-	//int ModelOneToOne(vector<unsigned char> buffer, int client);
+	int GetOneModel(unsigned char* rawImage, int width, int height, int client, int task);	
 	void ObserverError();
 	vector<string> LoadFilesForBatch(string folder);
 	void LoadImagesForBatch(vector<string> listFiles);

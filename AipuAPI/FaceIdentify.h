@@ -7,7 +7,10 @@
 #include "Format.h"
 #include "FaceIdkit.h"
 #include <random>
-
+#include "CropTemplate.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include "Base64.h"
 
 class FaceIndentify
 {
@@ -32,19 +35,27 @@ public:
 	void ResetEnrollVideo(int value) {
 		
 		countModelSendVideo = value;
+		
 	}
 
 	void AddUserEnrollVideo();
+
+	bool GetConnectionIdentification() {
+		return connectionIdentification;
+	}	
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	Rx::subject<User*> userSubject;
 	Rx::observable<User*> observableUser = userSubject.get_observable();
+	Rx::subject<string> cropImageSubject;
+	Rx::observable<string> observableCropImage = cropImageSubject.get_observable();
 private:
 
 	ErrorIdKitLib* error = new ErrorIdKitLib();
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	Rx::subscriber<User*> shootUser = userSubject.get_subscriber();
+	Rx::subscriber<string> shootCropImage = cropImageSubject.get_subscriber();
 	bool flagEnroll = false;
 	Format* format = new Format();
 	FaceIdkit* faceIdkit = new FaceIdkit();
@@ -66,12 +77,12 @@ private:
 	void BuildUserDatabase(std::tuple<char*, vector<unsigned char>, int*, string> modelImage,
 		int client, int userId);
 	void GetFaceTemplateUser(int idUser, int index);
-	void MatchUsers(const unsigned char* templateIn, int sizeIn);
-	void ConcatenateModeAuto(const unsigned char* templateIn, int sizeIn);
-	void ConcatenateModeForce(const unsigned char* templateIn, int sizeIn);
+	void MatchUsers(const unsigned char* templateIn, int sizeIn, int client);
+	void ConcatenateModeAuto(const unsigned char* templateIn, int sizeIn, int client);
+	void ConcatenateModeForce(const unsigned char* templateIn, int sizeIn, int client);
 	void ObserverError();
-	void WithDeduplication(const unsigned char* data, int sizeImage);
-	void WithoutDeduplication(const unsigned char* data, int sizeImage);
+	void WithDeduplication(const unsigned char* data, int sizeImage, int client);
+	void WithoutDeduplication(const unsigned char* data, int sizeImage, int client);
 	
 	void WithoutTemplatesRegisterUserWithDeduplication(std::tuple<char*, vector<unsigned char>,
 		int*, string> modelImage, int client);
@@ -85,16 +96,20 @@ private:
 	string BuildJSONLog(string prevContent);
 	void JoinedImageDetailVideo(string prevContent);
 	string BuildEndTracerPrevVideo(string prevContent);
-	int countAddFaceTemplate = 0;
-		
+	string CropImageToStringBase64(vector<unsigned char> image, int rows, int cols);
+	string BuildJSONCropImage(vector<std::string> values);
+	void BuildTemplateForSend(vector<unsigned char> image, int rows, int cols, int client);
+	int countAddFaceTemplate = 0;	
+	bool connectionIdentification = false;
 	int lastId = 1;
 		
 	int countModelSendVideo = 0;
 	User* userForDatabase = nullptr;
-	vector<unsigned char> templateGuide;		
+	vector<unsigned char> templateGuide;	
+	CropTemplate* cropImage = new CropTemplate();	
 	std::default_random_engine generator;
 	std::uniform_int_distribution<int> distribution{ 1, 1000};
-	
+	Base64* base64 = new Base64();
 };
 
 

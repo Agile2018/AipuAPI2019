@@ -13,10 +13,10 @@ public:
 	void ParseJSONToObject();
 	//void ParseMapToJSON();
 
-	void SetMinFaceSize(int value) {
+	void SetMinFaceSize(float value) {
 		minFaceSize = value;
 	}
-	void SetMaxFaceSize(int value) {
+	void SetMaxFaceSize(float value) {
 		maxFaceSize = value;
 	}
 
@@ -36,11 +36,11 @@ public:
 		return qualityModel;
 	}
 
-	int GetMinFaceSize() {
+	float GetMinFaceSize() {
 		return minFaceSize;
 	}
 
-	int GetMaxFaceSize() {
+	float GetMaxFaceSize() {
 		return maxFaceSize;
 	}
 
@@ -75,8 +75,8 @@ private:
 	Rx::subscriber<Either*> shootError = errorSubject.get_subscriber();
 	ErrorFaceLib* error = new ErrorFaceLib();
 	Configuration* configuration = new Configuration();
-	int minFaceSize = 25;
-	int maxFaceSize = 200;
+	float minFaceSize = 25.0;
+	float maxFaceSize = 200.0;
 	int maxfaceDetect = 1;
 	int confidenceThreshold = 600;	
 	int qualityModel = 60;

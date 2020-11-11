@@ -277,6 +277,7 @@ gboolean FlowVideo::MessageCallback(GstBus *bus, GstMessage *message, gpointer d
 		//g_main_loop_quit(loop);			
 		
 		cout << "end-of-stream" << endl;
+		
 		break;
 	default:
 		/* unhandled message */
@@ -401,54 +402,6 @@ gchar* FlowVideo::DescriptionFlow(int optionFlow) {
 
 }
 
-//void FlowVideo::ShowWindow(int option) {
-//	GstState cur_state;
-//	
-//	gst_element_get_state(GST_ELEMENT(pipeline), &cur_state, NULL, 0);
-//	if (cur_state == GST_STATE_PLAYING) {
-//		std::wstring stemp = std::wstring(nameWindow.begin(), nameWindow.end());
-//		LPCWSTR sw = stemp.c_str();
-//		HWND win_handle = FindWindow(0, sw);
-//		switch (option)
-//		{
-//		case 1:
-//			SetWindowPos(win_handle, HWND_BOTTOM, 0, 0, 0, 0, wFlags);
-//			break;
-//		case -1:
-//			SetWindowPos(win_handle, HWND_TOPMOST, 0, 0, 0, 0, wFlags);
-//			break;
-//		}
-//	}
-//		
-//}
-//
-//void FlowVideo::ResetLowScore() {
-//	backRest->ResetLowScore();
-//}
-//
-//int FlowVideo::GetCountLowScore() {
-//	return backRest->GetCountLowScore();
-//}
-//
-//void FlowVideo::ResetCountNotDetect() {
-//	backRest->ResetCountNotDetect();
-//}
-//
-//int FlowVideo::GetCountNotDetect() {
-//	return backRest->GetCountNotDetect();
-//}
-//
-//void FlowVideo::SetDeepTrack(string value) {
-//	deepTrack = value;
-//}
-//
-//void FlowVideo::ResetCountRepeatUser() {
-//	backRest->ResetCountRepeatUser();
-//}
-//
-//int FlowVideo::GetCountRepeatUser() {
-//	return backRest->GetCountRepeatUser();
-//}
 
 void FlowVideo::StatePlay() {
 	GstState cur_state;
@@ -479,23 +432,22 @@ void FlowVideo::SetFinishLoop() {
 	//GstState cur_state;
 	if (pipeline != NULL)
 	{
-		gst_element_change_state(GST_ELEMENT(pipeline), GST_STATE_CHANGE_READY_TO_NULL);
-		/*gst_element_get_state(GST_ELEMENT(pipeline), &cur_state, NULL, 0);
-		if (cur_state == GST_STATE_PLAYING) {
-			gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PAUSED);
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));			
-		}*/
-
-		//g_main_loop_quit(loop);
-
-		/*gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_NULL);
-		gst_object_unref(GST_OBJECT(pipeline));*/
-
-		/*if (loop)
+		//gst_element_change_state(GST_ELEMENT(pipeline), GST_STATE_CHANGE_READY_TO_NULL);
+		
+		if (!gst_element_send_event(GST_ELEMENT(pipeline), gst_event_new_eos()))
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			g_main_loop_quit(loop);
-		}*/
+			/*tracking->ClearAllCoordinatesImage();
+
+			tracking->SetCountFrameTracking(0);			
+
+			isInitFrame = false;
+			flagRate = false;*/
+
+			/*isInitFrame = false;
+			tracking->SetFlagTracking(false);
+			flagRate = false;*/
+			cout << "....................BAD FINISH PIPELINE ................." << endl;
+		}
 		
 	}
 	

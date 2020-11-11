@@ -59,6 +59,10 @@ public:
 		}
 	}
 
+	int GetTaskIdentify() {
+		return taskIdentify;
+	}
+
 	void SetConfigurationIFace(ConfigurationIFace* config) {
 		configurationIFaceProcessing = config;
 	}

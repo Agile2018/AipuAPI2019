@@ -9,7 +9,7 @@ FaceModel::FaceModel()
 
 FaceModel::~FaceModel()
 {
-	Terminate();
+	
 	delete configuration;
 	delete error;
 }
@@ -32,14 +32,6 @@ void FaceModel::ObserverError() {
 
 		shootError.on_next(either);
 	});
-
-}
-
-void FaceModel::Terminate() {
-	int errorCode;
-	TerminateHandle();
-	errorCode = IFACE_Terminate();
-	error->CheckError(errorCode, error->less);
 
 }
 
@@ -594,6 +586,7 @@ unsigned char* FaceModel::LoadFileImage(string image, int *width, int *height, i
 	{
 		
 		error->CheckError(errorCode, error->medium);
+		
 		return NULL;
 	}
 
@@ -603,6 +596,7 @@ unsigned char* FaceModel::LoadFileImage(string image, int *width, int *height, i
 	{
 		
 		error->CheckError(errorCode, error->medium);
+		
 		return NULL;
 	}
 	
@@ -786,14 +780,12 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 				error->CheckError(errorCode, error->medium);
 				//cout << "CONFIDENCE: " << faceConfidence << endl;
 				tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ") ");
-				//tracerImage += "(" + to_string(width) + "-" + to_string(height) + "), ";
-
-				//tracerImage += to_string(faceConfidence) + " vs " + to_string(configuration->GetConfidenceThreshold());
+				
 				tracerProcess.push_back(to_string(faceConfidence));
 				tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
 				if (faceConfidence > configuration->GetConfidenceThreshold())
 				{
-					//tracerImage += ", 1, ";
+					
 					tracerProcess.push_back("1");
 					//cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetConfidenceThreshold() << endl;
 					Molded* model = new Molded();
@@ -827,6 +819,12 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 		}
 	}
 	else {
+		tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ")");
+		tracerProcess.push_back("To refuse");
+		tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
+		tracerProcess.push_back("0");
+		tracerImage = BuildTracerString() + "\n";
+		file->WriteFile(tracerImage);
 		error->CheckError(errorCode, error->medium);
 		
 	}	

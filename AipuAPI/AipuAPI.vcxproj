@@ -164,6 +164,7 @@
     <ClInclude Include="ConfigurationIdentify.h" />
     <ClInclude Include="ConfigurationIFace.h" />
     <ClInclude Include="ConfigurationTracking.h" />
+    <ClInclude Include="CropTemplate.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="Either.h" />
     <ClInclude Include="ErrorAipuLib.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="ConfigurationIdentify.cpp" />
     <ClCompile Include="ConfigurationIFace.cpp" />
     <ClCompile Include="ConfigurationTracking.cpp" />
+    <ClCompile Include="CropTemplate.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Either.cpp" />

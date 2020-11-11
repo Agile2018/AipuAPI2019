@@ -279,18 +279,20 @@ void Database::ObserverError() {
 }
 
 void Database::FindUserByIdFace(User* user) {	
-
-	if (QueryUserByFace(user->GetUserIdIFace(), user->GetClient(), user->GetMoldScore()))
+	std::vector<std::string> valuesUser;
+	if (QueryUserByFace(user->GetUserIdIFace(), user->GetClient(), user->GetMoldScore(), valuesUser))
 	{
 		
 		UpdateImageUser(user->GetUserIdIFace(), user->GetCropImageData(), 
 			user->GetMoldCropHeight(), user->GetMoldCropWidth(), user->GetLogProcess());
+		BuildJSONUser(valuesUser);
+		valuesUser.clear();
 	}
 	/*std::thread(&Database::QueryUserByFace, this, idFaceUser, client).detach();
 	std::thread(&Database::UpdateImageUser, this, idFaceUser, image, rows, cols).detach();*/
 }
 
-bool Database::QueryUserByFace(int idFaceUser, int client, int score) {
+bool Database::QueryUserByFace(int idFaceUser, int client, int score, std::vector<std::string>& values) {
 
 	/*if (lastUserId != idFaceUser || lastClient != client)
 	{*/
@@ -321,7 +323,8 @@ bool Database::QueryUserByFace(int idFaceUser, int client, int score) {
 					
 					flagSearch = true;
 					int idFace = view["id_face"].get_int32().value;
-					std::vector<std::string> values;
+
+					//std::vector<std::string> values;
 					values.push_back(to_string(idFace));
 					values.push_back(view["name"].get_utf8().value.to_string());
 					values.push_back(view["lastname"].get_utf8().value.to_string());
@@ -329,7 +332,7 @@ bool Database::QueryUserByFace(int idFaceUser, int client, int score) {
 					values.push_back("2");
 					values.push_back(to_string(client));
 					values.push_back(to_string(score));
-					BuildJSONUser(values);
+					//BuildJSONUser(values);
 				}
 			}
 			

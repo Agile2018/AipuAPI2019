@@ -75,7 +75,7 @@ private:
 	//void AddRecordsUser(User* user);
 	void AddImageUser(vector<unsigned char> image, int rows, int cols, int idUser, string log);
 	void ObserverError();
-	bool QueryUserByFace(int idFaceUser, int client, int score);
+	bool QueryUserByFace(int idFaceUser, int client, int score, std::vector<std::string> &values);
 	void BuildJSONUser(vector<std::string> values);
 	void BuildNewUser(User* user);
 	string QueryImageOfUser(int idFaceUser);

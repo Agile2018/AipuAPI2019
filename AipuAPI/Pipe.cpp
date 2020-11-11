@@ -9,6 +9,7 @@ Pipe::Pipe()
 	ObserverIdentifyFace();	
 	ObserverError();
 	ObserverTrackingFace();
+	ObserverCropImage();
 }
 
 Pipe::~Pipe()
@@ -26,8 +27,6 @@ void Pipe::SetFrameView(FrameView* frame) {
 void Pipe::SetDatabase(Database* db) {
 	database = db;
 }
-
-
 
 void Pipe::LoadConfiguration() {
 	configurationFile->SetNameDirectory(directoryConfiguration);
@@ -47,10 +46,28 @@ void Pipe::LoadConfiguration() {
 	
 	faceIdentify->SetStringJSON(configurationFile->GetStringJSON());	
 	faceIdentify->ParseJSONToObject();
-	faceIdentify->LoadConnection();	
+	faceIdentify->LoadConnection();		
 
-	configurationPerformance->SetNameFileConfiguration(filePerformance);
 	isLoadConfig = true;
+}
+
+void Pipe::CloseConnectionIdentification() {
+	if (faceIdentify->GetConnectionIdentification())
+	{
+		faceIdentify->CloseConnection();
+	}
+	
+}
+
+void Pipe::LoadConnectionIdentification() {
+	if (!faceIdentify->GetConnectionIdentification() && GetIsLoadConfig()) {
+		faceIdentify->LoadConnection();
+	}
+	
+}
+
+int Pipe::GetTaskIdentify() {
+	return flowVideo->GetTaskIdentify();
 }
 
 void Pipe::RunFlowVideo() {
@@ -90,6 +107,14 @@ void Pipe::SetIndexFrame(int value)
 	flowVideo->SetIndexFrame(value);
 }
 
+void Pipe::ObserverCropImage() {
+	auto cropImage = faceIdentify->observableCropImage.map([](string dataImage) {
+		return dataImage;
+	});
+	auto subscriptionCropImage = cropImage.subscribe([this](string dataImage) {
+		shootCropImage.on_next(dataImage);
+		});
+}
 
 void Pipe::ObserverError() {
 	auto faceModelError = faceModel->observableError.map([](Either* either) {
@@ -180,9 +205,6 @@ void Pipe::ObserverIdentifyFace() {
 	subscriptionIdentifyUser.clear();
 }
 
-void Pipe::CloseConnection() {
-	faceIdentify->CloseConnection();
-}
 
 void Pipe::AddCollectionOfImages(string folder, int client, int doing) {
 	faceModel->AddCollectionOfImages(folder, client, doing);
@@ -194,4 +216,44 @@ void Pipe::ResetEnrollVideo(int value) {
 
 void Pipe::AddUserEnrollVideo() {
 	faceIdentify->AddUserEnrollVideo();
+}
+
+void Pipe::DownConfigurationModel() {
+	if (GetIsLoadConfig()) {
+		faceModel->TerminateHandle();
+	}
+	
+}
+
+void Pipe::LoadConfigurationModel() {
+	if (GetIsLoadConfig()) {
+		configurationFile->SetNameDirectory(directoryConfiguration);
+		configurationFile->SetNameFileConfiguration(fileConfiguration);
+		configurationFile->ParseJSONToObject();
+		faceModel->SetStringJSON(configurationFile->GetStringJSON());
+		faceModel->ParseJSONToObject();
+		faceModel->InitHandle();
+	}
+
+}
+
+void Pipe::LoadConfigurationIdentify() {
+	if (GetIsLoadConfig()) {
+		configurationFile->SetNameDirectory(directoryConfiguration);
+		configurationFile->SetNameFileConfiguration(fileConfiguration);
+		configurationFile->ParseJSONToObject();
+		faceIdentify->SetStringJSON(configurationFile->GetStringJSON());
+		faceIdentify->ParseJSONToObject();
+		faceIdentify->LoadConnection();
+	}
+}
+
+void Pipe::LoadConfigurationTracking() {
+	if (GetIsLoadConfig()) {
+		configurationFile->SetNameDirectory(directoryConfiguration);
+		configurationFile->SetNameFileConfiguration(fileConfiguration);
+		configurationFile->ParseJSONToObject();
+		flowVideo->SetStringJSONTracking(configurationFile->GetStringJSON());
+		flowVideo->SetConfigurationIFace(faceModel->configuration);
+	}
 }

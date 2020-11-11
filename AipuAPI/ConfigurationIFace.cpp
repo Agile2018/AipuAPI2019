@@ -29,10 +29,10 @@ void ConfigurationIFace::SetValueJSONToConfiguration() {
 			maxfaceDetect = it->asInt();
 		}
 		else if (it.key().asString() == MINFACE) {
-			minFaceSize = it->asInt();
+			minFaceSize = it->asFloat();
 		}
 		else if (it.key().asString() == MAXFACE) {
-			maxFaceSize = it->asInt();
+			maxFaceSize = it->asFloat();
 		}
 		else if (it.key().asString() == CONFIDENCE_THRESHOLD) {
 			confidenceThreshold = it->asInt();
