@@ -2,10 +2,9 @@
 #include "Innovatrics.h"
 #include "Pipe.h"
 
-
 Innovatrics* innovatrics;
 Database databaseMongo;
-
+File* fileErrors;
 FrameView windowOGL;
 
 vector<Pipe*> pipelines;
@@ -13,15 +12,15 @@ std::vector<std::thread> threadPipes;
 std::mutex mtx;
 string userJson;
 string messageError;
-//string templateJson;
 bool isOpenWindow = false;
 std::vector<string> listUser;
-std::vector<string> listTemplates;
+std::vector<std::string> listTemplates;
 int countTemplates = 0;
 const string nameConfiguration =  "configuration";
 const string fileDatabaseConfiguration = "database.txt";
 const string fileGlobalConfiguration = "global.txt";
-
+const string folderLogs = "Logs";
+const string nameFileErrors = "errors.txt";
 
 const char* fileConfigurations[4] = { "configPipeOne.txt", "configPipeTwo.txt", 
 "configPipeThree.txt", "configPipeFour.txt" };
@@ -209,11 +208,14 @@ void InitDatabaseMongo() {
 }
 
 AipuAPI::AipuAPI()
-{
+{	
 	innovatrics = new Innovatrics();	
 	innovatrics->SetNameDirectory(nameConfiguration);
 	innovatrics->SetNameFileConfiguration(fileGlobalConfiguration);
 	innovatrics->ParseJSONToObject();
+	fileErrors = new File();
+	fileErrors->SetNameDirectory(folderLogs);
+	fileErrors->SetNameFile(nameFileErrors);
 }
 
 AipuAPI::~AipuAPI()
@@ -221,6 +223,17 @@ AipuAPI::~AipuAPI()
 	delete innovatrics;
 	pipelines.clear();
 	threadPipes.clear();
+}
+
+void AipuAPI::WriteError(string msgError) {
+	char buff[20];
+
+	time_t now = time(NULL);
+	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+	string timeEvent(buff);
+
+	string messageToWrite = timeEvent + " " + msgError;
+	fileErrors->WriteFile(messageToWrite);
 }
 
 void AipuAPI::ConnectDatabase() {
@@ -248,12 +261,15 @@ void AipuAPI::ObserverTemplateJson() {
 			/*mtx.lock();
 			listTemplates.push_back(jsonTemplate);			
 			mtx.unlock();*/
-			std::lock_guard<std::mutex> guard(mtx);
+			std::lock_guard<std::mutex> guard(mtx);			
 			listTemplates.push_back(jsonTemplate);
 			
 		}));
 
 	}
+
+	
+
 }
 
 void AipuAPI::ObserverDatabase() {
@@ -265,6 +281,7 @@ void AipuAPI::ObserverDatabase() {
 		if (either->GetLabel() != "OK")
 		{
 			string message = to_string(either->GetCode()) + ": " + either->GetLabel();
+			WriteError(message);
 			messageError = message;
 			cout << messageError << endl;
 		}
@@ -337,6 +354,7 @@ void AipuAPI::ObserverError() {
 			if (either->GetLabel() != "OK")
 			{
 				string message = to_string(either->GetCode()) + ": " + either->GetLabel();
+				WriteError(message);
 				messageError = message;
 				cout << messageError << endl;
 			}
@@ -419,8 +437,7 @@ string AipuAPI::GetUserJSON() {
 
 	if (listUser.size() != 0)
 	{
-		user = *listUser.begin();
-		//cout << user <<  endl;
+		user = *listUser.begin();		
 		listUser.erase(listUser.begin());
 	}
 
@@ -452,11 +469,14 @@ string AipuAPI::GetTemplateJSON() {
 	//	
 	//	mtx.unlock();
 	//}
+	
 	if (!listTemplates.empty())
 	{		
+		
 		templateImage = listTemplates[countTemplates];
 		countTemplates++;
 	}
+	
 	return templateImage;
 }
 
@@ -513,7 +533,7 @@ void AipuAPI::ResetEnrollVideo(int option, int value) {
 	int index = option - 1;
 	if (value == 0)
 	{
-		listTemplates.clear();
+		listTemplates.clear();		
 		countTemplates = value;
 	}
 		

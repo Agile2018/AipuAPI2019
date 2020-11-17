@@ -12,7 +12,7 @@ void ErrorAipuLib::CheckError(int errorCode, ErrorWeight errorWeight,
 	string message) {
 
 	Either* either = new Either();
-	message += ", Code: " + to_string(errorCode);
+	message += ", Code: " + to_string(errorCode) + "\n";
 	either->Clear();
 	either->SetCode(errorWeight);
 	either->SetLabel(message);

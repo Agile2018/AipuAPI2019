@@ -16,7 +16,7 @@ public:
 	void Clear();
 
 private:
-	int code;
+	int code = 0;
 	string label;
 
 };

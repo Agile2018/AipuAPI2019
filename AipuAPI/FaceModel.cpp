@@ -137,8 +137,7 @@ int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED], int clien
 
 // size image different
 int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
-	std::vector<std::vector<unsigned char>> bufferOfImagesBatch,
-	int client, int doing) {
+	std::vector<std::vector<unsigned char>> bufferOfImagesBatch) {
 	int errorCode, countFacesDetected = 0;
 	int maxFaces = configuration->GetMaxDetect();
 	string tracerSize, tracerConfidence;
@@ -193,11 +192,11 @@ int FaceModel::DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
 						facesDetected[countFacesDetected]);
 					error->CheckError(errorCode, error->medium);
 
-					Molded* model = new Molded();
+					/*Molded* model = new Molded();
 					model->SetIdClient(client);
 					model->SetWhatDoing(doing);
 					FaceCropImage(facesDetected[countFacesDetected], model);
-					modelsDetected.push_back(model);
+					modelsDetected.push_back(model);*/
 					countFacesDetected++;
 
 				}
@@ -315,16 +314,31 @@ void FaceModel::FaceCropImage(void* face, Molded* model) {
 	delete[] cropImageData;
 }
 
+void FaceModel::CropDetectedFaces(int countFacesDetected, void* facesDetected[TOTAL_FACE_DETECTED],
+	int client, int doing) {
+	
+	for (int i = 0; i < countFacesDetected; i++)
+	{
+		Molded* model = new Molded();
+		model->SetIdClient(client);
+		model->SetWhatDoing(doing);
+		FaceCropImage(facesDetected[i], model);
+		modelsDetected.push_back(model);
+		
+	}
+}
+
 int FaceModel::ModelByBatch(int client,  int doing) {
 	int errorCode, facesValid = 0;
 	void* facesDetected[TOTAL_FACE_DETECTED];
 
-	int countFacesDetected = DetectByBatch(facesDetected, bufferOfImagesBatch, client, doing);
+	int countFacesDetected = DetectByBatch(facesDetected, bufferOfImagesBatch);
 	//int countFacesDetected = DetectByBatch(facesDetected, client, doing);
 	//tracerImage += "Face detected: " + to_string(countFacesDetected) + "\n";
 	tracerProcess.push_back(to_string(countFacesDetected));
 	if (countFacesDetected != 0)
 	{
+		CropDetectedFaces(countFacesDetected, facesDetected, client, doing);
 		facesValid = GetBatchModels(countFacesDetected, facesDetected);
 	}
 
@@ -466,7 +480,7 @@ unsigned char* FaceModel::LoadImage(vector<unsigned char> buffer, int *width, in
 
 }
 
-vector<string> FaceModel::LoadFilesForBatch(string folder) {	
+vector<string> FaceModel::LoadFilesForBatch(string folder, string& filesFolder) {
 	vector<string> listPathFile;
 	std::set<std::string> targetExtensions;
 	targetExtensions.insert(".JPG");
@@ -482,7 +496,7 @@ vector<string> FaceModel::LoadFilesForBatch(string folder) {
 		std::transform(extension.begin(), extension.end(), extension.begin(), ::toupper);
 		if (targetExtensions.find(extension) == targetExtensions.end()) { continue; }		
 		listPathFile.push_back(iter->path().string());
-		
+		filesFolder += iter->path().string() + " ";
 	}	
 	
 	return listPathFile;
@@ -514,6 +528,7 @@ void FaceModel::LoadImagesForBatch(vector<string> listFiles) {
 }
 
 void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
+	string filesInFolder = " ";
 	tracerProcess.clear();
 	if (file->GetNameFile().length() == 0)
 	{
@@ -525,12 +540,11 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 	time_t now = time(NULL);
 	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
 	string timeInit(buff);
-	//tracerImage = timeInit + ", " + to_string(client) + ", " + folder + ", ";
-	
+		
 	tracerProcess.push_back(timeInit);
-	tracerProcess.push_back(to_string(client));
-	tracerProcess.push_back(folder);
-	vector<string> listFiles = LoadFilesForBatch(folder);
+	tracerProcess.push_back(to_string(client));	
+	vector<string> listFiles = LoadFilesForBatch(folder, filesInFolder);
+	tracerProcess.push_back(filesInFolder);
 	LoadImagesForBatch(listFiles);
 	if (!bufferOfImagesBatch.empty())
 	{		

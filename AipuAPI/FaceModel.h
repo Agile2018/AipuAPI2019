@@ -69,13 +69,15 @@ private:
 	int ModelByBatch(int client, int doing);
 	void FaceCropImage(void* face, Molded* model);
 	int DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED],
-		std::vector<std::vector<unsigned char>> bufferOfImagesBatch, int client, int doing);
+		std::vector<std::vector<unsigned char>> bufferOfImagesBatch);
 	int DetectByBatch(void* facesDetected[TOTAL_FACE_DETECTED], int client, int doing);
 	int GetBatchModels(int countFacesDetected, void* facesDetected[TOTAL_FACE_DETECTED]);
+	void CropDetectedFaces(int countFacesDetected, void* facesDetected[TOTAL_FACE_DETECTED], 
+		int client, int doing);
 	void CreateTemplate(void* face, Molded* model, int client, int task);
 	int GetOneModel(unsigned char* rawImage, int width, int height, int client, int task);	
 	void ObserverError();
-	vector<string> LoadFilesForBatch(string folder);
+	vector<string> LoadFilesForBatch(string folder, string& filesFolder);
 	void LoadImagesForBatch(vector<string> listFiles);
 	unsigned char* LoadImage(vector<unsigned char> buffer, int *width, int *height);
 	unsigned char* LoadFileImage(string image, int *width, int *height, int *length);

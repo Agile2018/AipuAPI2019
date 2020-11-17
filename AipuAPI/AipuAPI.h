@@ -56,5 +56,5 @@ private:
 	void ObserverError();
 	void ObserverDatabase();
 	void ObserverTemplateJson();
-	
+	void WriteError(string msgError);
 };

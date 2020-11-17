@@ -625,9 +625,10 @@ void FaceIndentify::ConcatenateModeAuto(const unsigned char* templateIn, int siz
 			{
 
 				countAddFaceTemplate++;				
-				
-				std::thread(&FaceIndentify::BuildTemplateForSend, this, cropImage->GetCropImageData(),
-					cropImage->GetCropHeight(), cropImage->GetCropWidth(), client).detach();
+				BuildTemplateForSend(cropImage->GetCropImageData(),
+					cropImage->GetCropHeight(), cropImage->GetCropWidth(), client);
+				/*std::thread(&FaceIndentify::BuildTemplateForSend, this, cropImage->GetCropImageData(),
+					cropImage->GetCropHeight(), cropImage->GetCropWidth(), client).detach();*/
 
 			}
 			
@@ -652,9 +653,11 @@ void FaceIndentify::ConcatenateModeForce(const unsigned char* templateIn, int si
 	if (errorCode == IENGINE_E_NOERROR)
 	{
 		countAddFaceTemplate++;
-		
-		std::thread(&FaceIndentify::BuildTemplateForSend, this, cropImage->GetCropImageData(),
-			cropImage->GetCropHeight(), cropImage->GetCropWidth(), client).detach();
+		BuildTemplateForSend(cropImage->GetCropImageData(),
+			cropImage->GetCropHeight(), cropImage->GetCropWidth(), client);
+
+		/*std::thread(&FaceIndentify::BuildTemplateForSend, this, cropImage->GetCropImageData(),
+			cropImage->GetCropHeight(), cropImage->GetCropWidth(), client).detach();*/
 	}
 	
 }
@@ -718,7 +721,7 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 	else
 	{
 		
-		tracerProcess.push_back("-1");
+		tracerProcess.push_back("0");
 		tracerProcess.push_back("-1");
 		errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
 		error->CheckError(errorCode, error->medium);
@@ -738,7 +741,7 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
 
-	tracerProcess.push_back("-1");
+	tracerProcess.push_back("0");
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);
 	
@@ -796,7 +799,7 @@ void FaceIndentify::ControlEntry(std::tuple<char*, vector<unsigned char>, int*, 
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
-	tracerProcess.push_back("-1");
+	tracerProcess.push_back("0");
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);
 	
