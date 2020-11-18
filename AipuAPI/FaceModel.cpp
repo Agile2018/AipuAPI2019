@@ -455,22 +455,23 @@ int FaceModel::GetBatchModels(int countFacesDetected,
 	return count;
 }
 
-unsigned char* FaceModel::LoadImage(vector<unsigned char> buffer, int *width, int *height) {
-	int lenght, errorCode;
+unsigned char* FaceModel::LoadImageMemory(vector<unsigned char> buffer, 
+	int *width, int *height, int *lenght) {
+	int errorCode;
 	const char* imgData = reinterpret_cast<const char*> (&buffer[0]);
 	if (imgData == NULL) {
 		return NULL;
 	}
 
 	errorCode = IFACE_LoadImageFromMemory(imgData, (unsigned int)buffer.size(), width,
-		height, &lenght, NULL);
+		height, lenght, NULL);
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->medium);
 		return NULL;
 	}
-	unsigned char* rawImage = new unsigned char[lenght];
+	unsigned char* rawImage = new unsigned char[*lenght];
 	errorCode = IFACE_LoadImageFromMemory(imgData, (unsigned int)buffer.size(), width,
-		height, &lenght, rawImage);
+		height, lenght, rawImage);
 	if (errorCode != IFACE_OK) {
 		error->CheckError(errorCode, error->medium);
 		return NULL;
@@ -508,21 +509,33 @@ void FaceModel::LoadImagesForBatch(vector<string> listFiles) {
 	if (!listFiles.empty())
 	{
 		for (int i = 0; i < listFiles.size(); i++)
-		{					
-			unsigned char* rawImage = LoadFileImage(listFiles[i],
-				&width, &height, &lenght);
+		{				
+			unsigned char* rawImage;
 
-			if (rawImage != NULL && count < BATCH_TOTAL_SIZE) {
+			if (file->GetImageSizeEx(listFiles[i].c_str(), &width, &height)) {
 
-				vector<unsigned char> bufferImage;
-				bufferImage.assign(rawImage, rawImage + lenght);
-				bufferOfImagesBatch.push_back(bufferImage);							
-				std::vector<int> sizeImage = { width, height, lenght};				
-				dimensionsImages.push_back(sizeImage);
-				count++;
+				if (width <= MAX_SIZE_IMAGE) {
+					rawImage = LoadFileImage(listFiles[i], &width, &height, &lenght);
+				}
+				else
+				{
+					vector<uchar> newImg = file->ResizeImage(listFiles[i].c_str(), width, height);
+					rawImage = LoadImageMemory(newImg, &width, &height, &lenght);
+				}
+
+				if (rawImage != NULL && count < BATCH_TOTAL_SIZE) {
+
+					vector<unsigned char> bufferImage;
+					bufferImage.assign(rawImage, rawImage + lenght);
+					bufferOfImagesBatch.push_back(bufferImage);
+					std::vector<int> sizeImage = { width, height, lenght };
+					dimensionsImages.push_back(sizeImage);
+					count++;
+					delete[] rawImage;
+				}
+				
 			}
-			delete[] rawImage;			
-
+								
 		}		
 	}			
 }
@@ -578,16 +591,37 @@ void FaceModel::RecognitionFaceFiles(string namefile, int client, int task) {
 	string timeInit(buff);
 	tracerProcess.push_back(timeInit);
 	tracerProcess.push_back(to_string(client));
-	tracerProcess.push_back(namefile);
-	//tracerImage = timeInit + ", " + to_string(client) + ", " + namefile + ", ";
-	isFinishLoadFiles = false;		
-	unsigned char* rawImage = LoadFileImage(namefile, &width, &height, &lenght);
-	if (rawImage != NULL) {
-		tracerProcess.push_back("1");
-		//tracerImage += "1,";
-		templates = GetOneModel(rawImage, width, height, client, task);
+	tracerProcess.push_back(namefile);	
+	isFinishLoadFiles = false;	
+	if (file->GetImageSizeEx(namefile.c_str(), &width, &height))
+	{
+		unsigned char* rawImage;
+
+		if (width <= MAX_SIZE_IMAGE)
+		{
+			rawImage = LoadFileImage(namefile, &width, &height, &lenght);
+			
+		}
+		else
+		{
+			vector<uchar> newImg = file->ResizeImage(namefile.c_str(), width, height);
+			rawImage = LoadImageMemory(newImg, &width, &height, &lenght);
+			
+		}
+		if (rawImage != NULL) {
+			tracerProcess.push_back("1");
+			templates = GetOneModel(rawImage, width, height, client, task);
+			delete[] rawImage;
+		}
+		
 	}
-	delete[] rawImage;
+	else
+	{
+		string errorContent = timeInit + " Error file image format (" + namefile + ")\n";
+		string pathError = "Logs/errors.txt";
+		file->WriteFile(pathError, errorContent);
+	}
+	
 	
 	isFinishLoadFiles = true;
 }

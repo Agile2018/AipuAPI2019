@@ -79,7 +79,7 @@ private:
 	void ObserverError();
 	vector<string> LoadFilesForBatch(string folder, string& filesFolder);
 	void LoadImagesForBatch(vector<string> listFiles);
-	unsigned char* LoadImage(vector<unsigned char> buffer, int *width, int *height);
+	unsigned char* LoadImageMemory(vector<unsigned char> buffer, int *width, int *height, int *lenght);
 	unsigned char* LoadFileImage(string image, int *width, int *height, int *length);
 	string BuildTracerString();
 	std::string IntToStr(int num);

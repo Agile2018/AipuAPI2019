@@ -9,7 +9,7 @@ FaceIndentify::FaceIndentify()
 FaceIndentify::~FaceIndentify()
 {	
 	delete error;
-	delete format;	
+	//delete format;	
 	delete faceIdkit;	
 }
 

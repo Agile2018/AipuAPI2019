@@ -4,12 +4,12 @@
 #include "ErrorIdKitLib.h"
 #include "Molded.h"
 #include "User.h"
-#include "Format.h"
+//#include "Format.h"
 #include "FaceIdkit.h"
 #include <random>
 #include "CropTemplate.h"
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 #include "Base64.h"
 
 class FaceIndentify
@@ -57,7 +57,7 @@ private:
 	Rx::subscriber<User*> shootUser = userSubject.get_subscriber();
 	Rx::subscriber<string> shootCropImage = cropImageSubject.get_subscriber();
 	bool flagEnroll = false;
-	Format* format = new Format();
+	//Format* format = new Format();
 	FaceIdkit* faceIdkit = new FaceIdkit();
 	File* file = new File();
 	Configuration* turnIntoLogToJSON = new Configuration();
