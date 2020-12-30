@@ -181,7 +181,21 @@ vector<uchar> File::ResizeImage(const char* fileName, int width, int height) {
 	cv::Mat img = cv::imread(fileName);
 	cv::Mat newImg;
 	cv::resize(img, newImg, cv::Size(newWidth, newHeight));	
+
+	//cv::imwrite("Logs/some.jpg", newImg);
+
 	bool code = cv::imencode(".jpg", newImg, bufferImage, std::vector<int>(params, params + 2));
 
 	return bufferImage;
+}
+
+std::string File::BuildHeadLog() {
+
+	return "Date, Channel, Channel Type (1=IP 2=File 3=Device), Source, Source Quantity, Image Size, Face Detection Confidence Detected, Face Detection Confidence Threshold, Source Quantity above Face Detection Confidence Threshold, Template Quality, Template Quality Threshold, Source Quantity over Template Quality Threshold, Function (Enroll Video Single UserID - Enroll Video Separate UserIDs - Enroll File Single UserID - Enroll File Separate UserIDs), Deduplicate Enrollment (1=yes 0=no), Result of Deduplication/Entry Search (UserID - Score), Deduplication Score_Threshold, Concatenate Enrollment Templates (0=No 1=yes), Concatenation Mode (0=auto - 1=forced), Enroll Concatenation Minimum Score Threshold, Enroll Concatenation Maximum Score Threshold, Identification Score Threshold, Verification Score Theshold, Match scores, Number of Templates Concatenated, Result\n";
+}
+
+bool File::FileLogExists() {
+	string path = nameDirectory + "/" + nameFile;
+	struct stat buffer;
+	return (stat(path.c_str(), &buffer) == 0);
 }

@@ -432,32 +432,42 @@ string Database::QueryImageOfUser(int idFaceUser) {
 }
 
 void Database::ProcessUserDB(User* user) {
-	if (user->GetStateUser() == 1)
+	User* userDb = new User();
+	userDb->SetStateUser(user->GetStateUser());
+	userDb->SetMoldScore(user->GetMoldScore());
+	userDb->SetUserIdIFace(user->GetUserIdIFace());
+	userDb->SetClient(user->GetClient());
+	userDb->SetCropImageData(user->GetCropImageData());
+	userDb->SetMoldCropHeight(user->GetMoldCropHeight());
+	userDb->SetMoldCropWidth(user->GetMoldCropWidth());
+	userDb->SetLogProcess(user->GetLogProcess());
+
+	if (userDb->GetStateUser() == 1)
 	{
-		string number = to_string(user->GetUserIdIFace());
+		string number = to_string(userDb->GetUserIdIFace());
 		string name = "Person " + number;
 		string lastName = "LasName " + number;
 		string identification = "0000000";
-		user->SetNameUser(name);
-		user->SetLastNameUser(lastName);
-		user->SetIdentificationUser(identification);
-		InsertNewUser(user);
+		userDb->SetNameUser(name);
+		userDb->SetLastNameUser(lastName);
+		userDb->SetIdentificationUser(identification);
+		InsertNewUser(userDb);
 
 	}
-	else if (user->GetStateUser() == 2) {
+	else if (userDb->GetStateUser() == 2) {
 		
-		FindUserByIdFace(user);
+		FindUserByIdFace(userDb);
 		
 	}
-	else if (user->GetStateUser() == 3) {
+	else if (userDb->GetStateUser() == 3) {
 		string name = "Unidentified";
 		string lastName = "Unidentified";
 		string identification = "-";
-		user->SetNameUser(name);
-		user->SetLastNameUser(lastName);
-		user->SetIdentificationUser(identification);
-		InsertNewUser(user);
+		userDb->SetNameUser(name);
+		userDb->SetLastNameUser(lastName);
+		userDb->SetIdentificationUser(identification);
+		InsertNewUser(userDb);
 	}
 
-	
+	delete userDb;
 }

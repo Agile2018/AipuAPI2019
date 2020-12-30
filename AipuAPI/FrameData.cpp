@@ -1,8 +1,5 @@
 #include "FrameData.h"
 
-
-
-
 FrameData::FrameData()
 {
 }
@@ -10,14 +7,6 @@ FrameData::FrameData()
 FrameData::~FrameData()
 {
     flowImage.clear();
-}
-
-void FrameData::SetShowFrame(bool value) {
-    showFrame = value;
-}
-
-bool FrameData::GetShowFrame() {
-    return showFrame;
 }
 
 void FrameData::SetWidthImage(int value) {
@@ -80,6 +69,16 @@ void FrameData::SetPositionY(int index, float value) {
     positionY[index] = value;
 }
 
+float FrameData::GetPositionX(int index)
+{
+    return positionX[index];
+}
+
+float FrameData::GetPositionY(int index)
+{
+    return positionY[index];
+}
+
 float FrameData::GetTransforX(int index) {
     return transforX[index];
 }
@@ -96,6 +95,13 @@ int FrameData::GetHeightImage() {
     return heightImage;
 }
 
+void FrameData::ClearImageData() {
+    if (!flowImage.empty()) {
+        SOIL_free_image_data(flowImage.back());
+        flowImage.pop_back();
+    }
+}
+
 void FrameData::SetImageData(unsigned char* data, int size) {
     int w, h, c;
     mtx.lock();
@@ -107,14 +113,6 @@ void FrameData::SetImageData(unsigned char* data, int size) {
     flowImage.push_back(SOIL_load_image_from_memory(data,
         size, &w, &h, &c, SOIL_LOAD_RGB));
     mtx.unlock();
-}
-
-void FrameData::SetSides(int value) {
-    sides = value;
-}
-
-int FrameData::GetSides() {
-    return sides;
 }
 
 void FrameData::TransformCoordinates() {

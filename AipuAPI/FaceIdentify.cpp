@@ -3,7 +3,7 @@
 FaceIndentify::FaceIndentify()
 {
 	file->SetNameDirectory("Logs");
-	
+	ObserverError();
 }
 
 FaceIndentify::~FaceIndentify()
@@ -14,7 +14,17 @@ FaceIndentify::~FaceIndentify()
 }
 
 void FaceIndentify::LoadConnection() {
-	faceIdkit->Connection();
+	if (faceIdkit->configuration->GetIsDeduplication() == 1) {
+
+		faceIdkit->Connection(SIMILARITY_DEDUPLICATION);
+
+	}
+	else
+	{
+		faceIdkit->Connection(SIMILARITY_IDENTIFICATION);
+
+	}
+	
 	connectionIdentification = true;
 }
 
@@ -143,7 +153,7 @@ void FaceIndentify::EnrollUserVideo(std::tuple<char*,
 			tracerProcess.push_back(tracerImage);
 		}
 
-		tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+		tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
 		tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsConcatenateTemplates()));
 		tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenateMode()));
 		tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
@@ -216,7 +226,7 @@ void FaceIndentify::AddUserEnrollVideo() {
 	
 	tracerPrevImage = BuildEndTracerPrevVideo(tracerPrevImage);
 
-	tracerProcess.push_back("EnrollUserVideo");
+	tracerProcess.push_back("Enroll Video Separate UserIDs");
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));
 
 	if (!templateGuide.empty()) {
@@ -248,11 +258,15 @@ void FaceIndentify::AddUserEnrollVideo() {
 	{
 		tracerProcess.push_back(collectionFind);
 	}
-	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsConcatenateTemplates()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenateMode()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMaximumScore()));
+
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetVerificationScore()));
+
 	if (collectionMatch.empty())
 	{
 		tracerProcess.push_back("0");
@@ -299,7 +313,7 @@ void FaceIndentify::WithoutTemplatesRegisterUserWithDeduplication(std::tuple<cha
 	tracerPrevImage = std::get<3>(modelImage);
 
 	
-	tracerProcess.push_back("EnrollUserAndTemplates");
+	tracerProcess.push_back("Enroll File Separate UserIDs");
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));	
 
 	errorCode = faceIdkit->FindUser(templateData, std::get<2>(modelImage)[2],
@@ -311,12 +325,14 @@ void FaceIndentify::WithoutTemplatesRegisterUserWithDeduplication(std::tuple<cha
 		error->CheckError(errorCode, error->medium);				
 	}
 	tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
-	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsConcatenateTemplates()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenateMode()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMaximumScore()));
-	tracerProcess.push_back("-1");
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetVerificationScore()));
+	tracerProcess.push_back("0");
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);
 
@@ -343,20 +359,22 @@ void FaceIndentify::WithoutTemplatesRegisterUserWithoutDeduplication(std::tuple<
 
 	string tracerFlow = "";
 	tracerPrevImage = std::get<3>(modelImage);	
-	tracerProcess.push_back("EnrollUserAndTemplates");
+	tracerProcess.push_back("Enroll File Separate UserIDs");
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));
-	tracerProcess.push_back("-1");
+	tracerProcess.push_back("0");
 	
 	errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
 	error->CheckError(errorCode, error->medium);
 	tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
 	
-	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsConcatenateTemplates()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenateMode()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMaximumScore()));
-	tracerProcess.push_back("-1");
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetVerificationScore()));
+	tracerProcess.push_back("0");
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);
 
@@ -403,11 +421,15 @@ void FaceIndentify::FinishRegisterUserAndTemplates() {
 		tracerProcess.push_back(tracerImage);
 	}
 	
-	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsConcatenateTemplates()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenateMode()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMinimumScore()));
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetConcatenationMaximumScore()));
+
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+	tracerProcess.push_back(to_string(faceIdkit->configuration->GetVerificationScore()));
+
 	if (tracerMatch.empty())
 	{
 		tracerProcess.push_back("0");
@@ -431,13 +453,7 @@ void FaceIndentify::FinishRegisterUserAndTemplates() {
 	
 	lastId = 1;
 	templateGuide.clear();	
-	countAddFaceTemplate = 0;
-	//clock_t timeStart1 = clock();
-	//string logJSON = BuildJSONLog(tracerPrevImage);
-	//cout << "JSON STRING: " << logJSON << endl;
-	/*clock_t duration1 = clock() - timeStart1;
-	int durationMs1 = int(1000 * ((float)duration1) / CLOCKS_PER_SEC);
-	printf("   BUILD JASON LOG time: %d\n", durationMs1);*/
+	countAddFaceTemplate = 0;	
 	tracerProcess.clear();
 	tracerPrevImage = "";
 	collectionMatch = "";
@@ -470,7 +486,7 @@ void FaceIndentify::EnrollUserAndTemplates(std::tuple<char*,
 			tracerImage = "";
 			tracerMatch = "";
 			
-			tracerProcess.push_back("EnrollUserAndTemplates");
+			tracerProcess.push_back("Enroll File Separate UserIDs");
 			tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));
 			faceIdkit->ClearUser();
 			BuildUserDatabase(modelImage, client, userID);						
@@ -635,7 +651,7 @@ void FaceIndentify::ConcatenateModeAuto(const unsigned char* templateIn, int siz
 		}
 		else
 		{
-			tracerMatch += "(To_refuse) ";
+			tracerMatch += "(Rejected) ";
 			
 		}
 	}
@@ -686,12 +702,17 @@ string FaceIndentify::BuildTracerString() {
 
 void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client) {
 	int errorCode, userID = -1, score = -1;
-	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
+	
+	vector<unsigned char> templateNew(std::get<0>(modelImage), std::get<0>(modelImage) + std::get<2>(modelImage)[2]);
+	const unsigned char* templateData = reinterpret_cast<const unsigned char*>(&templateNew[0]);
+
+	//const unsigned char* templateData = reinterpret_cast<const unsigned char*>(std::get<0>(modelImage));
+	
 	string tracerFlow = "";
 	tracerPrevImage = std::get<3>(modelImage);
 	bool flagRegister = false;
 	
-	tracerProcess.push_back("ImportUsers");
+	tracerProcess.push_back("Enroll Single UserID");
 	tracerProcess.push_back(to_string(faceIdkit->configuration->GetIsDeduplication()));
 
 	if (faceIdkit->configuration->GetIsDeduplication() == 1) {			
@@ -700,10 +721,10 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 			&userID, &score, &tracerFlow);
 		error->CheckError(errorCode, error->medium);	
 		tracerProcess.push_back(tracerFlow);
-		tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
+		tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
 		if (userID == 0 && errorCode == IENGINE_E_NOERROR) {	
 
-			errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
+			errorCode = faceIdkit->RegisterUserImport(templateData, std::get<2>(modelImage)[2], &userID);
 			error->CheckError(errorCode, error->medium);				
 			tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
 			if (errorCode == IENGINE_E_NOERROR)
@@ -723,7 +744,8 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 		
 		tracerProcess.push_back("0");
 		tracerProcess.push_back("-1");
-		errorCode = faceIdkit->RegisterUser(templateData, std::get<2>(modelImage)[2], &userID);
+		
+		errorCode = faceIdkit->RegisterUserImport(templateData, std::get<2>(modelImage)[2], &userID);		
 		error->CheckError(errorCode, error->medium);
 		
 		tracerFlow = "RegisterUser ErrorCode: " + to_string(errorCode);
@@ -741,6 +763,9 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
 
+	tracerProcess.push_back("-1");
+	tracerProcess.push_back("-1");
+
 	tracerProcess.push_back("0");
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);
@@ -748,17 +773,27 @@ void FaceIndentify::ImportUsers(std::tuple<char*, vector<unsigned char>, int*, s
 
 	if (errorCode == IENGINE_E_NOERROR && flagRegister)
 	{
+		
 		string logJSON = BuildJSONLog(tracerPrevImage);		
 		BuildUserDatabase(modelImage, client, userID);
 		userForDatabase->SetLogProcess(logJSON);
 		shootUser.on_next(userForDatabase);
+		
 	}	
 	
+	//clock_t timeStart1 = clock();
+	
+	/*clock_t duration1 = clock() - timeStart1;
+	int durationMs1 = int(1000 * ((float)duration1) / CLOCKS_PER_SEC);
+	printf("   BUILD JASON LOG time: %d\n", durationMs1);*/
+	
 	tracerFlow = tracerPrevImage + BuildTracerString() + "\n";
-	file->WriteFile(tracerFlow);
+	file->WriteFile(tracerFlow);	
 	tracerProcess.clear();
 	tracerPrevImage = "";
 	templateData = NULL;
+	templateNew.clear();
+	isFinishLoadFiles = true;
 }
 
 void FaceIndentify::ControlEntry(std::tuple<char*, vector<unsigned char>, int*, string> modelImage, int client) {
@@ -768,7 +803,7 @@ void FaceIndentify::ControlEntry(std::tuple<char*, vector<unsigned char>, int*, 
 	string tracerFlow = "";
 	tracerPrevImage = std::get<3>(modelImage);
 
-	tracerProcess.push_back("ControlEntry");
+	tracerProcess.push_back("Control Entry");
 	tracerProcess.push_back("-1"); // deduplication
 	//tracerFlow += "Control Entry, FindUser, ";
 	errorCode = faceIdkit->FindUser(templateData, std::get<2>(modelImage)[2], 
@@ -794,11 +829,15 @@ void FaceIndentify::ControlEntry(std::tuple<char*, vector<unsigned char>, int*, 
 		tracerFlow = "Result ErrorCode: " + to_string(errorCode);
 	}
 
-	tracerProcess.push_back(to_string(faceIdkit->configuration->GetSimilarityThreshold()));
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
 	tracerProcess.push_back("-1");
+	tracerProcess.push_back("-1");
+
+	tracerProcess.push_back(to_string(faceIdkit->GetSimilarityThreshold()));
+	tracerProcess.push_back("-1");
+
 	tracerProcess.push_back("0");
 	tracerProcess.push_back(to_string(countAddFaceTemplate));
 	tracerProcess.push_back(tracerFlow);

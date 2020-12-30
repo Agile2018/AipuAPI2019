@@ -83,6 +83,7 @@ private:
 	unsigned char* LoadFileImage(string image, int *width, int *height, int *length);
 	string BuildTracerString();
 	std::string IntToStr(int num);
+	
 };
 
 

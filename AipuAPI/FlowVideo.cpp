@@ -47,12 +47,11 @@ void FlowVideo::SetFrameView(FrameView* frame) {
 void FlowVideo::InitParamsFrame(std::tuple<int, int, int, int> tupleParams) {
 	int index = std::get<3>(tupleParams);
 	if (!isInitFrame && index == indexFrame)
-	{
+	{		
 		isInitFrame = true;
 		frameView->SetWidthImage(indexFrame, std::get<0>(tupleParams));
 		frameView->SetHeightImage(indexFrame, std::get<1>(tupleParams));
-		tracking->ReCalculateSizeVideoStream(std::get<2>(tupleParams));
-		frameView->SetShowFrame(indexFrame, true);
+		tracking->ReCalculateSizeVideoStream(std::get<2>(tupleParams));		
 	}
 	
 }
@@ -127,7 +126,7 @@ void FlowVideo::SendImageScreen(unsigned char* data, int size, int index) {
 		trt.detach();
 
 		clock_t timeStart1 = clock();
-		frameView->SetImageData(indexFrame, data, size);
+		frameView->SetImageData(indexFrame, data, size);	
 		DrawRectangles();
 		clock_t duration1 = clock() - timeStart1;
 		int durationMs1 = int(1000 * ((float)duration1) / CLOCKS_PER_SEC);
@@ -158,10 +157,15 @@ void FlowVideo::DrawRectangles() {
 			float h = coordinatesFace[i + 3];
 			float c = colorLine[countRectangles];
 
-			float xc = x + (w / 2);
-			float yc = y + (h / 2);
-			float rx = w / ((frameView->GetWidthImage(indexFrame) == 0) ? 1.0f : (float)frameView->GetWidthImage(indexFrame));
-			float ry = h / ((frameView->GetHeightImage(indexFrame) == 0) ? 1.0f : (float)frameView->GetHeightImage(indexFrame));
+			float xc = (((x + (w / 2)) * 100.0f) / ((frameView->GetWidthImage(indexFrame) == 0) ? 1.0f : (float)frameView->GetWidthImage(indexFrame))) / 100.0f;
+			float yc = (((y + (h / 2)) * 100.0f) / ((frameView->GetHeightImage(indexFrame) == 0) ? 1.0f : (float)frameView->GetHeightImage(indexFrame))) / 100.0f;
+
+			/*float xc = x;
+			float yc = y;*/
+			//float rx = w / 2;
+			//float ry = h / 2;
+			float rx = (w / ((frameView->GetWidthImage(indexFrame) == 0) ? 1.0f : (float)frameView->GetWidthImage(indexFrame))) / 2.0f;
+			float ry = (h / ((frameView->GetHeightImage(indexFrame) == 0) ? 1.0f : (float)frameView->GetHeightImage(indexFrame))) / 2.0f;
 			//float rx = w / (float)frameView->GetWidthImage(indexFrame);
 			//float ry = h / (float)frameView->GetHeightImage(indexFrame);
 			frameView->SetRatioHeight(indexFrame, countRectangles, ry);
@@ -300,7 +304,7 @@ void FlowVideo::RunFlowVideo() {
 	
 	
 	tracking->InitITracking();
-	
+	tracking->SetTypeSource(configuration->GetSourceFlow());
 	
 	gchar *descr = DescriptionFlow(configuration->GetSourceFlow());
 	
@@ -358,10 +362,25 @@ void FlowVideo::RunFlowVideo() {
 	
 }
 
+string FlowVideo::ConvertBackslashToSlash(string input) {
+	std::string output;
+	for (auto character : input)
+	{
+		if (character == '\\')
+		{
+			output.push_back('/');
+		}
+		else
+		{
+			output.push_back(character);
+		}		
+	}
+	return output;
+}
 
 gchar* FlowVideo::DescriptionFlow(int optionFlow) {
 	gchar *descr = nullptr;
-
+	
 	//"! video/x-raw, width=(int)%d, height=(int)%d, format=(string)I420, framerate=30/1 "
 	switch (optionFlow) {
 	case 1: // IP CAMERA
@@ -377,13 +396,14 @@ gchar* FlowVideo::DescriptionFlow(int optionFlow) {
 		
 		break;
 	case 2: // FILE		
+		
 		descr = g_strdup_printf(
 			"filesrc location=%s "
 			"! decodebin ! videoconvert "			
 			"! video/x-raw, format=(string)I420 "
 			"! jpegenc quality=100 "
 			"! appsink name=sink emit-signals=true sync=true max-buffers=1 drop=true",
-			configuration->GetFileVideo().c_str()
+			ConvertBackslashToSlash(configuration->GetFileVideo()).c_str()
 		);
 		
 		break;
@@ -429,23 +449,15 @@ void FlowVideo::StatePaused() {
 
 void FlowVideo::SetFinishLoop() {
 	
-	//GstState cur_state;
+	isInitFrame = false;
+	flagRate = false;
 	if (pipeline != NULL)
 	{
 		//gst_element_change_state(GST_ELEMENT(pipeline), GST_STATE_CHANGE_READY_TO_NULL);
 		
 		if (!gst_element_send_event(GST_ELEMENT(pipeline), gst_event_new_eos()))
 		{
-			/*tracking->ClearAllCoordinatesImage();
 
-			tracking->SetCountFrameTracking(0);			
-
-			isInitFrame = false;
-			flagRate = false;*/
-
-			/*isInitFrame = false;
-			tracking->SetFlagTracking(false);
-			flagRate = false;*/
 			cout << "....................BAD FINISH PIPELINE ................." << endl;
 		}
 		

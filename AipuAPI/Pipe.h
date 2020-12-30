@@ -35,13 +35,18 @@ public:
 	void SetFrameView(FrameView* frame);
 	void SetIndexFrame(int value);
 	void SetDatabase(Database* db);
-	void RecognitionFaceFiles(string file, int client, int task);
+	void RecognitionFaceFiles(string namefile, int client, int task);
 	void SetIsFinishLoadFiles(bool value);
 	bool GetIsFinishLoadFiles();
 	
 	bool GetIsLoadConfig() {
 		return isLoadConfig;
 	}
+
+	void ResetConfiguration() {
+		isLoadConfig = false;
+	}
+
 	void SetTaskIdentify(int value);
 	void ResetEnrollVideo(int value);
 	
@@ -55,6 +60,14 @@ public:
 	void LoadConfigurationTracking();
 	int GetTaskIdentify();
 	
+	void SetIndexthread(int value) {
+		indexthread = value;
+	}
+
+	int GetIndexthread() {
+		return indexthread;
+	}
+
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
 	Rx::subject<string> cropImageSubject;
@@ -64,6 +77,7 @@ private:
 	string directoryConfiguration = "configuration";
 	int client = 1;
 	bool isLoadConfig = false;
+	int indexthread = 0;
 	ConfigurationFile* configurationFile = new ConfigurationFile();	
 	FaceModel* faceModel = new FaceModel();
 	FaceIndentify* faceIdentify = new FaceIndentify();

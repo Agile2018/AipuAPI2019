@@ -21,7 +21,7 @@ using namespace std;
 
 class Tracking
 {
-public:
+public:	
 	Tracking();
 	~Tracking();
 	void InitITracking();
@@ -52,11 +52,7 @@ public:
 	}
 
 	void SetTaskIdentify(int task) {
-		taskIdentify = task;
-		if (task == ENROLL_VIDEO || task == IMPORT_VIDEO || task == CONTROL_ENTRY)
-		{
-			timeStartEnroll = clock();
-		}
+		taskIdentify = task;		
 	}
 
 	int GetTaskIdentify() {
@@ -71,6 +67,14 @@ public:
 		client = value;
 		string nameFileTracer = file->GetNameLog() + to_string(client) + ".cvs";
 		file->SetNameFile(nameFileTracer);
+		if (!file->FileLogExists())
+		{
+			file->WriteFile(file->BuildHeadLog());
+		}
+	}
+
+	void SetTypeSource(int value) {
+		typeSource = value;
 	}
 
 	void ClearAllCoordinatesImage();
@@ -85,14 +89,14 @@ public:
 
 private:		
 	long countFrameTracking = 0;
-	int sizeVideoStream = 0;
+	int sizeVideoStream = 0, residueCountFrames = 0;
 	int taskIdentify = -1; // -1 only tracking -- 0 register by appearance -- 1 register by quality model of user
+	int typeSource = 0;
 	void* objectHandler = nullptr;
 	void* faceHandlerTracking = nullptr;
 	void* objects[NUM_TRACKED_OBJECTS] = {};	
 	int client = 0;	
-	bool flagTracking = false;
-	clock_t timeStartEnroll;
+	bool flagTracking = false;	
 	float colorRectangle[NUM_TRACKED_OBJECTS] = {};
 	float imageCoordinatesFollowed[COORDINATES_X_ALL_IMAGES];	
 	void SetColorRectangle(float score, int indexObject);

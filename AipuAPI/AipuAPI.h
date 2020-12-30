@@ -6,7 +6,7 @@
 #endif
 
 #include <string>
-
+#include <vector>
 
 using namespace std;
 
@@ -18,19 +18,20 @@ public:
 	void ConnectDatabase();
 	void InitLibrary();	
 	void LoadConfiguration(int option); // 1 2 3 4 throw group
-	void InitWindowMain(int option); // 1 2 3 4 throw group
-	void RunVideo(int option); // 1 2 3 4 throw group
+	void InitWindowMain(int option, string channels); // 1 2 3 4 throw group
+	void RunVideo(int option, string channels); // 1 2 3 4 throw group
 	void LoadConfigurationPipe(int pipeline); // 1 2 3 4 throw single
 	void CloseWindow();
 	void Terminate();
 	void ReRunVideo(int option); // throw single
-	void SetColourTextFrameOne(float red, float green, float blue);
+	void SetColourLabelFrame(int indexFrame, float red, float green, float blue);
+	/*void SetColourTextFrameOne(float red, float green, float blue);
 	void SetColourTextFrameTwo(float red, float green, float blue);
 	void SetColourTextFrameThree(float red, float green, float blue);
-	void SetColourTextFrameFour(float red, float green, float blue);
+	void SetColourTextFrameFour(float red, float green, float blue);*/
 	void ReloadRecognitionFace();
 	void AddCollectionOfImages(string folder, int client, int doing);
-	void RecognitionFaceFiles(string file, int client, int task);
+	void RecognitionFaceFiles(string namefile, int client, int task);
 	void SetIsFinishLoadFiles(int option, bool value);
 	bool GetIsFinishLoadFiles(int option);	
 	void SetTaskIdentify(int value, int option);
@@ -57,4 +58,5 @@ private:
 	void ObserverDatabase();
 	void ObserverTemplateJson();
 	void WriteError(string msgError);
+	
 };

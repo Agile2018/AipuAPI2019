@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
+#include "GLFrame.h"
 #include <time.h>
-//#include <SOIL2.h>
 #include <vector>
 #include "FrameData.h"
 
@@ -16,9 +16,10 @@ class FrameView
 public:
 	FrameView();
 	~FrameView();
-	void RunFour(int argc, char** argv);
-	void RunOne(int argc, char** argv);
-	void RunTwo(int argc, char** argv);
+	int RunFour();
+	int RunOne();
+	int RunTwo();
+	int RunThree();
 	void DestroyWindow();
 	void SetPositionX(int indexFrame, int indexFigure, float value);
 	void SetPositionY(int indexFrame, int indexFigure, float value);
@@ -50,13 +51,13 @@ public:
 		nameWindow = name;
 	}
 
+	void SetIndexCurrent(int value);
 	void SetImageData(int indexFrame, unsigned char* data, int size);
-	void SetSides(int indexFrame, int value);
-	void SetShowFrame(int indexFrame, bool value);
-	void SetColourTextFrameOne(float red, float green, float blue);
+	void SetColourLabelFrame(int indexFrame, float red, float green, float blue);
+	/*void SetColourTextFrameOne(float red, float green, float blue);
 	void SetColourTextFrameTwo(float red, float green, float blue);
 	void SetColourTextFrameThree(float red, float green, float blue);
-	void SetColourTextFrameFour(float red, float green, float blue);
+	void SetColourTextFrameFour(float red, float green, float blue);*/
 private:
 	std::string nameWindow = "Recognition Videos";
 	

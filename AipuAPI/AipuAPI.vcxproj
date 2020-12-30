@@ -140,7 +140,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>F:\freeglut\include;F:\glew-2.2.0\include;F:\SOIL2-master\src\SOIL2;D:\mongo-c-driver\include\libmongoc-1.0;D:\mongo-c-driver\include\libbson-1.0;D:\mongo-cxx-driver\install\include\bsoncxx\v_noabi;D:\mongo-cxx-driver\install\include\mongocxx\v_noabi;C:\local\boost_1_74_0;C:\Program Files\Innovatrics\IDKit SDK\include;D:\opencv\include;F:\gstreamer\1.0\x86_64\include;F:\gstreamer\1.0\x86_64\lib\glib-2.0\include;F:\gstreamer\1.0\x86_64\include\glib-2.0;F:\gstreamer\1.0\x86_64\include\gstreamer-1.0;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;D:\Program Files %28x86%29\JSONCPP\include;C:\Program Files\Innovatrics\IFace SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\freetype\include;C:\Program Files %28x86%29\GLFW\include;F:\glew-2.2.0\include;F:\SOIL2-master\src\SOIL2;D:\mongo-c-driver\include\libmongoc-1.0;D:\mongo-c-driver\include\libbson-1.0;D:\mongo-cxx-driver\install\include\bsoncxx\v_noabi;D:\mongo-cxx-driver\install\include\mongocxx\v_noabi;C:\local\boost_1_74_0;C:\Program Files\Innovatrics\IDKit SDK\include;D:\opencv\include;F:\gstreamer\1.0\x86_64\include;F:\gstreamer\1.0\x86_64\lib\glib-2.0\include;F:\gstreamer\1.0\x86_64\include\glib-2.0;F:\gstreamer\1.0\x86_64\include\gstreamer-1.0;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;D:\Program Files %28x86%29\JSONCPP\include;C:\Program Files\Innovatrics\IFace SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,8 +149,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>C:\local\boost_1_74_0\stage\lib;F:\freeglut\lib\x64;F:\glew-2.2.0\lib\Release\x64;F:\SOIL2-master\lib\windows;D:\mongo-cxx-driver\install\lib;C:\Program Files\Innovatrics\IDKit SDK\lib;D:\opencv\x64\vc16\lib;F:\gstreamer\1.0\x86_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64;D:\Program Files %28x86%29\JSONCPP\lib;C:\Program Files\Innovatrics\IFace SDK\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iface.lib;idkit.lib;jsoncpp.lib;cudart_static.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;gstapp-1.0.lib;opencv_world420.lib;bsoncxx.lib;mongocxx.lib;glew32.lib;freeglut.lib;soil2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:\freetype\release dll\win64;C:\Program Files %28x86%29\GLFW\lib;C:\local\boost_1_74_0\stage\lib;F:\glew-2.2.0\lib\Release\x64;F:\SOIL2-master\lib\windows;D:\mongo-cxx-driver\install\lib;C:\Program Files\Innovatrics\IDKit SDK\lib;D:\opencv\x64\vc16\lib;F:\gstreamer\1.0\x86_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64;D:\Program Files %28x86%29\JSONCPP\lib;C:\Program Files\Innovatrics\IFace SDK\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>iface.lib;idkit.lib;jsoncpp.lib;cudart_static.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;gstapp-1.0.lib;opencv_world420.lib;bsoncxx.lib;mongocxx.lib;glew32.lib;soil2.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>/NODEFAULTLIB:library;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -178,16 +181,24 @@
     <ClInclude Include="Format.h" />
     <ClInclude Include="FrameData.h" />
     <ClInclude Include="FrameView.h" />
+    <ClInclude Include="GLFrame.h" />
     <ClInclude Include="GraphicProcessor.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Innovatrics.h" />
     <ClInclude Include="Molded.h" />
     <ClInclude Include="MongoAccess.h" />
     <ClInclude Include="Pipe.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="SafeQueue.h" />
+    <ClInclude Include="ShaderGL.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Tracking.h" />
     <ClInclude Include="User.h" />
+    <ClInclude Include="VertexArray.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AipuAPI.cpp" />
@@ -214,30 +225,43 @@
     <ClCompile Include="Format.cpp" />
     <ClCompile Include="FrameData.cpp" />
     <ClCompile Include="FrameView.cpp" />
+    <ClCompile Include="GLFrame.cpp" />
     <ClCompile Include="GraphicProcessor.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Innovatrics.cpp" />
     <ClCompile Include="Molded.cpp" />
     <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ShaderGL.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Tracking.cpp" />
     <ClCompile Include="User.cpp" />
+    <ClCompile Include="VertexArray.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Fonts.shader" />
     <None Include="packages.config" />
+    <None Include="Rectangle.shader" />
+    <None Include="Stipple.shader" />
+    <None Include="Texture.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\rxcpp.4.0.0\build\native\rxcpp.targets" Condition="Exists('..\packages\rxcpp.4.0.0\build\native\rxcpp.targets')" />
+    <Import Project="..\packages\glm.0.9.9.800\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.9.800\build\native\glm.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\rxcpp.4.0.0\build\native\rxcpp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\rxcpp.4.0.0\build\native\rxcpp.targets'))" />
+    <Error Condition="!Exists('..\packages\glm.0.9.9.800\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.800\build\native\glm.targets'))" />
   </Target>
 </Project>

@@ -188,7 +188,7 @@ void Tracking::InitITracking() {
 	error->CheckError(errorCode, error->medium);	
 
 	flagTracking = false;
-	
+	countFrameTracking = 0;
 }
 
 void Tracking::FaceTracking(std::vector<unsigned char> vectorData) {
@@ -199,15 +199,15 @@ void Tracking::FaceTracking(std::vector<unsigned char> vectorData) {
 
 	if (rawImageData != NULL) {
 		long secuence = countFrameTracking * configuration->GetTimeDeltaMs();
-		ResetCoordinates();
-		
+				
 		errorCode = IFACE_TrackObjects(objectHandler, rawImageData,
 			width, height, secuence, NUM_TRACKED_OBJECTS, objects);			
 		error->CheckError(errorCode, error->medium);
 		if (errorCode != IFACE_OK) {
 			cout << "..........ERRRRORORRRRRRR IFACE_TrackObjects.............................." << errorCode << endl;
 		}
-		
+
+		ResetCoordinates();
 		TrackObjectState();
 
 		delete[] rawImageData;
@@ -249,8 +249,8 @@ void Tracking::ClearAllCoordinatesImage() {
 
 void Tracking::ResetCoordinates() {
 	long countFrames = countFrameTracking - 1;
-	int residue = countFrames % sizeVideoStream;
-	if (residue == 0)
+	residueCountFrames = countFrames % sizeVideoStream;
+	if (residueCountFrames == 0)
 	{
 		ClearAllCoordinatesImage();
 	}
@@ -287,7 +287,7 @@ string Tracking::BuildHeadTracer() {
 	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
 
 	string timeInit(buff);	
-	string tracerImage = timeInit + ", " + to_string(client) + ", frame, 1, ";
+	string tracerImage = timeInit + ", " + to_string(client) + ", " + to_string(typeSource) + ", frame, 1, ";
 	return tracerImage;
 }
 
@@ -453,7 +453,7 @@ void Tracking::CreateFaceOfObject(int indexTracking) {
 	errorCode = IFACE_CreateFace(&face);
 
 	errorCode = IFACE_GetFaceFromObject(objects[indexTracking],
-		objectHandler, face, IFACE_TRACKED_OBJECT_FACE_TYPE_BEST_DISCOVERY);
+		objectHandler, face, IFACE_TRACKED_OBJECT_FACE_TYPE_LAST_DISCOVERY);
 	error->CheckError(errorCode, error->medium);	
 	
 	if (errorCode == IFACE_OK) {		
@@ -537,24 +537,20 @@ void Tracking::TrackObjectState() {
 			{
 				SendEnrollment(trackedObjectIndex);
 			}
-			/*else {
-				std::thread tcf(&Tracking::CreateFaceOfObject, this, trackedObjectIndex);
-				tcf.detach();
-			}	*/								       			
+										       			
 		}
 	}
 	countFrameTracking++;
 }
 
 void Tracking::SendEnrollment(int objectIndex) {
-	clock_t duration = clock() - timeStartEnroll;
-	int durationMs = int(1000 * ((float)duration) / CLOCKS_PER_SEC);
-	if (durationMs >= LAPSE_ENROLL_MS)
-	{
-		timeStartEnroll = clock();
+	
+	if (residueCountFrames == 0) {
+		
 		std::thread tcf(&Tracking::CreateFaceOfObject, this, objectIndex);
 		tcf.detach();
 	}
+	
 }
 
 unsigned char* Tracking::LoadImageOfMemory(vector<unsigned char> buffer,

@@ -17,6 +17,8 @@ public:
 	std::mutex mtx;
 	void SetPositionX(int index, float value);
 	void SetPositionY(int index, float value);
+	float GetPositionX(int index);
+	float GetPositionY(int index);
 	void SetWidthImage(int value);
 
 	void SetHeightImage(int value);
@@ -47,16 +49,21 @@ public:
 	void SetElapse(int value);
 	int GetElapse();
 	void SetImageData(unsigned char* data, int size);
-	unsigned char* LoadImageForTexture();
-	void SetSides(int value);	
-	int GetSides();
-	void TransformCoordinates();
-	void SetShowFrame(bool value);
-	bool GetShowFrame();
+	unsigned char* LoadImageForTexture();	
+	void TransformCoordinates();	
+	void ClearImageData();
+
+	inline void SetColourLabelR(float value) { colourLabelR = value; }
+	inline void SetColourLabelG(float value) { colourLabelG = value; }
+	inline void SetColourLabelB(float value) { colourLabelB = value; }
+
+	inline float GetColourLabelR() { return colourLabelR; }
+	inline float GetColourLabelG() { return colourLabelG; }
+	inline float GetColourLabelB() { return colourLabelB; }	
 
 private:
-	int widthImage = 800;
-	int heightImage = 450;
+	int widthImage = 400;
+	int heightImage = 300;
 	int elapse = 100;
 	float colourR[NUM_RECTANGLES] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 	float colourG[NUM_RECTANGLES] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
@@ -69,9 +76,9 @@ private:
 	float positionY[NUM_RECTANGLES] = {};
 	float halfScreenWidth = 0.0f;
 	float halfScreenHeight = 0.0f;
-	std::vector<unsigned char* > flowImage;
-	int sides = 32;
-	bool showFrame = false;
+	float colourLabelR = 0.5f, colourLabelG = 0.8f, colourLabelB = 0.2f;
+	std::vector<unsigned char* > flowImage;	
+	
 };
 
 

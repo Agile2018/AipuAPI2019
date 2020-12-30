@@ -6,7 +6,7 @@ Innovatrics* innovatrics;
 Database databaseMongo;
 File* fileErrors;
 FrameView windowOGL;
-
+Format* format = new Format();
 vector<Pipe*> pipelines;
 std::vector<std::thread> threadPipes;
 std::mutex mtx;
@@ -25,6 +25,17 @@ const string nameFileErrors = "errors.txt";
 const char* fileConfigurations[4] = { "configPipeOne.txt", "configPipeTwo.txt", 
 "configPipeThree.txt", "configPipeFour.txt" };
 
+std::vector<int> GetChannels(string channels)
+{
+	std::vector<int> result;
+	std::vector<string> strChannels = format->Split(channels, '*');
+	for (int i = 0; i < strChannels.size(); i++)
+	{
+		int newValue = stoi(strChannels[i]) - 1;
+		result.push_back(newValue);
+	}
+	return result;
+}
 
 void AipuAPI::SetNumberPipelines(int value) {
 	for (int i = 0; i < pipelines.size(); i++)
@@ -43,52 +54,103 @@ void AipuAPI::SetNumberPipelines(int value) {
 	pipelines[0]->SetDatabase(&databaseMongo);
 }
 
-void ThreadRunWindow() {
-	int argc = 1;
-
-	char appName[] = "AipuAPI.dll";
-	char* arg[] = { appName, NULL };
-	char** argv = { arg };
-		
-	windowOGL.RunOne(argc, argv);
+void ThreadRunWindow(int idx) {		
+	windowOGL.SetIndexCurrent(idx);
+	int end = windowOGL.RunOne();
+	pipelines[idx]->SetFinishLoop();	
+	pipelines[idx]->DownConfigurationModel();
+	pipelines[idx]->CloseConnectionIdentification();
+	pipelines[idx]->ResetConfiguration();
+	threadPipes.clear();
+	messageError = "FINISH LOOP";
+	cout << "FINISH LOOP" << endl;
 }
 
-void ThreadRunWindowTwo() {
-	int argc = 1;
+void ThreadRunWindowTwo(int idx0, int idx1) {		
+	int end = windowOGL.RunTwo();
+	pipelines[idx0]->SetFinishLoop();
+	pipelines[idx0]->DownConfigurationModel();
+	pipelines[idx0]->CloseConnectionIdentification();
+	pipelines[idx0]->ResetConfiguration();
+	pipelines[idx1]->SetFinishLoop();
+	pipelines[idx1]->DownConfigurationModel();
+	pipelines[idx1]->CloseConnectionIdentification();
+	pipelines[idx1]->ResetConfiguration();
+	threadPipes.clear();
+	messageError = "FINISH LOOP";
+	cout << "FINISH LOOP" << endl;
 
-	char appName[] = "AipuAPI.dll";
-	char* arg[] = { appName, NULL };
-	char** argv = { arg };
+}
+
+void ThreadRunWindowThree(int idx0, int idx1, int idx2) {
+	int end = windowOGL.RunThree();
+	pipelines[idx0]->SetFinishLoop();
+	pipelines[idx0]->DownConfigurationModel();
+	pipelines[idx0]->CloseConnectionIdentification();
+	pipelines[idx0]->ResetConfiguration();
+	pipelines[idx1]->SetFinishLoop();
+	pipelines[idx1]->DownConfigurationModel();
+	pipelines[idx1]->CloseConnectionIdentification();
+	pipelines[idx1]->ResetConfiguration();
+	pipelines[idx2]->SetFinishLoop();
+	pipelines[idx2]->DownConfigurationModel();
+	pipelines[idx2]->CloseConnectionIdentification();
+	pipelines[idx2]->ResetConfiguration();
+	threadPipes.clear();
+	messageError = "FINISH LOOP";
+	cout << "FINISH LOOP" << endl;
+
+}
+
+void ThreadRunWindowFour(int idx0, int idx1, int idx2, int idx3) {
+	int end = windowOGL.RunFour();
+	pipelines[idx0]->SetFinishLoop();
+	pipelines[idx0]->DownConfigurationModel();
+	pipelines[idx0]->CloseConnectionIdentification();
+	pipelines[idx0]->ResetConfiguration();
+	pipelines[idx1]->SetFinishLoop();
+	pipelines[idx1]->DownConfigurationModel();
+	pipelines[idx1]->CloseConnectionIdentification();
+	pipelines[idx1]->ResetConfiguration();
+	pipelines[idx2]->SetFinishLoop();
+	pipelines[idx2]->DownConfigurationModel();
+	pipelines[idx2]->CloseConnectionIdentification();
+	pipelines[idx2]->ResetConfiguration();
+	pipelines[idx3]->SetFinishLoop();
+	pipelines[idx3]->DownConfigurationModel();
+	pipelines[idx3]->CloseConnectionIdentification();
+	pipelines[idx3]->ResetConfiguration();
+	threadPipes.clear();
+	messageError = "FINISH LOOP";
+	cout << "FINISH LOOP" << endl;
+
+}
+
+
+void InitWindow(int idx) {
+	std::thread togl(ThreadRunWindow, idx);
+	togl.detach();
 	
-	windowOGL.RunTwo(argc, argv);
+	pipelines[0]->SetFrameView(&windowOGL);
+	//pipelines[idx]->SetIndexFrame(1);
 }
 
-void ThreadRunWindowFour() {
-	int argc = 1;
-
-	char appName[] = "AipuAPI.dll";
-	char* arg[] = { appName, NULL };
-	char** argv = { arg };
-	
-	windowOGL.RunFour(argc, argv);
-}
-
-void InitWindow() {
-	std::thread togl(ThreadRunWindow);
+void InitWindowTwo(int idx0, int idx1) {
+	std::thread togl(ThreadRunWindowTwo, idx0, idx1);
 	togl.detach();
 	
 	pipelines[0]->SetFrameView(&windowOGL);
 }
 
-void InitWindowTwo() {
-	std::thread togl(ThreadRunWindowTwo);
+void InitWindowThree(int idx0, int idx1, int idx2) {
+	std::thread togl(ThreadRunWindowThree, idx0, idx1, idx2);
 	togl.detach();
-	
+
 	pipelines[0]->SetFrameView(&windowOGL);
 }
 
-void InitWindowFour() {
-	std::thread togl(ThreadRunWindowFour);
+void InitWindowFour(int idx0, int idx1, int idx2, int idx3) {
+	std::thread togl(ThreadRunWindowFour, idx0, idx1, idx2, idx3);
 	togl.detach();
 	
 	pipelines[0]->SetFrameView(&windowOGL);
@@ -172,24 +234,26 @@ int AipuAPI::GetTaskIdentify(int channel) {
 	return pipelines[index]->GetTaskIdentify();
 }
 
-void AipuAPI::InitWindowMain(int option) {
+void AipuAPI::InitWindowMain(int option, string channels) {
+	std::vector<int> vecChannels = GetChannels(channels);
+	
 	switch (option)
 	{
 	case 1:
 		
-		InitWindow();
+		InitWindow(vecChannels[0]);
 		break;
 	case 2:
 		
-		InitWindowTwo();
+		InitWindowTwo(vecChannels[0], vecChannels[1]);
 		break;
 	case 3:
 		
-		InitWindowFour();
+		InitWindowThree(vecChannels[0], vecChannels[1], vecChannels[2]);
 		break;
 	case 4:
 		
-		InitWindowFour();
+		InitWindowFour(vecChannels[0], vecChannels[1], vecChannels[2], vecChannels[3]);
 		break;
 	default:
 		break;
@@ -303,17 +367,18 @@ void AipuAPI::ObserverDatabase() {
 
 }
 
-void ExecuteFlowVideo(int index) {
+void ExecuteFlowVideo(int indexthread, int indexPipe) {
 
-	pipelines[index]->RunFlowVideo();
-
+	pipelines[indexPipe]->RunFlowVideo();
+	pipelines[indexPipe]->SetIndexthread(indexthread);
 }
 
-void AipuAPI::RunVideo(int option) {
-
+void AipuAPI::RunVideo(int option, string channels) {
+	std::vector<int> vecChannels = GetChannels(channels);
+	
 	for (int i = 0; i < option; i++)
 	{
-		threadPipes.push_back(std::thread(ExecuteFlowVideo, i));
+		threadPipes.push_back(std::thread(ExecuteFlowVideo, i, vecChannels[i]));
 		threadPipes[i].detach();
 	}
 
@@ -322,9 +387,10 @@ void AipuAPI::RunVideo(int option) {
 
 void AipuAPI::ReRunVideo(int option) {
 	int index = option - 1;
+	int indexThread = pipelines[index]->GetIndexthread();
 	auto it = threadPipes.begin();
-	threadPipes.insert(it + index, std::thread(ExecuteFlowVideo, index));
-	threadPipes[index].detach();
+	threadPipes.insert(it + indexThread, std::thread(ExecuteFlowVideo, indexThread, index));
+	threadPipes[indexThread].detach();
 
 }
 
@@ -337,13 +403,13 @@ void AipuAPI::CloseWindow() {
 }
 
 void AipuAPI::ObserverError() {
-
+	
 	vector<rxcpp::observable<Either*>> observers;
 	for (int i = 0; i < pipelines.size(); i++)
 	{
 		observers.push_back(pipelines[i]->observableError.map([](Either* either) {
 			return either;
-			}));
+		}));
 	}
 
 
@@ -355,10 +421,10 @@ void AipuAPI::ObserverError() {
 			{
 				string message = to_string(either->GetCode()) + ": " + either->GetLabel();
 				WriteError(message);
-				messageError = message;
-				cout << messageError << endl;
+				messageError = message;		
+				
 			}
-			}));
+		}));
 		
 	}
 	
@@ -375,7 +441,7 @@ void AipuAPI::Terminate() {
 		}*/
 		pipelines[i]->DownConfigurationModel();
 		pipelines[i]->CloseConnectionIdentification();
-
+		pipelines[i]->SetFinishLoop();
 	}	
 
 	listUser.clear();
@@ -392,21 +458,25 @@ void AipuAPI::Terminate() {
 	
 }
 
-void AipuAPI::SetColourTextFrameOne(float red, float green, float blue) {
-	windowOGL.SetColourTextFrameOne(red, green, blue);
+void AipuAPI::SetColourLabelFrame(int indexFrame, float red, float green, float blue) {
+	windowOGL.SetColourLabelFrame(indexFrame, red, green, blue);
 }
 
-void AipuAPI::SetColourTextFrameTwo(float red, float green, float blue) {
-	windowOGL.SetColourTextFrameTwo(red, green, blue);
-}
-
-void AipuAPI::SetColourTextFrameThree(float red, float green, float blue) {
-	windowOGL.SetColourTextFrameThree(red, green, blue);
-}
-
-void AipuAPI::SetColourTextFrameFour(float red, float green, float blue) {
-	windowOGL.SetColourTextFrameFour(red, green, blue);
-}
+//void AipuAPI::SetColourTextFrameOne(float red, float green, float blue) {
+//	windowOGL.SetColourTextFrameOne(red, green, blue);
+//}
+//
+//void AipuAPI::SetColourTextFrameTwo(float red, float green, float blue) {
+//	windowOGL.SetColourTextFrameTwo(red, green, blue);
+//}
+//
+//void AipuAPI::SetColourTextFrameThree(float red, float green, float blue) {
+//	windowOGL.SetColourTextFrameThree(red, green, blue);
+//}
+//
+//void AipuAPI::SetColourTextFrameFour(float red, float green, float blue) {
+//	windowOGL.SetColourTextFrameFour(red, green, blue);
+//}
 
 void AipuAPI::InitLibrary()
 {
@@ -481,13 +551,15 @@ string AipuAPI::GetTemplateJSON() {
 }
 
 string AipuAPI::GetMessageError() {
-	return messageError;
+	string msg = messageError;
+	messageError = "";
+	return msg;
 }
 
 
-void AipuAPI::RecognitionFaceFiles(string file, int client, int task) {
+void AipuAPI::RecognitionFaceFiles(string namefile, int client, int task) {
 	int index = client - 1;
-	pipelines[index]->RecognitionFaceFiles(file, client, task);
+	pipelines[index]->RecognitionFaceFiles(namefile, client, task);
 	
 }
 

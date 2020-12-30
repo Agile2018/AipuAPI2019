@@ -9,9 +9,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <vector>
+#include <string>
+#include <sys/stat.h>
 
 #define TEMP_FILE "temp.txt"
-#define MAX_SIZE_IMAGE 1280
+#define MAX_SIZE_IMAGE 640 //1280
 
 using namespace std;
 
@@ -27,6 +29,7 @@ public:
 	bool DeleteFile();
 	bool DeleteFile(string filePath);
 	void CreateDirectory();
+	bool FileLogExists();
 	string GetNameDirectory();
 	string GetNameFile();
 	string GetNameLog();
@@ -34,10 +37,12 @@ public:
 	string ReadFileText(string path);
 	bool GetImageSizeEx(const char* fn, int* x, int* y);
 	vector<uchar> ResizeImage(const char* fileName, int width, int height);
+	std::string BuildHeadLog();
 private:
 	string nameDirectory = "";
 	string nameFile = "";
 	string nameLog = "logChannel_";
+
 };
 
 

@@ -74,16 +74,18 @@ void Pipe::RunFlowVideo() {
 	flowVideo->RunFlowVideo();
 }
 
-void Pipe::RecognitionFaceFiles(string file, int client, int task) {
-	faceModel->RecognitionFaceFiles(file, client, task);
+void Pipe::RecognitionFaceFiles(string namefile, int client, int task) {
+	faceModel->RecognitionFaceFiles(namefile, client, task);
 }
 
 void Pipe::SetIsFinishLoadFiles(bool value) {
 	faceModel->SetIsFinishLoadFiles(value);
+	faceIdentify->SetIsFinishLoadFiles(value);
 }
 
 bool Pipe::GetIsFinishLoadFiles() {
-	return faceModel->GetIsFinishLoadFiles();
+	
+	return faceModel->GetIsFinishLoadFiles() || faceIdentify->GetIsFinishLoadFiles();
 }
 
 void Pipe::StatePlay() {

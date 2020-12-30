@@ -547,6 +547,7 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 	{
 		string nameFileTracer = file->GetNameLog() + to_string(client) + ".cvs";
 		file->SetNameFile(nameFileTracer);
+		
 	}
 	char buff[20];
 	
@@ -556,15 +557,16 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 		
 	tracerProcess.push_back(timeInit);
 	tracerProcess.push_back(to_string(client));	
+	tracerProcess.push_back(to_string(2));
 	vector<string> listFiles = LoadFilesForBatch(folder, filesInFolder);
 	tracerProcess.push_back(filesInFolder);
 	LoadImagesForBatch(listFiles);
 	if (!bufferOfImagesBatch.empty())
 	{		
-		//tracerImage += to_string((int)bufferOfImagesBatch.size()) + "\n";
+		
 		tracerProcess.push_back(to_string((int)bufferOfImagesBatch.size()));
 		int detectNumber = ModelByBatch(client, doing);
-		//cout << "FACES DETECTED AND VALIDATED: " << detectNumber << endl;
+		
 	}
 	else {
 		
@@ -574,57 +576,64 @@ void FaceModel::AddCollectionOfImages(string folder, int client, int doing) {
 	}
 }
 
-void FaceModel::RecognitionFaceFiles(string namefile, int client, int task) {
-	int lenght, width, height, templates;	
+void FaceModel::RecognitionFaceFiles(string namefile, int client, int task) {	
+	int lenght, width, height, templates;
 	char buff[20];
-	
+
+	//std::cout << namefile << std::endl;
+
 	tracerProcess.clear();
 	if (file->GetNameFile().length() == 0)
 	{
 		string nameFileTracer = file->GetNameLog() + to_string(client) + ".cvs";
 		file->SetNameFile(nameFileTracer);
+
 	}
-	
+
 	time_t now = time(NULL);
 	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
 
 	string timeInit(buff);
 	tracerProcess.push_back(timeInit);
 	tracerProcess.push_back(to_string(client));
-	tracerProcess.push_back(namefile);	
-	isFinishLoadFiles = false;	
+	tracerProcess.push_back(to_string(2));
+	tracerProcess.push_back(namefile);
+
 	if (file->GetImageSizeEx(namefile.c_str(), &width, &height))
 	{
+
 		unsigned char* rawImage;
 
 		if (width <= MAX_SIZE_IMAGE)
 		{
 			rawImage = LoadFileImage(namefile, &width, &height, &lenght);
-			
+
 		}
 		else
 		{
 			vector<uchar> newImg = file->ResizeImage(namefile.c_str(), width, height);
 			rawImage = LoadImageMemory(newImg, &width, &height, &lenght);
-			
+
 		}
 		if (rawImage != NULL) {
 			tracerProcess.push_back("1");
+
 			templates = GetOneModel(rawImage, width, height, client, task);
 			delete[] rawImage;
 		}
-		
+
 	}
 	else
 	{
 		string errorContent = timeInit + " Error file image format (" + namefile + ")\n";
 		string pathError = "Logs/errors.txt";
 		file->WriteFile(pathError, errorContent);
+		isFinishLoadFiles = true;
 	}
-	
-	
-	isFinishLoadFiles = true;
+
+	//this_thread::sleep_for(chrono::milliseconds(20));
 }
+
 
 unsigned char* FaceModel::LoadFileImage(string image, int *width, int *height, int *length)
 {
@@ -654,7 +663,7 @@ unsigned char* FaceModel::LoadFileImage(string image, int *width, int *height, i
 void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) {
 	int errorCode, majorVersion, minorVersion, quality;
 	int templateSize;
-	
+	string logTemplate = "", tracerImageForSend = "";
 	errorCode = IFACE_CreateTemplate(face, faceHandlerGlobal, 0, &templateSize, NULL);
 	if (errorCode == IFACE_OK) {
 		char* templateData = new char[templateSize];
@@ -669,15 +678,20 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 				templateData, &majorVersion, &minorVersion, &quality);
 			//cout << "QUALITY MODEL: " << quality << endl;
 			//cout << "CONFIGURATION MODEL: " << configuration->GetQualityModel() << endl;
-			tracerProcess.push_back(to_string(quality));
-			tracerProcess.push_back(to_string(configuration->GetQualityModel()));
+			logTemplate = to_string(quality) + ", " + to_string(configuration->GetQualityModel());
+
+			//tracerProcess.push_back(to_string(quality));
+			//tracerProcess.push_back(to_string(configuration->GetQualityModel()));
 
 			//tracerImage +=  to_string(quality) + " vs " + to_string(configuration->GetQualityModel()) + ", ";
 
 			if (quality > configuration->GetQualityModel()) {
-				tracerProcess.push_back("1");
+				logTemplate += ", 1, ";
+				//tracerProcess.push_back("1");
 				//tracerImage += "1, ";
-				tracerImage = BuildTracerString();
+				
+				tracerImageForSend = BuildTracerString() + logTemplate;
+				
 				int sizeImage[6];
 				sizeImage[0] = model->GetMoldCropWidth();
 				sizeImage[1] = model->GetMoldCropHeight();
@@ -685,16 +699,20 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 				sizeImage[3] = quality;
 				sizeImage[4] = task; // doing
 				sizeImage[5] = 0; // priority of template
-
+				//cout << "TRACER FILE.........:" << tracerImage << endl;
+				
 				auto tupleTemplateFace = std::make_tuple(templateData,
-					model->GetCropImageData(), sizeImage, tracerImage);
+					model->GetCropImageData(), sizeImage, tracerImageForSend);
+				
 				templateOut.on_next(tupleTemplateFace);
+				//cout << "TRACER FILE.........:" << tracerImageForSend << endl;
 			}
 			else {
-				tracerProcess.push_back("0");
-				tracerImage = BuildTracerString() + "\n";
-				file->WriteFile(tracerImage);
-				
+				//tracerProcess.push_back("0");
+				logTemplate += ", 0, ";
+				tracerImageForSend = BuildTracerString() + logTemplate + "\n";
+				file->WriteFile(tracerImageForSend);
+				isFinishLoadFiles = true;
 			}
 			
 		}
@@ -702,9 +720,8 @@ void FaceModel::CreateTemplate(void* face, Molded* model, int client, int task) 
 	}
 	else {
 		error->CheckError(errorCode, error->medium);
-	}
-	
-
+		isFinishLoadFiles = true;
+	}	
 }
 
 string FaceModel::BuildTracerString() {
@@ -712,7 +729,15 @@ string FaceModel::BuildTracerString() {
 	for (string value : tracerProcess) {
 		result += value + ", ";
 	}
-	tracerProcess.clear();
+	if ((int)tracerProcess.size() > 4)
+	{
+		tracerProcess.pop_back();
+		tracerProcess.pop_back();
+		tracerProcess.pop_back();
+		tracerProcess.pop_back();
+	}
+	
+	//tracerProcess.clear();
 	return result;
 }
 
@@ -835,9 +860,11 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 				{
 					
 					tracerProcess.push_back("1");
-					//cout << "GREATER OR EQUAL ACCURACY .." << configuration->GetConfidenceThreshold() << endl;
+					//cout << "GREATER OR EQUAL ACCURACY .." << i << endl;
 					Molded* model = new Molded();
+					
 					FaceCropImage(face, model);
+					
 					CreateTemplate(face, model, client, task);
 					delete model;
 					
@@ -847,23 +874,20 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 					tracerProcess.push_back("0");
 					tracerImage = BuildTracerString() + "\n";
 					file->WriteFile(tracerImage);
+					isFinishLoadFiles = true;
 				}
 				
 
 			}
 		}
-		else {
-			/*tracerImage += "To refuse: (" + to_string(width) +
-				", " + to_string(height) + "), CONFIDENCE THRESHOLD: " +
-				to_string(configuration->GetConfidenceThreshold()) + "\n";*/			
-			
-			
+		else {											
 			tracerProcess.push_back("(" + to_string(width) + "-" + to_string(height) + ")");
 			tracerProcess.push_back("To refuse");
 			tracerProcess.push_back(to_string(configuration->GetConfidenceThreshold()));
 			tracerProcess.push_back("0");
 			tracerImage = BuildTracerString() + "\n";
 			file->WriteFile(tracerImage);
+			isFinishLoadFiles = true;
 		}
 	}
 	else {
@@ -874,7 +898,7 @@ int FaceModel::GetOneModel(unsigned char* rawImage,
 		tracerImage = BuildTracerString() + "\n";
 		file->WriteFile(tracerImage);
 		error->CheckError(errorCode, error->medium);
-		
+		isFinishLoadFiles = true;
 	}	
 
 	for (int i = 0; i < maxFaces; i++) {

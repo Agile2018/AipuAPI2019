@@ -68,7 +68,7 @@ private:
 	void DrawRectangles();
 	void RunTracking(std::vector<unsigned char> buffer, int index);
 	void SendImageScreen(unsigned char* data, int size, int index);
-	
+	string ConvertBackslashToSlash(string input);
 };
 
 

@@ -42,7 +42,15 @@ public:
 
 	bool GetConnectionIdentification() {
 		return connectionIdentification;
-	}	
+	}		
+
+	void SetIsFinishLoadFiles(bool value) {
+		isFinishLoadFiles = value;
+	}
+
+	bool GetIsFinishLoadFiles() {
+		return isFinishLoadFiles;
+	}
 
 	Rx::subject<Either*> errorSubject;
 	Rx::observable<Either*> observableError = errorSubject.get_observable();
@@ -102,7 +110,7 @@ private:
 	int countAddFaceTemplate = 0;	
 	bool connectionIdentification = false;
 	int lastId = 1;
-		
+	bool isFinishLoadFiles = true;
 	int countModelSendVideo = 0;
 	User* userForDatabase = nullptr;
 	vector<unsigned char> templateGuide;	

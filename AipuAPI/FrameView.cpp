@@ -1,44 +1,20 @@
 #include "FrameView.h"
-//#include <mutex>
 
-//int widthImage = 800;
-//int heightImage = 400;
-//int elapse = 100;
-GLuint idTexture1 = 0, idTexture2 = 0, idTexture3 = 0, idTexture4 = 0;
-GLushort pattern = 0x5555;
+
+int widthWindow = 400;
+int heightWindow = 300;
+int indexCurrentFrame = 0;
 GLint factorStipple = 10;
 GLfloat lineWidth = 3.0f;
-GLfloat colourRfo = 0.0, colourGfo = 0.0, colourBfo = 0.0;
-GLfloat colourRft = 0.0, colourGft = 0.0, colourBft = 0.0;
-GLfloat colourRfth = 0.0, colourGfth = 0.0, colourBfth = 0.0;
-GLfloat colourRff = 0.0, colourGff = 0.0, colourBff = 0.0;
-std::string lblOne = "Video 1";
-std::string lblTwo = "Video 2";
-std::string lblThree = "Video 3";
-std::string lblFour = "Video 4";
-FrameData* frameOne = new FrameData();
-FrameData* frameTwo = new FrameData();
-FrameData* frameThree = new FrameData();
-FrameData* frameFour = new FrameData();
+std::string labels[NUM_FRAMES] = { "Video 1", "Video 2", "Video 3", "Video 4" };
 
-//FrameData* frames = new FrameData[NUM_FRAMES];
-//FrameData frames[NUM_FRAMES];
-//float colourR[NUM_RECTANGLES] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-//float colourG[NUM_RECTANGLES] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-//float colourB[NUM_RECTANGLES] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-//float ratioWidth[NUM_RECTANGLES] = {};
-//float ratioHeight[NUM_RECTANGLES] = {};
-//float transforX[NUM_RECTANGLES] = {};
-//float transforY[NUM_RECTANGLES] = {};
-//float positionX[NUM_RECTANGLES] = {};
-//float positionY[NUM_RECTANGLES] = {};
-//float halfScreenWidth = 0.0f;
-//float halfScreenHeight = 0.0f;
-//std::vector<unsigned char* > flowImage;
-//std::mutex mtx;
-int handleWindow, windowOne, windowTwo, windowThree, windowFour;
-//bool showFrame = true;
-//int sides = 32;
+GLFrame* glFrame;
+GLFrame* glFrameTwo = new GLFrame();
+GLFrame* glFrameThree = new GLFrame();
+GLFrame* glFrameFour = new GLFrame();
+GLFWwindow* window;
+
+FrameData* frames = new FrameData[NUM_FRAMES];
 
 FrameView::FrameView()
 {
@@ -47,76 +23,51 @@ FrameView::FrameView()
 
 FrameView::~FrameView()
 {
-    delete frameOne;
-    delete frameTwo;
-    delete frameThree;
-    delete frameFour;
+    delete[] frames;
+   
+}
+
+void FrameView::SetIndexCurrent(int value) {
+    indexCurrentFrame = value;
 }
 
 void FrameView::SetWidthImage(int index, int value) {
-    switch (index)
-    {
-    case 1:
-        frameOne->SetWidthImage(value);
-        break;
-    case 2:
-        frameTwo->SetWidthImage(value);
-        break;
-    case 3:
-        frameThree->SetWidthImage(value);
-        break;
-    case 4:
-        frameFour->SetWidthImage(value);
-        break;
-    default:
-        break;
-    }
+    int idx = index - 1;
+    frames[idx].SetWidthImage(value);
         
 }
 
 void FrameView::SetHeightImage(int index, int value) {
-    switch (index)
-    {
-    case 1:
-        frameOne->SetHeightImage(value);
-        break;
-    case 2:
-        frameTwo->SetHeightImage(value);
-        break;
-    case 3:
-        frameThree->SetHeightImage(value);
-        break;
-    case 4:
-        frameFour->SetHeightImage(value);
-        break;
-    default:
-        break;
-    }
-        
+    int idx = index - 1;
+    frames[idx].SetHeightImage(value);
+            
 }
 
 void FrameView::SetElapse(int index, int value) {
-    switch (index)
-    {
-    case 1:
-        std::cout << "ELAPSE ONE: " << value << std::endl;
-        frameOne->SetElapse(value);
-        break;
-    case 2:
-        std::cout << "ELAPSE TWO: " << value << std::endl;
-        frameTwo->SetElapse(value);
-        break;
-    case 3:
-        std::cout << "ELAPSE THREE: " << value << std::endl;
-        frameThree->SetElapse(value);
-        break;
-    case 4:
-        std::cout << "ELAPSE FOUR: " << value << std::endl;
-        frameFour->SetElapse(value);
-        break;
-    default:
-        break;
-    }
+    int idx = index - 1;
+    frames[idx].SetElapse(value);
+
+    //switch (index)
+    //{
+    //case 1:
+    //    std::cout << "ELAPSE ONE: " << value << std::endl;
+    //    frameOne->SetElapse(value);
+    //    break;
+    //case 2:
+    //    std::cout << "ELAPSE TWO: " << value << std::endl;
+    //    frameTwo->SetElapse(value);
+    //    break;
+    //case 3:
+    //    std::cout << "ELAPSE THREE: " << value << std::endl;
+    //    frameThree->SetElapse(value);
+    //    break;
+    //case 4:
+    //    std::cout << "ELAPSE FOUR: " << value << std::endl;
+    //    frameFour->SetElapse(value);
+    //    break;
+    //default:
+    //    break;
+    //}
        
 }
 
@@ -129,937 +80,744 @@ void FrameView::SetLineWidth(GLfloat value) {
 }
 
 void FrameView::SetColourR(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetColourR(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetColourR(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetColourR(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetColourR(indexFigure, value);
-        break;
-    default:
-        break;
-    }
-    
+    int idx = indexFrame - 1;
+    frames[idx].SetColourR(indexFigure, value);        
     
 }
 
 void FrameView::SetColourG(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetColourG(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetColourG(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetColourG(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetColourG(indexFigure, value);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetColourG(indexFigure, value);
     
 }
 
 void FrameView::SetColourB(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetColourB(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetColourB(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetColourB(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetColourB(indexFigure, value);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetColourB(indexFigure, value);    
     
 }
 
 void FrameView::SetRatioWidth(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetRatioWidth(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetRatioWidth(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetRatioWidth(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetRatioWidth(indexFigure, value);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetRatioWidth(indexFigure, value);
+
+    //switch (indexFrame)
+    //{
+    //case 1:
+    //    frameOne->SetRatioWidth(indexFigure, value);
+    //    break;
+    //case 2:
+    //    frameTwo->SetRatioWidth(indexFigure, value);
+    //    break;
+    //case 3:
+    //    frameThree->SetRatioWidth(indexFigure, value);
+    //    break;
+    //case 4:
+    //    frameFour->SetRatioWidth(indexFigure, value);
+    //    break;
+    //default:
+    //    break;
+    //}
     
     
 }
 
 void FrameView::SetRatioHeight(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetRatioHeight(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetRatioHeight(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetRatioHeight(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetRatioHeight(indexFigure, value);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetRatioHeight(indexFigure, value);
+
+    //switch (indexFrame)
+    //{
+    //case 1:
+    //    frameOne->SetRatioHeight(indexFigure, value);
+    //    break;
+    //case 2:
+    //    frameTwo->SetRatioHeight(indexFigure, value);
+    //    break;
+    //case 3:
+    //    frameThree->SetRatioHeight(indexFigure, value);
+    //    break;
+    //case 4:
+    //    frameFour->SetRatioHeight(indexFigure, value);
+    //    break;
+    //default:
+    //    break;
+    //}
     
 }
 
 void FrameView::SetPositionX(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetPositionX(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetPositionX(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetPositionX(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetPositionX(indexFigure, value);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetPositionX(indexFigure, value);
+
+    //switch (indexFrame)
+    //{
+    //case 1:
+    //    frameOne->SetPositionX(indexFigure, value);
+    //    break;
+    //case 2:
+    //    frameTwo->SetPositionX(indexFigure, value);
+    //    break;
+    //case 3:
+    //    frameThree->SetPositionX(indexFigure, value);
+    //    break;
+    //case 4:
+    //    frameFour->SetPositionX(indexFigure, value);
+    //    break;
+    //default:
+    //    break;
+    //}
         
 }
 void FrameView::SetPositionY(int indexFrame, int indexFigure, float value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetPositionY(indexFigure, value);
-        break;
-    case 2:
-        frameTwo->SetPositionY(indexFigure, value);
-        break;
-    case 3:
-        frameThree->SetPositionY(indexFigure, value);
-        break;
-    case 4:
-        frameFour->SetPositionY(indexFigure, value);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetPositionY(indexFigure, value);
+
+    //switch (indexFrame)
+    //{
+    //case 1:
+    //    frameOne->SetPositionY(indexFigure, value);
+    //    break;
+    //case 2:
+    //    frameTwo->SetPositionY(indexFigure, value);
+    //    break;
+    //case 3:
+    //    frameThree->SetPositionY(indexFigure, value);
+    //    break;
+    //case 4:
+    //    frameFour->SetPositionY(indexFigure, value);
+    //    break;
+    //default:
+    //    break;
+    //}
     
 }
 
 int FrameView::GetWidthImage(int index) {
-    switch (index)
-    {
-    case 1:
-        return frameOne->GetWidthImage();
-        break;
-    case 2:
-        return frameTwo->GetWidthImage();
-        break;
-    case 3:
-        return frameThree->GetWidthImage();
-        break;
-    case 4:
-        return frameFour->GetWidthImage();
-        break;
-    default:
-        return 0;
-        break;
-    }
+    int idx = index - 1;
+    return frames[idx].GetWidthImage();
+    //switch (index)
+    //{
+    //case 1:
+    //    return frameOne->GetWidthImage();
+    //    break;
+    //case 2:
+    //    return frameTwo->GetWidthImage();
+    //    break;
+    //case 3:
+    //    return frameThree->GetWidthImage();
+    //    break;
+    //case 4:
+    //    return frameFour->GetWidthImage();
+    //    break;
+    //default:
+    //    return 0;
+    //    break;
+    //}
     
 }
 
 int FrameView::GetHeightImage(int index) {
-    switch (index)
-    {
-    case 1:
-        return frameOne->GetHeightImage();
-        break;
-    case 2:
-        return frameTwo->GetHeightImage();
-        break;
-    case 3:
-        return frameThree->GetHeightImage();
-        break;
-    case 4:
-        return frameFour->GetHeightImage();
-        break;
-    default:
-        return 0;
-        break;
-    }
+    int idx = index - 1;
+    return frames[idx].GetHeightImage();
+
+    //switch (index)
+    //{
+    //case 1:
+    //    return frameOne->GetHeightImage();
+    //    break;
+    //case 2:
+    //    return frameTwo->GetHeightImage();
+    //    break;
+    //case 3:
+    //    return frameThree->GetHeightImage();
+    //    break;
+    //case 4:
+    //    return frameFour->GetHeightImage();
+    //    break;
+    //default:
+    //    return 0;
+    //    break;
+    //}
     
 }
 
 void FrameView::SetImageData(int indexFrame, unsigned char* data, int size) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetImageData(data, size);
-        break;
-    case 2:
-        frameTwo->SetImageData(data, size);
-        break;
-    case 3:
-        frameThree->SetImageData(data, size);
-        break;
-    case 4:
-        frameFour->SetImageData(data, size);
-        break;
-    default:
-        break;
-    }
+    int idx = indexFrame - 1;
+    frames[idx].SetImageData(data, size);
+
+    //switch (indexFrame)
+    //{
+    //case 1:
+    //    frameOne->SetImageData(data, size);
+    //    break;
+    //case 2:
+    //    frameTwo->SetImageData(data, size);
+    //    break;
+    //case 3:
+    //    frameThree->SetImageData(data, size);
+    //    break;
+    //case 4:
+    //    frameFour->SetImageData(data, size);
+    //    break;
+    //default:
+    //    break;
+    //}
     
 }
 
-void FrameView::SetSides(int indexFrame, int value) {
-    switch (indexFrame)
+void LoadImageOnTextureOne(int indexFrame) {
+    if (frames[indexFrame].mtx.try_lock())
     {
-    case 1:
-        frameOne->SetSides(value);
-        break;
-    case 2:
-        frameTwo->SetSides(value);
-        break;
-    case 3:
-        frameThree->SetSides(value);
-        break;
-    case 4:
-        frameFour->SetSides(value);
-        break;
-    default:
-        break;
-    }
-    
-}
-
-void FrameView::SetShowFrame(int indexFrame, bool value) {
-    switch (indexFrame)
-    {
-    case 1:
-        frameOne->SetShowFrame(value);
-        
-        break;
-    case 2:
-        frameTwo->SetShowFrame(value);
-        
-        break;
-    case 3:
-        frameThree->SetShowFrame(value);
-        
-        break;
-    case 4:
-        frameFour->SetShowFrame(value);
-        
-        break;
-    default:
-        break;
-    }
-    
-}
-
-void InitTextureOne() {
-    glGenTextures(1, &idTexture1);
-    glBindTexture(GL_TEXTURE_2D, idTexture1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameOne->GetWidthImage(), 
-        frameOne->GetHeightImage(), 0,
-        GL_RGB, GL_UNSIGNED_BYTE, NULL);
-}
-
-void InitTextureTwo() {
-    glGenTextures(1, &idTexture2);
-    glBindTexture(GL_TEXTURE_2D, idTexture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameTwo->GetWidthImage(),
-        frameTwo->GetHeightImage(), 0,
-        GL_RGB, GL_UNSIGNED_BYTE, NULL);
-}
-
-void InitTextureThree() {
-    glGenTextures(1, &idTexture3);
-    glBindTexture(GL_TEXTURE_2D, idTexture3);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameThree->GetWidthImage(),
-        frameThree->GetHeightImage(), 0,
-        GL_RGB, GL_UNSIGNED_BYTE, NULL);
-}
-
-void InitTextureFour() {
-    glGenTextures(1, &idTexture4);
-    glBindTexture(GL_TEXTURE_2D, idTexture4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameFour->GetWidthImage(),
-        frameFour->GetHeightImage(), 0,
-        GL_RGB, GL_UNSIGNED_BYTE, NULL);
-}
-
-void LoadImageOnTextureOne() {
-    if (frameOne->mtx.try_lock())
-    {
-        unsigned char* image = frameOne->LoadImageForTexture();
+        unsigned char* image = frames[indexFrame].LoadImageForTexture();
         if (image != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameOne->GetWidthImage(),
-                frameOne->GetHeightImage(), 0,
-                GL_RGB, GL_UNSIGNED_BYTE, image);            
+            glFrame->SetFlowImage(image, frames[indexFrame].GetWidthImage(), frames[indexFrame].GetHeightImage());
         }
         image = nullptr;
         free(image);
-        frameOne->mtx.unlock();
+        frames[indexFrame].mtx.unlock();
     }   
 
 }
 
-void LoadImageOnTextureTwo() {
-    if (frameTwo->mtx.try_lock())
+void LoadImageOnTextureTwo(int indexFrame) {
+    if (frames[indexFrame].mtx.try_lock())
     {
-        unsigned char* image = frameTwo->LoadImageForTexture();
+        unsigned char* image = frames[indexFrame].LoadImageForTexture();
         if (image != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameTwo->GetWidthImage(),
-                frameTwo->GetHeightImage(), 0,
-                GL_RGB, GL_UNSIGNED_BYTE, image);
-            
+            glFrameTwo->SetFlowImage(image, frames[indexFrame].GetWidthImage(), frames[indexFrame].GetHeightImage());
         }
         image = nullptr;
         free(image);
-        frameTwo->mtx.unlock();
+        frames[indexFrame].mtx.unlock();
     }
 
 }
 
-void LoadImageOnTextureThree() {
-    if (frameThree->mtx.try_lock())
+void LoadImageOnTextureThree(int indexFrame) {
+    if (frames[indexFrame].mtx.try_lock())
     {
-        unsigned char* image = frameThree->LoadImageForTexture();
+        unsigned char* image = frames[indexFrame].LoadImageForTexture();
         if (image != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameThree->GetWidthImage(),
-                frameThree->GetHeightImage(), 0,
-                GL_RGB, GL_UNSIGNED_BYTE, image);
-            
+            glFrameThree->SetFlowImage(image, frames[indexFrame].GetWidthImage(), frames[indexFrame].GetHeightImage());
         }
         image = nullptr;
         free(image);
-        frameThree->mtx.unlock();
+        frames[indexFrame].mtx.unlock();
     }
 
 }
 
-void LoadImageOnTextureFour() {
-    if (frameFour->mtx.try_lock())
+void LoadImageOnTextureFour(int indexFrame) {
+    if (frames[indexFrame].mtx.try_lock())
     {
-        unsigned char* image = frameFour->LoadImageForTexture();
+        unsigned char* image = frames[indexFrame].LoadImageForTexture();
         if (image != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameFour->GetWidthImage(),
-                frameFour->GetHeightImage(), 0,
-                GL_RGB, GL_UNSIGNED_BYTE, image);
-            
+            glFrameFour->SetFlowImage(image, frames[indexFrame].GetWidthImage(), frames[indexFrame].GetHeightImage());
         }
         image = nullptr;
         free(image);
-        frameFour->mtx.unlock();
+        frames[indexFrame].mtx.unlock();
     }
 
 }
 
-void DrawRectangleOne() {
+void FrameView::SetColourLabelFrame(int indexFrame, float red, float green, float blue) {
+    frames[indexFrame].SetColourLabelR(red);
+    frames[indexFrame].SetColourLabelG(green);
+    frames[indexFrame].SetColourLabelB(blue);
+}
 
-    for (int i = 0; i < NUM_RECTANGLES; i++)
-    {
-        if (frameOne->GetRatioWidth(i) != 0.0f)
-        {
-            glLineStipple(factorStipple, pattern);
-            glLineWidth(lineWidth);
-            glBegin(GL_LINE_STRIP); //GL_LINE_STRIP GL_LINES GL_LINE_LOOP
-            glColor3f(frameOne->GetColourR(i), frameOne->GetColourG(i),
-                frameOne->GetColourB(i));
-            glVertex2f(frameOne->GetTransforX(i) - frameOne->GetRatioWidth(i),
-                frameOne->GetTransforY(i) + frameOne->GetRatioHeight(i));
-            glVertex2f(frameOne->GetTransforX(i) + frameOne->GetRatioWidth(i),
-                frameOne->GetTransforY(i) + frameOne->GetRatioHeight(i));
-            glVertex2f(frameOne->GetTransforX(i) + frameOne->GetRatioWidth(i),
-                frameOne->GetTransforY(i) - frameOne->GetRatioHeight(i));
-            glVertex2f(frameOne->GetTransforX(i) - frameOne->GetRatioWidth(i),
-                frameOne->GetTransforY(i) - frameOne->GetRatioHeight(i));
-            glVertex2f(frameOne->GetTransforX(i) - frameOne->GetRatioWidth(i),
-                frameOne->GetTransforY(i) + frameOne->GetRatioHeight(i));
-            glEnd();
-        }
+void DrawOnewindow(int indexFrame) {
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    double current_time = glfwGetTime();
+    if ((current_time - glFrame->GetLastTime()) * 1000 > frames[indexFrame].GetElapse()) {                
+        LoadImageOnTextureOne(indexFrame);        
+        glFrame->SetLastTime(glfwGetTime());       
+    }
+    //clock_t timeStart1 = clock();
+    //glFrame->DrawFrame(); // 3     3
+    //clock_t duration1 = clock() - timeStart1;
+    //int durationMs1 = int(1000 * ((float)duration1) / CLOCKS_PER_SEC);
+    //printf("   LOAD FRAME time: %d\n", durationMs1);
+    //glFrameTwo->DrawFrame();
+
+    glFrame->DrawFrame();
+    glfwSwapBuffers(window);
+}
+
+void DrawTwoWindow() {
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    double current_time = glfwGetTime();
+    if ((current_time - glFrame->GetLastTime()) * 1000 > frames[0].GetElapse()) {        
+        LoadImageOnTextureOne(0);
+        glFrame->SetLastTime(glfwGetTime());
     }
 
+    if ((current_time - glFrameTwo->GetLastTime()) * 1000 > frames[1].GetElapse()) {        
+        LoadImageOnTextureTwo(1);
+        glFrameTwo->SetLastTime(glfwGetTime());
+    }
+    glFrame->DrawFrame();
+    glFrameTwo->DrawFrame();
+    glfwSwapBuffers(window);
+
 }
 
-void DrawRectangleTwo() {
-
-    for (int i = 0; i < NUM_RECTANGLES; i++)
-    {
-        if (frameTwo->GetRatioWidth(i) != 0.0f)
-        {
-            glLineStipple(factorStipple, pattern);
-            glLineWidth(lineWidth);
-            glBegin(GL_LINE_STRIP); //GL_LINE_STRIP GL_LINES GL_LINE_LOOP
-            glColor3f(frameTwo->GetColourR(i), frameTwo->GetColourG(i),
-                frameTwo->GetColourB(i));
-            glVertex2f(frameTwo->GetTransforX(i) - frameTwo->GetRatioWidth(i),
-                frameTwo->GetTransforY(i) + frameTwo->GetRatioHeight(i));
-            glVertex2f(frameTwo->GetTransforX(i) + frameTwo->GetRatioWidth(i),
-                frameTwo->GetTransforY(i) + frameTwo->GetRatioHeight(i));
-            glVertex2f(frameTwo->GetTransforX(i) + frameTwo->GetRatioWidth(i),
-                frameTwo->GetTransforY(i) - frameTwo->GetRatioHeight(i));
-            glVertex2f(frameTwo->GetTransforX(i) - frameTwo->GetRatioWidth(i),
-                frameTwo->GetTransforY(i) - frameTwo->GetRatioHeight(i));
-            glVertex2f(frameTwo->GetTransforX(i) - frameTwo->GetRatioWidth(i),
-                frameTwo->GetTransforY(i) + frameTwo->GetRatioHeight(i));
-            glEnd();
-        }
+void DrawThreeWindow() {
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    double current_time = glfwGetTime();
+    if ((current_time - glFrame->GetLastTime()) * 1000 > frames[0].GetElapse()) {        
+        LoadImageOnTextureOne(0);
+        glFrame->SetLastTime(glfwGetTime());
     }
 
-}
-
-void DrawRectangleThree() {
-
-    for (int i = 0; i < NUM_RECTANGLES; i++)
-    {
-        if (frameThree->GetRatioWidth(i) != 0.0f)
-        {
-            glLineStipple(factorStipple, pattern);
-            glLineWidth(lineWidth);
-            glBegin(GL_LINE_STRIP); //GL_LINE_STRIP GL_LINES GL_LINE_LOOP
-            glColor3f(frameThree->GetColourR(i), frameThree->GetColourG(i),
-                frameThree->GetColourB(i));
-            glVertex2f(frameThree->GetTransforX(i) - frameThree->GetRatioWidth(i),
-                frameThree->GetTransforY(i) + frameThree->GetRatioHeight(i));
-            glVertex2f(frameThree->GetTransforX(i) + frameThree->GetRatioWidth(i),
-                frameThree->GetTransforY(i) + frameThree->GetRatioHeight(i));
-            glVertex2f(frameThree->GetTransforX(i) + frameThree->GetRatioWidth(i),
-                frameThree->GetTransforY(i) - frameThree->GetRatioHeight(i));
-            glVertex2f(frameThree->GetTransforX(i) - frameThree->GetRatioWidth(i),
-                frameThree->GetTransforY(i) - frameThree->GetRatioHeight(i));
-            glVertex2f(frameThree->GetTransforX(i) - frameThree->GetRatioWidth(i),
-                frameThree->GetTransforY(i) + frameThree->GetRatioHeight(i));
-            glEnd();
-        }
+    if ((current_time - glFrameTwo->GetLastTime()) * 1000 > frames[1].GetElapse()) {        
+        LoadImageOnTextureTwo(1);
+        glFrameTwo->SetLastTime(glfwGetTime());
     }
 
-}
-
-void DrawRectangleFour() {
-
-    for (int i = 0; i < NUM_RECTANGLES; i++)
-    {
-        if (frameFour->GetRatioWidth(i) != 0.0f)
-        {
-            glLineStipple(factorStipple, pattern);
-            glLineWidth(lineWidth);
-            glBegin(GL_LINE_STRIP); //GL_LINE_STRIP GL_LINES GL_LINE_LOOP
-            glColor3f(frameFour->GetColourR(i), frameFour->GetColourG(i),
-                frameFour->GetColourB(i));
-            glVertex2f(frameFour->GetTransforX(i) - frameFour->GetRatioWidth(i),
-                frameFour->GetTransforY(i) + frameFour->GetRatioHeight(i));
-            glVertex2f(frameFour->GetTransforX(i) + frameFour->GetRatioWidth(i),
-                frameFour->GetTransforY(i) + frameFour->GetRatioHeight(i));
-            glVertex2f(frameFour->GetTransforX(i) + frameFour->GetRatioWidth(i),
-                frameFour->GetTransforY(i) - frameFour->GetRatioHeight(i));
-            glVertex2f(frameFour->GetTransforX(i) - frameFour->GetRatioWidth(i),
-                frameFour->GetTransforY(i) - frameFour->GetRatioHeight(i));
-            glVertex2f(frameFour->GetTransforX(i) - frameFour->GetRatioWidth(i),
-                frameFour->GetTransforY(i) + frameFour->GetRatioHeight(i));
-            glEnd();
-        }
+    if ((current_time - glFrameThree->GetLastTime()) * 1000 > frames[2].GetElapse()) {        
+        LoadImageOnTextureThree(2);
+        glFrameThree->SetLastTime(glfwGetTime());
     }
 
-}
-
-//void DrawRegularPolygon(int index) {
-//    for (int i = 0; i < NUM_RECTANGLES; i++) {
-//        if (frames[index].GetRatioWidth(i) != 0.0f) {
-//            float xi = 0.0f, yi = 0.0f, xf = 0.0f, yf = 0.0f;
-//
-//            glLineStipple(factorStipple, pattern);
-//            glLineWidth(lineWidth);
-//            glBegin(GL_LINE_STRIP);
-//            glColor3f(frames[index].GetColourR(i), frames[index].GetColourG(i),
-//                frames[index].GetColourB(i));
-//            for (int j = 0; j < frames[index].GetSides(); j++)
-//            {
-//                float ang = 6.2832f * j / (float)frames[index].GetSides(); // PI * 2.0
-//                xf = frames[index].GetTransforX(i) + (cos(ang) * frames[index].GetRatioWidth(i));
-//                yf = frames[index].GetTransforY(i) + (-sin(ang) * frames[index].GetRatioHeight(i));
-//                if (j != 0)
-//                {
-//
-//                    glVertex2f(xi, yi);
-//                    glVertex2f(xf, yf);
-//                }
-//                xi = xf;
-//                yi = yf;
-//            }
-//            glEnd();
-//        }
-//    }
-//}
-
-
-
-void Display(void)
-{
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glFlush();
-}
-
-
-void DisplayFrameOne() {
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();*/
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, idTexture1);
-
-    glColor3ub(255, 255, 255);
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);  // Bottom Left Of The Texture and Quad
-    glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, -1.0f);  // Bottom Right Of The Texture and Quad    
-    glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, 1.0f);  // top Right Of The Texture and Quad
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, 1.0f);  // top Left Of The Texture and Quad
-
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-
-    DrawRectangleOne();
-   
-    glEnable(GL_BLEND);
-    glColor3f(colourRfo, colourGfo, colourBfo);
-    glRasterPos2f(-0.9f, 0.8f);
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)lblOne.c_str());
-    glDisable(GL_BLEND);
-    
-    //DrawRegularPolygon();
-    glutSwapBuffers();
+    glFrame->DrawFrame();
+    glFrameTwo->DrawFrame();
+    glFrameThree->DrawFrame();
+    glfwSwapBuffers(window);
 
 }
 
-void DisplayFrameTwo() {
+void DrawFourWindow() {
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    double current_time = glfwGetTime();
+    if ((current_time - glFrame->GetLastTime()) * 1000 > frames[0].GetElapse()) {        
+        LoadImageOnTextureOne(0);
+        glFrame->SetLastTime(glfwGetTime());
+    }
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    if ((current_time - glFrameTwo->GetLastTime()) * 1000 > frames[1].GetElapse()) {        
+        LoadImageOnTextureTwo(1);
+        glFrameTwo->SetLastTime(glfwGetTime());
+    }
 
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+    if ((current_time - glFrameThree->GetLastTime()) * 1000 > frames[2].GetElapse()) {        
+        LoadImageOnTextureThree(2);
+        glFrameThree->SetLastTime(glfwGetTime());
+    }
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();*/
+    if ((current_time - glFrameFour->GetLastTime()) * 1000 > frames[3].GetElapse()) {
+        
+        LoadImageOnTextureFour(3);
+        glFrameFour->SetLastTime(glfwGetTime());
+    }
 
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, idTexture2);
-
-    glColor3ub(255, 255, 255);
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);  // Bottom Left Of The Texture and Quad
-    glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, -1.0f);  // Bottom Right Of The Texture and Quad    
-    glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, 1.0f);  // top Right Of The Texture and Quad
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, 1.0f);  // top Left Of The Texture and Quad
-
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-
-    DrawRectangleTwo();
-
-    glEnable(GL_BLEND);
-    glColor3f(colourRft, colourGft, colourBft);
-    glRasterPos2f(-0.9f, 0.8f);
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)lblTwo.c_str());
-    glDisable(GL_BLEND);
-
-    //DrawRegularPolygon();
-    glutSwapBuffers();
+    glFrame->DrawFrame();
+    glFrameTwo->DrawFrame();
+    glFrameThree->DrawFrame();
+    glFrameFour->DrawFrame();
+    glfwSwapBuffers(window);
 
 }
-
-void DisplayFrameThree() {
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();*/
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, idTexture3);
-
-    glColor3ub(255, 255, 255);
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);  // Bottom Left Of The Texture and Quad
-    glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, -1.0f);  // Bottom Right Of The Texture and Quad    
-    glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, 1.0f);  // top Right Of The Texture and Quad
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, 1.0f);  // top Left Of The Texture and Quad
-
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-
-    DrawRectangleThree();
-
-    glEnable(GL_BLEND);
-    glColor3f(colourRfth, colourGfth, colourBfth);
-    glRasterPos2f(-0.9f, 0.8f);
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)lblThree.c_str());
-    glDisable(GL_BLEND);
-
-    //DrawRegularPolygon();
-    glutSwapBuffers();
-
-}
-
-void DisplayFrameFour() {
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();*/
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, idTexture4);
-
-    glColor3ub(255, 255, 255);
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);  // Bottom Left Of The Texture and Quad
-    glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, -1.0f);  // Bottom Right Of The Texture and Quad    
-    glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, 1.0f);  // top Right Of The Texture and Quad
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, 1.0f);  // top Left Of The Texture and Quad
-
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-
-    DrawRectangleFour();
-
-    glEnable(GL_BLEND);
-    glColor3f(colourRff, colourGff, colourBff);
-    glRasterPos2f(-0.9f, 0.8f);
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-        (unsigned char*)lblFour.c_str());
-    glDisable(GL_BLEND);
-
-    //DrawRegularPolygon();
-    glutSwapBuffers();
-
-}
-
-void ToggleGlutWindowCloseBox()
+void framebuffer_size_callback_one_window(GLFWwindow* window, int width, int height)
 {    
-    HWND hwndGlut;
-    hwndGlut = GetForegroundWindow();   
-    SetClassLongPtr(hwndGlut, GCL_STYLE,
-        GetClassLongPtr(hwndGlut, GCL_STYLE) | CS_NOCLOSE);
+    glFrame->Viewport(0, 0, width, height);    
+    DrawOnewindow(indexCurrentFrame);
 }
 
-void RefreshFrameOne(int value) {
-    static int disabledClose = 0;
-    glutSetWindow(windowOne);
-    if (frameOne->GetShowFrame())
-    {
-        
-        frameOne->TransformCoordinates();
-        LoadImageOnTextureOne();
-        if (disabledClose == 0)
-        {
-            disabledClose = 1;
-            ToggleGlutWindowCloseBox();
-        }
-        
-    }
-    glutTimerFunc(frameOne->GetElapse(), RefreshFrameOne, 1);
-    glutPostRedisplay();
-}
-
-void RefreshFrameTwo(int value) {
-    glutSetWindow(windowTwo);
-    if (frameTwo->GetShowFrame())
-    {
-        
-        frameTwo->TransformCoordinates();
-        LoadImageOnTextureTwo();
-        
-    }
-    glutTimerFunc(frameTwo->GetElapse(), RefreshFrameTwo, 1);
-    glutPostRedisplay();
-}
-
-void RefreshFrameThree(int value) {
-    glutSetWindow(windowThree);
-    if (frameThree->GetShowFrame())
-    {        
-        frameThree->TransformCoordinates();
-        LoadImageOnTextureThree();
-        
-    }
-    glutTimerFunc(frameThree->GetElapse(), RefreshFrameThree, 1);
-    glutPostRedisplay();
-}
-
-void RefreshFrameFour(int value) {
-    glutSetWindow(windowFour);
-    if (frameFour->GetShowFrame())
-    {
-        
-        frameFour->TransformCoordinates();
-        LoadImageOnTextureFour();
-        
-    }
-    glutTimerFunc(frameFour->GetElapse(), RefreshFrameFour, 1);
-    glutPostRedisplay();
-}
-
-void reshape(int w, int h)
+void framebuffer_size_callback_two_window(GLFWwindow* window, int width, int height)
 {
-    int width = 50;
-    int height = 50;
-
-    glViewport(0, 0, w, h);
-    if (w > 50) {
-        width = (w - 2 * GAP);
-    }
-    else {
-        width = 10;
-    }
-    if (h > 50) {
-        height = (h - 2 * GAP); // (h - 3 * GAP) / 2;
-    }
-    else {
-        height = 10;
-    }
-    glutSetWindow(windowOne);
-    glutPositionWindow(GAP, GAP);
-    glutReshapeWindow(width, height);    
-
+    glFrame->Viewport(0, 0, width / 2, height);
+    glFrameTwo->Viewport(width / 2, 0, width / 2, height);
+    DrawTwoWindow();
 }
 
-void reshapeTwo(int w, int h)
+void framebuffer_size_callback_three_window(GLFWwindow* window, int width, int height)
 {
-    int width = 50;
-    int height = 50;
-
-    glViewport(0, 0, w, h);
-    if (w > 50) {
-        width = (w - 3 * GAP) / 2;
-    }
-    else {
-        width = 10;
-    }
-    if (h > 50) {
-        height = (h - 2 * GAP); // (h - 3 * GAP) / 2;
-    }
-    else {
-        height = 10;
-    }
-    glutSetWindow(windowOne);
-    glutPositionWindow(GAP, GAP);
-    glutReshapeWindow(width, height);
-    glutSetWindow(windowTwo);
-    glutPositionWindow(GAP + width + GAP, GAP);
-    glutReshapeWindow(width, height);
-    
+    glFrame->Viewport(0, height / 2, width / 2, height / 2);
+    glFrameTwo->Viewport(width / 2, height / 2, width / 2, height / 2);
+    glFrameThree->Viewport(0, 0, width / 2, height / 2);
+    DrawThreeWindow();
 }
 
-void reshapeFour(int w, int h)
+void framebuffer_size_callback_four_window(GLFWwindow* window, int width, int height)
 {
-    int width = 50;
-    int height = 50;
+    glFrame->Viewport(0, height / 2, width / 2, height / 2);
+    glFrameTwo->Viewport(width / 2, height / 2, width / 2, height / 2);
+    glFrameThree->Viewport(0, 0, width / 2, height / 2);
+    glFrameFour->Viewport(width / 2, 0, width / 2, height / 2);
+    DrawThreeWindow();
+}
 
-    glViewport(0, 0, w, h);
-    if (w > 50) {
-        width = (w - 3 * GAP) / 2;
+int FrameView::RunOne() {
+    glFrame = new GLFrame();
+    frames[indexCurrentFrame].ClearImageData();    
+    frames[indexCurrentFrame].SetPositionX(0, 0.0f);
+    frames[indexCurrentFrame].SetPositionY(0, 0.0f);
+    frames[indexCurrentFrame].SetRatioWidth(0, 0.0f);
+    frames[indexCurrentFrame].SetRatioHeight(0, 0.0f);
+    widthWindow = 400;
+    heightWindow = 300;
+    if (!glfwInit())
+    {
+        return -1;
     }
-    else {
-        width = 10;
-    }
-    if (h > 50) {
-        height = (h - 3 * GAP) / 2;
-    }
-    else {
-        height = 10;
-    }
-    glutSetWindow(windowOne);
-    glutPositionWindow(GAP, GAP);
-    glutReshapeWindow(width, height);
-    glutSetWindow(windowTwo);
-    glutPositionWindow(GAP + width + GAP, GAP);
-    glutReshapeWindow(width, height);
-    glutSetWindow(windowThree);
-    glutPositionWindow(GAP, GAP + height + GAP);
-    glutReshapeWindow(width, height);
-    glutSetWindow(windowFour);
-    glutPositionWindow(GAP + width + GAP, GAP + height + GAP);
-    glutReshapeWindow(width, height);
-}
 
-void FrameView::SetColourTextFrameOne(float red, float green, float blue) {
-    colourRfo = red;
-    colourGfo = green;
-    colourBfo = blue;
-}
+    // Set all the required options for GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-void FrameView::SetColourTextFrameTwo(float red, float green, float blue) {
-    colourRft = red;
-    colourGft = green;
-    colourBft = blue;
-}
-
-void FrameView::SetColourTextFrameThree(float red, float green, float blue) {
-    colourRfth = red;
-    colourGfth = green;
-    colourBfth = blue;
-}
-
-void FrameView::SetColourTextFrameFour(float red, float green, float blue) {
-    colourRff = red;
-    colourGff = green;
-    colourBff = blue;
-}
-
-void FrameView::RunFour(int argc, char** argv) {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB); // GLUT_DOUBLE | GLUT_RGB   GLUT_SINGLE   GLUT_RGBA | GLUT_DOUBLE
-    glutInitWindowSize(400, 400);                    // window size    
-    handleWindow = glutCreateWindow(nameWindow.c_str());    // message displayed on top bar window    
-    glutSetWindow(handleWindow);         
-    glutDisplayFunc(Display);
-    glutReshapeFunc(reshapeFour);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-
-    windowOne = glutCreateSubWindow(handleWindow, 10, 10, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameOne);    
-    glutTimerFunc(frameOne->GetElapse(), RefreshFrameOne, 1);
-    InitTextureOne();
-
-    windowTwo = glutCreateSubWindow(handleWindow, 110, 10, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameTwo);
-    glutTimerFunc(frameTwo->GetElapse(), RefreshFrameTwo, 1);
-    InitTextureTwo();
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     
-    windowThree = glutCreateSubWindow(handleWindow, 10, 110, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameThree);
-    glutTimerFunc(frameThree->GetElapse(), RefreshFrameThree, 1);
-    InitTextureThree();
+    window = glfwCreateWindow(widthWindow, heightWindow, nameWindow.c_str(), nullptr, nullptr);
 
-    windowFour = glutCreateSubWindow(handleWindow, 110, 110, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameFour);
-    glutTimerFunc(frameFour->GetElapse(), RefreshFrameFour, 1);
-    InitTextureFour();
+    int screenWidth, screenHeight;
+    glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 
-    glutMainLoop();
-}
+    if (nullptr == window)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
 
-void FrameView::RunOne(int argc, char** argv) {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB); // GLUT_DOUBLE | GLUT_RGB   GLUT_SINGLE   GLUT_RGBA | GLUT_DOUBLE
-    glutInitWindowSize(400, 400);                    // window size        
-    handleWindow = glutCreateWindow(nameWindow.c_str());    // message displayed on top bar window    
+        return EXIT_FAILURE;
+    }
+    glfwMakeContextCurrent(window);
+
+    if (GLEW_OK != glewInit())
+    {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        return EXIT_FAILURE;
+    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    std::cout << glGetString(GL_VERSION) << std::endl;
+    GLCall(glViewport(0, 0, screenWidth, screenHeight));
+
+    glFrame->Viewport(0, 0, screenWidth, screenHeight);
+    glFrame->SetLabel(labels[indexCurrentFrame]);
+    glFrame->SetOrthographicProjection((float)frames[indexCurrentFrame].GetWidthImage(),
+        (float)frames[indexCurrentFrame].GetHeightImage());
+    glFrame->SetFrameData(&frames[indexCurrentFrame]);
+    glFrame->InitFrame();  
+    glFrame->SetLastTime(glfwGetTime());
+    while (!glfwWindowShouldClose(window)) {
+        // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
+        glfwPollEvents();
+        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback_one_window);
+        DrawOnewindow(indexCurrentFrame);
+
+    }
     
-    glutSetWindow(handleWindow);
-
-    glutDisplayFunc(Display);
-    glutReshapeFunc(reshape);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-
-    windowOne = glutCreateSubWindow(handleWindow, 10, 10, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameOne);
-    glutTimerFunc(frameOne->GetElapse(), RefreshFrameOne, 1);
-    InitTextureOne();        
-    glutMainLoop();
+    glfwTerminate();
+    delete glFrame;
+    return EXIT_SUCCESS;
 }
 
-void FrameView::RunTwo(int argc, char** argv) {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB); // GLUT_DOUBLE | GLUT_RGB   GLUT_SINGLE   GLUT_RGBA | GLUT_DOUBLE
-    glutInitWindowSize(400, 200);                    // window size    
-    handleWindow = glutCreateWindow(nameWindow.c_str());    // message displayed on top bar window    
-    glutSetWindow(handleWindow);
-    glutDisplayFunc(Display);
-    glutReshapeFunc(reshapeTwo);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+int FrameView::RunTwo() {
+    glFrame = new GLFrame();
+    glFrameTwo = new GLFrame();
+    frames[0].ClearImageData();
+    frames[0].SetPositionX(0, 0.0f);
+    frames[0].SetPositionY(0, 0.0f);
+    frames[0].SetRatioWidth(0, 0.0f);
+    frames[0].SetRatioHeight(0, 0.0f);
 
-    windowOne = glutCreateSubWindow(handleWindow, 10, 10, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameOne);
-    glutTimerFunc(frameOne->GetElapse(), RefreshFrameOne, 1);
-    InitTextureOne();
+    frames[1].ClearImageData();
+    frames[1].SetPositionX(0, 0.0f);
+    frames[1].SetPositionY(0, 0.0f);
+    frames[1].SetRatioWidth(0, 0.0f);
+    frames[1].SetRatioHeight(0, 0.0f);
 
-    windowTwo = glutCreateSubWindow(handleWindow, 110, 10, 90, 90);
-    glEnable(GL_LINE_STIPPLE);
-    glutDisplayFunc(DisplayFrameTwo);
-    glutTimerFunc(frameTwo->GetElapse(), RefreshFrameTwo, 1);
-    InitTextureTwo();
-    glutMainLoop();
+    widthWindow = 800;
+    heightWindow = 300;
+    if (!glfwInit())
+    {
+        return -1;
+    }
+
+    // Set all the required options for GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+
+    window = glfwCreateWindow(widthWindow, heightWindow, nameWindow.c_str(), nullptr, nullptr);
+
+    int screenWidth, screenHeight;
+    glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+
+    if (nullptr == window)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+
+        return EXIT_FAILURE;
+    }
+    glfwMakeContextCurrent(window);
+
+    if (GLEW_OK != glewInit())
+    {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        return EXIT_FAILURE;
+    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    std::cout << glGetString(GL_VERSION) << std::endl;
+
+    glFrame->Viewport(0, 0, screenWidth / 2, screenHeight);    
+    glFrame->SetLabel(labels[0]);
+    glFrame->SetOrthographicProjection((float)frames[0].GetWidthImage(),
+        (float)frames[0].GetHeightImage());
+    glFrame->SetFrameData(&frames[0]);
+    glFrame->InitFrame();
+    glFrame->SetLastTime(glfwGetTime());
+
+    glFrameTwo->Viewport(screenWidth / 2, 0, screenWidth / 2, screenHeight);
+    glFrameTwo->SetLabel(labels[1]);
+    glFrameTwo->SetOrthographicProjection((float)frames[1].GetWidthImage(),
+        (float)frames[1].GetHeightImage());
+    glFrameTwo->SetFrameData(&frames[1]);
+    glFrameTwo->InitFrame();
+    glFrameTwo->SetLastTime(glfwGetTime());
+
+    while (!glfwWindowShouldClose(window)) {
+        
+        glfwPollEvents();
+        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback_two_window);
+        DrawTwoWindow();
+
+    }
+
+    glfwTerminate();
+    delete glFrame;
+    delete glFrameTwo;
+    return EXIT_SUCCESS;
 }
 
+int FrameView::RunThree() {
+    glFrame = new GLFrame();
+    glFrameTwo = new GLFrame();
+    glFrameThree = new GLFrame();
+    frames[0].ClearImageData();
+    frames[0].SetPositionX(0, 0.0f);
+    frames[0].SetPositionY(0, 0.0f);
+    frames[0].SetRatioWidth(0, 0.0f);
+    frames[0].SetRatioHeight(0, 0.0f);
+
+    frames[1].ClearImageData();
+    frames[1].SetPositionX(0, 0.0f);
+    frames[1].SetPositionY(0, 0.0f);
+    frames[1].SetRatioWidth(0, 0.0f);
+    frames[1].SetRatioHeight(0, 0.0f);
+
+    frames[2].ClearImageData();
+    frames[2].SetPositionX(0, 0.0f);
+    frames[2].SetPositionY(0, 0.0f);
+    frames[2].SetRatioWidth(0, 0.0f);
+    frames[2].SetRatioHeight(0, 0.0f);
+
+    widthWindow = 800;
+    heightWindow = 600;
+    if (!glfwInit())
+    {
+        return -1;
+    }
+
+    // Set all the required options for GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+
+    window = glfwCreateWindow(widthWindow, heightWindow, nameWindow.c_str(), nullptr, nullptr);
+
+    int screenWidth, screenHeight;
+    glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+
+    if (nullptr == window)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+
+        return EXIT_FAILURE;
+    }
+    glfwMakeContextCurrent(window);
+
+    if (GLEW_OK != glewInit())
+    {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        return EXIT_FAILURE;
+    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    std::cout << glGetString(GL_VERSION) << std::endl;
+
+    glFrame->Viewport(0, screenHeight / 2, screenWidth / 2, screenHeight / 2);
+    glFrame->SetLabel(labels[0]);
+    glFrame->SetOrthographicProjection((float)frames[0].GetWidthImage(),
+        (float)frames[0].GetHeightImage());
+    glFrame->SetFrameData(&frames[0]);
+    glFrame->InitFrame();
+    glFrame->SetLastTime(glfwGetTime());
+
+    glFrameTwo->Viewport(screenWidth / 2, screenHeight / 2, screenWidth / 2, screenHeight / 2);
+    glFrameTwo->SetLabel(labels[1]);
+    glFrameTwo->SetOrthographicProjection((float)frames[1].GetWidthImage(),
+        (float)frames[1].GetHeightImage());
+    glFrameTwo->SetFrameData(&frames[1]);
+    glFrameTwo->InitFrame();
+    glFrameTwo->SetLastTime(glfwGetTime());
+
+    glFrameThree->Viewport(0, 0, screenWidth / 2, screenHeight / 2);
+    glFrameThree->SetLabel(labels[2]);
+    glFrameThree->SetOrthographicProjection((float)frames[2].GetWidthImage(),
+        (float)frames[2].GetHeightImage());
+    glFrameThree->SetFrameData(&frames[2]);
+    glFrameThree->InitFrame();
+    glFrameThree->SetLastTime(glfwGetTime());
+
+
+    while (!glfwWindowShouldClose(window)) {
+
+        glfwPollEvents();
+        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback_three_window);
+        DrawThreeWindow();
+
+    }
+
+    glfwTerminate();
+    delete glFrame;
+    delete glFrameTwo;
+    delete glFrameThree;
+    return EXIT_SUCCESS;
+}
+
+int FrameView::RunFour() {
+    glFrame = new GLFrame();
+    glFrameTwo = new GLFrame();
+    glFrameThree = new GLFrame();
+    glFrameFour = new GLFrame();
+
+    frames[0].ClearImageData();
+    frames[0].SetPositionX(0, 0.0f);
+    frames[0].SetPositionY(0, 0.0f);
+    frames[0].SetRatioWidth(0, 0.0f);
+    frames[0].SetRatioHeight(0, 0.0f);
+
+    frames[1].ClearImageData();
+    frames[1].SetPositionX(0, 0.0f);
+    frames[1].SetPositionY(0, 0.0f);
+    frames[1].SetRatioWidth(0, 0.0f);
+    frames[1].SetRatioHeight(0, 0.0f);
+
+    frames[2].ClearImageData();
+    frames[2].SetPositionX(0, 0.0f);
+    frames[2].SetPositionY(0, 0.0f);
+    frames[2].SetRatioWidth(0, 0.0f);
+    frames[2].SetRatioHeight(0, 0.0f);
+
+    frames[3].ClearImageData();
+    frames[3].SetPositionX(0, 0.0f);
+    frames[3].SetPositionY(0, 0.0f);
+    frames[3].SetRatioWidth(0, 0.0f);
+    frames[3].SetRatioHeight(0, 0.0f);
+
+
+    widthWindow = 800;
+    heightWindow = 600;
+    if (!glfwInit())
+    {
+        return -1;
+    }
+
+    // Set all the required options for GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+
+    window = glfwCreateWindow(widthWindow, heightWindow, nameWindow.c_str(), nullptr, nullptr);
+
+    int screenWidth, screenHeight;
+    glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+
+    if (nullptr == window)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+
+        return EXIT_FAILURE;
+    }
+    glfwMakeContextCurrent(window);
+
+    if (GLEW_OK != glewInit())
+    {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        return EXIT_FAILURE;
+    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    std::cout << glGetString(GL_VERSION) << std::endl;
+
+    glFrame->Viewport(0, screenHeight / 2, screenWidth / 2, screenHeight / 2);
+    glFrame->SetLabel(labels[0]);
+    glFrame->SetOrthographicProjection((float)frames[0].GetWidthImage(),
+        (float)frames[0].GetHeightImage());
+    glFrame->SetFrameData(&frames[0]);
+    glFrame->InitFrame();
+    glFrame->SetLastTime(glfwGetTime());
+
+
+    glFrameTwo->Viewport(screenWidth / 2, screenHeight / 2, screenWidth / 2, screenHeight / 2);
+    glFrameTwo->SetLabel(labels[1]);
+    glFrameTwo->SetOrthographicProjection((float)frames[1].GetWidthImage(),
+        (float)frames[1].GetHeightImage());
+    glFrameTwo->SetFrameData(&frames[1]);
+    glFrameTwo->InitFrame();
+    glFrameTwo->SetLastTime(glfwGetTime());
+
+    glFrameThree->Viewport(0, 0, screenWidth / 2, screenHeight / 2);
+    glFrameThree->SetLabel(labels[2]);
+    glFrameThree->SetOrthographicProjection((float)frames[2].GetWidthImage(),
+        (float)frames[2].GetHeightImage());
+    glFrameThree->SetFrameData(&frames[2]);
+    glFrameThree->InitFrame();
+    glFrameThree->SetLastTime(glfwGetTime());
+
+    glFrameFour->Viewport(screenWidth / 2, 0, screenWidth / 2, screenHeight / 2);
+    glFrameFour->SetLabel(labels[3]);
+    glFrameFour->SetOrthographicProjection((float)frames[3].GetWidthImage(),
+        (float)frames[3].GetHeightImage());
+    glFrameFour->SetFrameData(&frames[3]);
+    glFrameFour->InitFrame();
+    glFrameFour->SetLastTime(glfwGetTime());
+
+
+    while (!glfwWindowShouldClose(window)) {
+
+        glfwPollEvents();
+        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback_four_window);
+        DrawFourWindow();
+
+    }
+
+    glfwTerminate();
+    delete glFrame;
+    delete glFrameTwo;
+    delete glFrameThree;
+    delete glFrameFour;
+    return EXIT_SUCCESS;
+}
 void FrameView::DestroyWindow() {    
-    //int win = glutGetWindow();
-    glutDestroyWindow(handleWindow);
+    glfwDestroyWindow(window);
 }
 
